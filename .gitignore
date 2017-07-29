@@ -2,6 +2,6 @@
 !/bzoj/
 !/poj/
 !/hdoj/
-
+!/codeforces
 !*.cpp
 !*.c
