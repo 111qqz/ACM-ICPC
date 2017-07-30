@@ -2,7 +2,7 @@
 Author :111qqz
 Created Time :Mon 24 Jul 2017 10:32:44 PM CST
 File Name :B.cpp
-************************************************ */
+ ************************************************ */
 
 #include <cstdio>
 #include <cstring>
@@ -62,32 +62,52 @@ bool solve()
     if (star)
     {
 
-	bool kkkkk = false;
+	int stat =  0; //0表示没有经过*,1表示在*的作用域内，-1表示经过了*的作用域
 	if (len2>=len)
 	{
 	    int num = len2-len+1; //*匹配的字母个数
+	    int offset = num;
+    	   // cout<<"num:"<<num<<endl;
 	    for ( int i = 0 ; i < len ; i++)
 	    {
-		if (st[i]=='?')
-		{
-		    if (!vis[tmp[i]-'a']) return false;
-		}
 		if (st[i]=='*')
 		{
-		    kkkkk = true;
+		    stat = 1;
 		}
-		if (num==0) kkkkk = false;
-		if (kkkkk)
+		if (1==stat) //遇*一次判断完
 		{
-		    if (vis[tmp[i]-'a']) return false;
-		    num--;
+		    for ( int j = i ; j < i+num ; j++)
+			if (vis[tmp[j]-'a']) return false;
+		    stat = -1;
+		}
+
+		if(st[i]=='?')
+		{
+		    if (0 == stat)
+		    {
+			if (!vis[tmp[i]-'a']) return false;
+		    }
+		    if (-1 == stat)
+		    {
+			if (!vis[tmp[i+offset-1]-'a']) return false;
+		    }
 		}
 		if (st[i]!='?'&&st[i]!='*')
-		    if (st[i]!=tmp[i]) return false;
+		{
+		    if (0==stat)
+		    {
+			if (st[i]!=tmp[i]) return false;
+		    }
+		    if (-1==stat)
+		    {
+			if (st[i]!=tmp[i+offset-1]) return false;  //记得*造成的偏移，却只考虑了*表示一个字母时的偏移...orz
+		    }
+		}
 	    }
+	    //区分*经过前和后的两种状态
 	    return true;
 	}
-	else  if (len2==len-1)
+	else  if (len2==len-1) //*替换为空
 	{
 	    bool flag = false;
 	    for ( int i = 0 ; i < len2 ; i++)
@@ -104,40 +124,36 @@ bool solve()
 		}
 	    }
 	}else return false;
-	
+
     }
-	return true;
-
-	    
+    return true;
 }
-
-    
 int main()
 {
-	#ifndef  ONLINE_JUDGE 
-	freopen("./in.txt","r",stdin);
-  #endif
-	
-	ms(vis,false);
-	cin>>good;
-	len = good.length();
-	for ( int i = 0 ; i < len ; i++) vis[good[i]-'a'] = true;
+#ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+#endif
 
-	cin>>st;
-	len = st.length();
-	star = false;
-	for ( int i = 0 ; i < len ; i++) if (st[i]=='*') star = true;
-	cin>>n;
-	for ( int i = 1 ; i <= n ; i++)
-	{
-	    cin>>tmp;
-	    bool ok = solve();
-	    if (ok) puts("YES");
-	    else puts("NO");
-	}
+    ms(vis,false);
+    cin>>good;
+    len = good.length();
+    for ( int i = 0 ; i < len ; i++) vis[good[i]-'a'] = true;
 
-  #ifndef ONLINE_JUDGE  
-  fclose(stdin);
-  #endif
+    cin>>st;
+    len = st.length();
+    star = false;
+    for ( int i = 0 ; i < len ; i++) if (st[i]=='*') star = true;
+    cin>>n;
+    for ( int i = 1 ; i <= n ; i++)
+    {
+	cin>>tmp;
+	bool ok = solve();
+	if (ok) puts("YES");
+	else puts("NO");
+    }
+
+#ifndef ONLINE_JUDGE  
+    fclose(stdin);
+#endif
     return 0;
 }

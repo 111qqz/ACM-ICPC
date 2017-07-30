@@ -49,8 +49,8 @@ LL BSGS(LL a,LL b,LL p)
 {
     a%=p;
     b%=p;
-   // if (a==0&&b==0) return 0;
-   // if (a==0) return -1;
+    //if (a==0&&b==0) return 0;
+    //if (a==0) return -1;
     if (b==1) return 0;
     int cnt = 0 ;
     LL t = 1;
@@ -66,7 +66,7 @@ LL BSGS(LL a,LL b,LL p)
     mp.clear();
     int m = ceil(sqrt(double(p)));
     LL base = b ;
-    for ( LL i = 0 ; i < m ; i++)
+    for ( int i = 0 ; i < m ; i++)
     {
         mp[base] =  i;
         base = base * a % p;
@@ -85,21 +85,17 @@ int main()
     #ifndef  ONLINE_JUDGE 
     freopen("./in.txt","r",stdin);
   #endif
+    //k^(D+1))-1=n (%p)  求D
     while (~scanf("%lld%lld%lld",&k,&p,&n))
     {
-	if (n>=p)
-	{
-	    puts("Orz,I can’t find D!");
-	    continue;
-	}
-        if (p==1) 
-	{
-	    puts("Orz,I can’t find D!");
-	    continue;
+         if (p==1) {
+         puts("Orz,I can’t find D!");
+         continue;
         }
+	 n++;
          LL ans = BSGS(k,n,p);
              if (ans==-1) puts("Orz,I can’t find D!");
-             else printf("%lld\n",ans);
+             else printf("%lld\n",--ans);
     }
 
   #ifndef ONLINE_JUDGE  
