@@ -1,0 +1,28 @@
+/*************************************************************************
+	> File Name: code/2015summer/0713kk.cpp
+	> Author: 111qqz
+	> Email: rkz2013@126.com 
+	> Created Time: 2015年07月13日 星期一 15时21分40秒
+ ************************************************************************/
+
+#include<iostream>
+#include<iomanip>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+#include<cstring>
+#include<string>
+#include<map>
+#include<set>
+#include<queue>
+#include<vector>
+#include<stack>
+using namespace std;
+#define REP(i, n) for (int i=0;i<int(n);++i)  
+typedef long long LL;
+typedef unsigned long long ULL;
+int main()
+{
+  
+	return 0;
+}

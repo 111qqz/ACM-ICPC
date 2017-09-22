@@ -1,0 +1,73 @@
+/*************************************************************************
+	> File Name: code/#323/CC.cpp
+	> Author: 111qqz
+	> Email: rkz2013@126.com 
+	> Created Time: 2015年10月04日 星期日 14时51分08秒
+ ************************************************************************/
+
+#include<iostream>
+#include<iomanip>
+#include<cstdio>
+#include<algorithm>
+#include<cmath>
+#include<cstring>
+#include<string>
+#include<map>
+#include<set>
+#include<queue>
+#include<vector>
+#include<stack>
+#include<cctype>
+                 
+#define yn hez111qqz
+#define j1 cute111qqz
+#define ms(a,x) memset(a,x,sizeof(a))
+using namespace std;
+const int dx4[4]={1,0,0,-1};
+const int dy4[4]={0,-1,1,0};
+typedef long long LL;
+typedef double DB;
+const int inf = 0x3f3f3f3f;
+const int N=5E2+7;
+int a[N*N];
+int n;
+map<int,int>mp;
+vector<int> ans;
+int gcd(int a,int b) { return b==0?a:gcd(b,a%b);}
+int main()
+{
+  #ifndef  ONLINE_JUDGE 
+   freopen("in.txt","r",stdin);
+  #endif
+   mp.clear();
+   scanf("%d",&n);
+   for ( int i = 0 ; i < n*n ; i++)
+    {
+	scanf("%d",&a[i]);
+	mp[a[i]]++;
+    }
+    sort(a,a+n*n);
+
+    for ( int i = n*n-1 ;i>=0 ; i--)
+    {
+	if (!mp[a[i]]) continue;
+	mp[a[i]]--;
+	for ( int j = 0 ; j< ans.size() ; j++)
+	{
+	    int tmp = gcd(a[i],ans[j]);
+	    mp[tmp]--;
+	    mp[tmp]--;
+	}
+	ans.push_back(a[i]);
+    }
+    for ( int i = 0 ; i < n-1 ; i++)
+	printf("%d ",ans[i]);
+    printf("%d",ans[n-1]);
+
+  
+   
+ #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+	return 0;
+}
