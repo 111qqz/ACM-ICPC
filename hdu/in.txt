@@ -1,0 +1,17 @@
+9
+add 1
+add 2
+add 3
+add 4
+add 5
+sum
+add 6
+del 3
+sum
+6
+add 1
+add 3
+add 5
+add 7
+add 9
+sum
