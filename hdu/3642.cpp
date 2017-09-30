@@ -78,7 +78,7 @@ void PushUp(int l,int r,int rt)
 	tree[rt].one = tree[rt].two = X[r+1]-X[l];
 	
 	if (l==r) tree[rt].three = 0 ;
-	else tree[rt].three = tree[rt<<1].two + tree[rt<<1|1].two;
+	else tree[rt].three = tree[rt<<1].one + tree[rt<<1|1].one;
 
     }else if (tree[rt].cnt==1)
     {
@@ -120,7 +120,7 @@ LL solve( int z)
 {
     int siz = rec[z].size();
     if (siz<3) return 0LL;
-    for ( int i = 0 ; i < siz ; i++) rec[z][i].print();
+   // for ( int i = 0 ; i < siz ; i++) rec[z][i].print();
     ms(tree,0);
     for ( int i = 0 ; i < siz ; i++)
     {
@@ -128,7 +128,7 @@ LL solve( int z)
 	LL y1 = rec[z][i].y1;
 	LL x2 = rec[z][i].x2;
 	LL y2 = rec[z][i].y2;
-	printf("x1:%lld y1:%lld x2:%lld y2:%lld\n",x1,y1,x2,y2);
+//	printf("x1:%lld y1:%lld x2:%lld y2:%lld\n",x1,y1,x2,y2);
 	X[i+1] = x1;
 	X[i+1+siz] = x2;
 	a[i+1]=Seg(x1,x2,y1,1);
@@ -138,7 +138,6 @@ LL solve( int z)
     sort(X+1,X+siz+1);
     sort(a+1,a+siz+1);
     int m = unique(X+1,X+siz+1)-X-1;
-    
     LL ret = 0;
     for ( int i = 1 ; i < siz; i++)
     {
@@ -147,11 +146,9 @@ LL solve( int z)
 	update(l,r-1,a[i].d,1,m,1);
 	ret += tree[1].three * (a[i+1].h-a[i].h);
     }
-    cout<<"Z:"<<z<<" ret:"<<ret<<endl;
+    //cout<<"Z:"<<z<<" ret:"<<ret<<endl;
     return ret;
 }
-
-
 int main()
 {
 	#ifndef  ONLINE_JUDGE 
@@ -172,34 +169,18 @@ int main()
 		//此处先存储下来是为了将Z坐标离散化
 		Z[i] = cube[i].z1;
 		Z[i+n] = cube[i].z2;
-	    }
-
-
-	    n<<=1;
-	    sort(Z+1,Z+n+1);
-	    int nz = unique(Z+1,Z+n+1)-Z-1;
-	    cout<<"nz:"<<nz<<endl;
-	    for ( int i = 1 ; i <= nz ; i++) printf("i:%d z:%lld\n",i,Z[i]);
-	    n>>=1;
-	    for ( int i = 1 ; i <= n ; i++)
-	    {
-		int z1 = lower_bound(Z+1,Z+nz+1,cube[i].z1)-Z-1;
-		int z2 = lower_bound(Z+1,Z+nz+1,cube[i].z2)-Z-1;
-		cout<<"z1:"<<z1<<" z2:"<<z2<<endl;
-		for ( int j = z1 ; j < z2 ; j++)
-		  rec[j].PB(Rec(cube[i].x1,cube[i].y1,cube[i].x2,cube[i].y2));
-		//此处存储下来是为了同一层的矩形要一起搞
+		for ( int j = cube[i].z1 ; j < cube[i].z2 ; j++)
+		{
+                    rec[j+500].PB(Rec(cube[i].x1,cube[i].y1,cube[i].x2,cube[i].y2));
+		}
 	    }
 	    LL ans = 0;
-	    for ( int i = 0 ; i < nz ; i++)
+	    for ( int i = 0 ; i <=1000 ; i++)
 	    {
 		ans += solve(i);
 	    }
 	    printf("Case %d: %lld\n",++cas,ans);
-
 	}
-
-
   #ifndef ONLINE_JUDGE  
   fclose(stdin);
   #endif
