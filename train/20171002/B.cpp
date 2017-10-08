@@ -38,7 +38,11 @@ int get_mx( int n)
 {
     if (n==2) return 2;
     if (n==3) return 5;
-    return n+4;
+    if (n==4) return 8;
+    int a = (n+1)%3;
+    int b = (n+1)/3;
+    int ret = 5*(b-1)+4+a;
+    return ret;
 }
 string solve()
 {
@@ -134,6 +138,7 @@ string solve()
     }
     else
     {
+	/*
 	int sum = n+2;
 	if (x+y==sum)
 	{
@@ -164,6 +169,7 @@ string solve()
 	    }
 	    return ret;
 	}
+	*/
 
 	if (x==n&&y==0)
 	{
@@ -192,6 +198,7 @@ string solve()
 	if (x>=mx/2 +1 && x<=n && x+y==mx)
 	{
 	    int tmp = y-2;
+	    //cout<<"tmp:"<<tmp<<endl;
 	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'G';
 	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'B';
 	    return ret;
@@ -203,7 +210,7 @@ string solve()
 	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'G';
 	    return ret;
 	}
-
+	/*
 	if (x==mx/2+1 && y==mx/2)
 	{
 	    int tmp = n/2+1;
@@ -218,6 +225,7 @@ string solve()
 	    for ( int i = tmp + 1 ; i <= n ; i++) ret = ret +'B';
 	    return ret;
 	}
+	*/
 	if (x==n/2+2&&y==n/2+1)
 	{
 	    int tmp = n/2;
@@ -265,8 +273,8 @@ bool check(string st)
 }
 int main()
 {
-	freopen("boysgirls.in","r",stdin);
-	freopen("boysgirls.out","w",stdout);
+//	freopen("boysgirls.in","r",stdin);
+//	freopen("boysgirls.out","w",stdout);
        while (cin>>n>>x>>y)
        {
 	string ans = solve();
