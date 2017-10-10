@@ -34,225 +34,47 @@ const int inf = 0x3f3f3f3f;
 const string error = "Impossible";
 int n,x,y;
 int mx;
+char more,less;
 int get_mx( int n)
 {
     if (n==2) return 2;
     if (n==3) return 5;
     if (n==4) return 8;
-    int a = (n+1)%3;
-    int b = (n+1)/3;
-    int ret = 5*(b-1)+4+a;
+    int a = (n+2)%3;
+    int b = (n+2)/3;
+    int ret = 5*(b-1)+3+a;
     return ret;
 }
+string tail( int x)
+{
+    string add = "";
+    if (x==1) add = less;
+    if (x==2) add = less+more;
+    return add;
+}
+string work( int n,int y)
+{
+    string add ="";
+    if (n%3==0)
+    {
+	if (y%3==0) add+='GGB'; i                            
 string solve()
 {
     mx = get_mx(n);
     string ret="";
+    string block = more + more + less; 
+    string block2 = more + less + less;
     if ((x+y)%2!=n%2) return error;
     if (x+y>mx) return error;
-    //cout<<"mx:"<<mx<<endl;
-    if (n%2==0)
-    {
-	if (x==n&&y==0)
-	{
-	    for ( int i = 1 ; i <= n ; i++) ret = ret + 'B';
-	    return ret;
-	}
-	if (x==0&&y==n)
-	{
-	    for ( int i = 1 ; i <= n ; i++) ret = ret + 'G';
-	    return ret;
-	}
-
-	if (x==n&&y<n)
-	{
-	    int tmp = y/2;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'G';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'B';
-	    return ret;
-	}
-	if (y==n&&x<n)
-	{
-	    int tmp = x/2;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'B';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'G';
-	    return ret;
-	}
-	if (x>=mx/2 && x <= n && y==mx-x)
-	{
-	    int tmp = y-2;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'G';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'B';
-	    return ret;
-	}
-	if (y>=mx/2 && y<=n && x==mx-y)
-	{
-	    int tmp = x-2;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'B';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'G';
-	    return ret;
-	}
-	int sum = n + 2;
-	if (x+y==sum && x!=y)
-	{
-	    if (x>y)
-	    {
-		int tmp = y-1;
-		int cnt = 0;
-		for ( int i = 1 ; i <= n ; i++) 
-		    if (i%2==1&&cnt<tmp) 
-		    {
-			cnt++;
-			ret = ret + 'G';
-		    }
-		    else ret = ret + 'B';
-	    }else
-	    {
-		int tmp = x-1;
-		int cnt = 0 ;
-		for ( int i = 1 ; i <= n ; i++)
-		    if (i%2==1&&cnt<tmp)
-		    {
-			cnt++;
-			ret = ret + 'B';
-		    }
-		else ret = ret + 'G';
-	    }
-	    return ret;
-	}
-		
-
-	if (x==mx/2 && y==mx/2)
-	{
-	    for ( int i = 1 ; i <= n/2 ; i++) ret = ret + 'B';
-	    for ( int i = n/2+1 ; i <= n ; i++) ret = ret + 'G';
-	    return ret;
-	}
-	if (x==n/2 && y==n/2)
-	{
-	    for ( int i = 1 ; i <= n ; i++)
-		if (i%2) ret = ret +'B';
-		else ret = ret + 'G';
-	    return ret;
-	}
-    }
-    else
-    {
-	/*
-	int sum = n+2;
-	if (x+y==sum)
-	{
-	    if (x>y)
-	    {
-		int tmp = y-1;
-		int cnt = 0;
-		for ( int i = 1 ; i <= n ; i++)
-		{   if (i%2==1&&cnt<tmp)
-		    {
-			cnt++;
-			ret = ret +'G';
-		    }else ret = ret + 'B';
-		}
-	    }
-	    else
-	    {
-		int tmp = x-1;
-		int cnt = 0 ;
-		for ( int i = 1 ; i <= n ; i++)
-		{
-		    if (i%2==1&&cnt<tmp)
-		    {
-			cnt++;
-			ret = ret + 'B';
-		    }else ret = ret + 'G';
-		}
-	    }
-	    return ret;
-	}
-	*/
-
-	if (x==n&&y==0)
-	{
-	    for ( int i = 1 ; i <= n ; i++) ret = ret +'B';
-	    return ret;
-	}
-	if (x==0&&y==n)
-	{
-	    for ( int i = 1 ; i <= n ; i++) ret = ret + 'G';
-	    return ret;
-	}
-	if (x==n&&y<n)
-	{
-	    int tmp = y/2;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'G';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'B';
-	    return ret;
-	}
-	if (y==n&&x<n)
-	{
-	    int tmp = x/2;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'B';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret +'G';
-	    return ret;
-	}
-	if (x>=mx/2 +1 && x<=n && x+y==mx)
-	{
-	    int tmp = y-2;
-	    //cout<<"tmp:"<<tmp<<endl;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'G';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'B';
-	    return ret;
-	}
-	if (y>=mx/2+1 && y<=n && x+y==mx)
-	{
-	    int tmp = x-2;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'B';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret + 'G';
-	    return ret;
-	}
-	/*
-	if (x==mx/2+1 && y==mx/2)
-	{
-	    int tmp = n/2+1;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'B';
-	    for ( int i = tmp+1 ; i <= n ; i++) ret = ret +'G';
-	    return ret;
-	}
-	if (x==mx/2&&y==mx/2+1)
-	{
-	    int tmp = n/2+1;
-	    for ( int i = 1 ; i <= tmp ; i++) ret = ret + 'G';
-	    for ( int i = tmp + 1 ; i <= n ; i++) ret = ret +'B';
-	    return ret;
-	}
-	*/
-	if (x==n/2+2&&y==n/2+1)
-	{
-	    int tmp = n/2;
-	    int cnt = 0 ;
-	    for ( int i = 1 ; i <= n ; i++)
-	    {
-		if (i%2==1&&cnt<tmp)
-		{
-		    ret = ret +'G';
-		    cnt++;
-		}else ret = ret + 'B';
-	    }
-	    return ret;
-	}
-	if (x==n/2+1&&y==n/2+2)
-	{
-	    int tmp = n/2;
-	    int cnt = 0 ;
-	    for ( int i = 1 ; i <= n ; i++)
-	      if (i%2==1&&cnt<tmp)
-	      {
-		  ret = ret + 'B';
-		  cnt++;
-	      }else ret = ret + 'G';
-	    return ret;
-	}
-    }
+    if (y==1) return error;
+    if (x==n&y==0) {for ( int i = 1 ; i <= n ; i++) ret = ret + more; return ret;}
+    if (x==(n+1)/2&&y==x+n%2) { for ( int i = 1 ; i<=n ;i++) if (i<=(n+1)/2) ret +=more;else ret+=less;return ret;}
+    if (x==n&&y==mx-x){for (int i=1;i<=n/3;i++)ret+=block;ret+=tail(n%3);return ret;}
+    int bk_cnt=(y+2)/3;
+    int tot=0;
+    int num;
+    for ( int i=1;i<=bk_cnt;i++)ret+=block;
+    ret += work(n,y)
 
 
     return error;
@@ -277,6 +99,9 @@ int main()
 //	freopen("boysgirls.out","w",stdout);
        while (cin>>n>>x>>y)
        {
+	   more = 'B';
+	   less = 'G';
+	   if (x<y) swap(more,less),swap(x,y);
 	string ans = solve();
 	//if (ans!=error && !check(ans))
 	cout<<ans<<endl;
