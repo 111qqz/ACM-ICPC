@@ -1,7 +1,6 @@
 /* ***********************************************
 Author :111qqz
-Created Time :2017年10月11日 星期三 19时53分30秒
-File Name :ciru.circlep
+File Name :H.cpp
 ************************************************ */
  
 #include <cstdio>
@@ -29,13 +28,16 @@ typedef long long LL;
 typedef unsigned long long ULL;  
 typedef vector <int> VI;  
 const int INF = 0x3f3f3f3f;  
-const double eps = 1e-10;  
+const double eps = 1e-6;  
 const int MAXN = 1E3+7;  
 const double PI = acos(-1.0);  
 #define sqr(x) ((x)*(x))  
 const int N = 1010;  
 double area[N];  
-int n;  
+int n,k;
+double Z[N];
+double W,S;
+
   
 int dblcmp(double d){ return d<-eps?-1:d>eps;}  
 struct point
@@ -59,6 +61,7 @@ struct point
     point operator * (double t)const{ return point(t*x,t*y);}
     point operator / (double t)const{ return point(x/t,y/t);}
     double length() const { return sqrt(x*x+y*y);};
+    double length2() const { return x*x + y*y;}
     point unit()const { double l = length();return point(x/l,y/l); }
 }tp[N*2];
 double cross (const point a,point b){ return a.x*b.y-a.y*b.x ;}
@@ -67,7 +70,12 @@ struct circle
 { 
     point c;
     double r;
+    double Z;
     int d; 
+    void pr()
+    {
+	printf(" (%.3f,%.3f) r=%.3f\n",c.x,c.y,r);
+    }
     void input()  
     {  
 	c.input();
@@ -113,7 +121,6 @@ double calc(circle cir, point p1, point p2)
 		 - cross ( (p1-cir.c),(p2-cir.c)) + cross( p1,p2);
     return ans *0.5; 
 }  
-  
 void CirUnion(circle cir[], int n)  
 {  
     circle cir1, cir2;  
@@ -150,12 +157,21 @@ void CirUnion(circle cir[], int n)
         }  
     }  
 }  
-void solve()  
-{  
-    scanf("%d", &n);  
-    for (int i = 0; i < n; ++i)  
-        cir[i].input();  
-    memset(area, 0, sizeof(area));  
+bool check( double h)  
+{ 
+   // cout<<"h:"<<h<<"  ";
+    
+    for ( int i = 0 ; i < n ; i++)
+    {
+	double l = sqrt(cir[i].c.length2() + h*h);
+	double r = W/(l*cir[i].Z);
+	cir[i].r = r;
+	cir[i].d = 1; //多次，是累加值，记得每次二分都要初始化。
+	//cir[i].pr();
+    }
+
+    memset(area, 0, sizeof(area));
+    ms(tp,0);
     CirUnion(cir, n);  
     //去掉重复计算的  
     for (int i = 1; i <= n; ++i)  
@@ -163,16 +179,55 @@ void solve()
         area[i] -= area[i + 1];  
     }  
     //area[i]为重叠了i次的面积 
-    for ( int i = 1 ; i <= n ; i++) printf("[%d] = %.3f\n",i,area[i]+eps);
+    double sum=0;
+    for ( int i = k ; i <= n ; i++) sum = sum + area[i];
+    //sum = fabs(sum);
+    return dblcmp(sum-S)>0;
     //tot 为总面积  
     //double tot = 0;  
     //for(int i=1; i<=n; i++) tot += area[i];  
     //printf("%f\n", tot);  
 }  
-  
+
+bool ok;
+double bin()
+{
+    double l = 0;
+    double r = 10000;
+    while (dblcmp(l-r)<0)
+    {
+	double mid = (l+r)*0.5;
+	//printf("l: %.4f r:%.4f mid:%.4f \n",l,r,mid);	
+	if (check(mid)) l = mid,ok = true;
+	else r = mid;
+    }
+    return l;
+}
 int main()  
 {  
-   // freopen("./in.txt", "r", stdin);  
-    solve();
+   // freopen("./in.txt", "r", stdin);
+    int T;
+    cin>>T;
+    while (T--)
+    {
+	ok = false;
+	cin>>n>>W>>k>>S;
+	for ( int i = 0 ; i < n ; i++) 
+	{
+	    cir[i].c.input();
+	    scanf("%lf",&cir[i].Z);
+	}
+	double ans =bin();
+	if (!ok) puts("No solution!");
+	else
+	{
+	    if (dblcmp(ans-500)>0) puts("Oops!");
+	    else printf("%.4f\n",ans);
+	}
+    }
+	    
+
+
+
     return 0;  
 }
