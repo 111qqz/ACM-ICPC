@@ -1,7 +1,7 @@
 /* ***********************************************
 Author :111qqz
-Created Time :2016年11月30日 星期三 15时18分00秒
-File Name :data.cpp
+Created Time :2017年10月13日 星期五 20时53分01秒
+File Name :test.cpp
 ************************************************ */
 
 #include <cstdio>
@@ -16,6 +16,7 @@ File Name :data.cpp
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#define PB push_back
 #define fst first
 #define sec second
 #define lson l,m,rt<<1
@@ -30,17 +31,23 @@ const double eps = 1E-8;
 const int dx4[4]={1,0,0,-1};
 const int dy4[4]={0,-1,1,0};
 const int inf = 0x3f3f3f3f;
+const int N=1E6+7;
+int F[N];
+void get_fib()
+{
+    F[0] = 0;
+    F[1] = 1;
+    for ( int i = 1 ; i < N ; i++) F[i] = F[i-1] + F[i-2];
+}
+
 int main()
 {
 	#ifndef  ONLINE_JUDGE 
-//	freopen("code/in.txt","r",stdin);
+	freopen("./in.txt","r",stdin);
   #endif
-    srand(time(0));
-    for ( int i = 1 ; i <= 200 ; i++)
-    {
-	int n = rand()%654321+2;
-	printf("%d\n",n);
-    }
+	get_fib();
+
+
   #ifndef ONLINE_JUDGE  
   fclose(stdin);
   #endif
