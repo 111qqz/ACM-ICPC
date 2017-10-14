@@ -69,11 +69,6 @@ double calc(double R,bool debug)
     double lstR,curR;
     lstR = R;
     //cout<<"R:"<<R<<endl;
-    if (!checkR(R,1)) 
-    {
-	//puts("fuck");
-	return DINF;
-    }
     if (debug)
     {
 	vecR.clear();
@@ -84,15 +79,6 @@ double calc(double R,bool debug)
     {
 	curR = a[i]-lstR;
 	if (debug) vecR.PB(curR);
-	if (debug)
-	{
-	   // cout<<"curR:"<<curR<<" lstR:"<<lstR<<" a[i]:"<<a[i]<<endl;
-	}
-	if (dblcmp(curR)<0)
-	{
-	   // puts(" fuck curR");
-	    return DINF;
-	}
 	ret += area(curR);
 	lstR = curR;
     }
@@ -115,11 +101,58 @@ double sanfen(double l, double r){
     ans=calc(l,true);
     return ans;
 }
-int main()
+
+void odd()
 {
-	#ifndef  ONLINE_JUDGE 
+	double lstR=0;
+	double p = 1;
+	double ans = 0 ;
+	for ( int i = n ; i >= 1 ; i--)
+	{
+	    if (i%2==1) lstR+=a[i];
+	    else lstR-=a[i];
+	}
+	/*
+	for ( int i = n ; i >= 1 ; i--,p*=-1) 
+	{
+	    lstR = lstR + p * a[i];
+	    cout<<"lstR:"<<lstR<<endl;
+	}
+	*/
+	lstR/=2;
+	cout<<"R:"<<lstR<<endl;
+	if (!checkR(lstR,1)) 
+	{
+	    puts("IMPOSSIBLE?");
+	    return ;
+	}
+	vecR.PB(lstR);
+	ans += area(lstR);
+	for ( int i = 1 ; i <= n-1 ; i++)
+	{
+	    double curR = a[i]-lstR;
+	    cout<<"lstR:"<<lstR<<" curR:"<<curR<<endl;
+	    if (!checkR(curR,i+1))
+	    {
+		puts("IMPOSSIBLE???");
+	//	return;
+	    }
+	    vecR.PB(curR);
+	    ans += area(curR);
+	    lstR = curR;
+	}
+	ans*=PI;
+	printf("%.2f\n",ans);
+	for ( int i = 0 ; i < int(vecR.size()) ; i++)
+	{
+	    printf("%.2f\n",vecR[i]+eps);
+	}
+}
+    int main()
+    {
+#ifndef  ONLINE_JUDGE 
 	freopen("./in.txt","r",stdin);
-  #endif
+#endif
 	int T;
 	cin>>T;
 	while (T--)
@@ -132,48 +165,47 @@ int main()
 		if (i==n)
 		    a[i] = p[1].dis(p[n]);
 		else 
-		    a[i] = p[i+1].dis(p[i]);
+		    a[i] = p[i-1].dis(p[i]);
 	    }
-//	    for ( int i = 1 ; i <= n ; i++) printf("%f%c",a[i],i==n?'\n':' ');
+	    for ( int i = 1 ; i <= n ; i++) printf("a[i]:%f%c",a[i],i==n?'\n':' ');
 	    //a[n+1] = a[1];
+	    
 	    if (n%2==1)
 	    {
-		 double lstR;
-		 double p = 1;
-		 double ans = 0 ;
-		 for ( int i = n ; i >= 1 ; i--,p*=-1) lstR = lstR + p * a[i];
-		 lstR/=2;
-		 vecR.PB(lstR);
-		 ans += area(lstR);
-		 if (!checkR(lstR,1)) 
-		  {
-		      puts("IMPOSSIBLE");
-		      continue;
-		 }
-		 bool die = false;
-		 for ( int i = 1 ; i <= n-1 ; i++)
-		 {
-		     double curR = a[i]-lstR;
-		     if (!checkR(curR,i+1))
-		     {
-			 puts("IMPOSSIBLE");
-			 die = true;
-			 break;
-		     }
-		     vecR.PB(curR);
-		     ans +=area(curR);
-		     lstR = curR;
-		}
-		if (die) continue;
-		ans*=PI;
-		printf("%.2f\n",ans);
-		for ( int i = 0 ; i < int(vecR.size()) ; i++)
-		{
-		    printf("%.2f\n",vecR[i]+eps);
-		}
+		odd();
 		continue;
 	    }
-	    double ans = sanfen(0,a[1]);
+	    double tmp=0;
+	    for ( int i = n ; i >= 1 ; i--)
+		if (i&1) tmp+=a[i];
+		else tmp-=a[i];
+	    if (dblcmp(tmp)!=0) 
+	    {
+		puts("IMPOSSIBLE");
+		continue;
+	    }
+	    tmp = 0 ;
+	    double L=0,R=a[1];//三分的范围。。。
+	    //之前的做法是在三分范围内判断可行性。。。我好傻啊？
+	    int idx = 1;
+	    for ( int i = 2 ; i <= n ; i++)
+	    {
+		tmp =a[idx]-tmp;
+		if (i&1)
+		{
+		    R = min(R,tmp);
+		}
+		else
+		{
+		    L = max(L,-tmp);
+		}
+		idx++;
+		if (idx>n) idx = 1;
+	    }
+	    cout<<"L:"<<L<<" R:"<<R<<endl;
+	    if (L>R) { puts("IMPOSSIBLE");continue;}
+
+	    double ans = sanfen(L,R);
 	    if (dblcmp(ans-DINF)==0) 
 	    {
 		puts("IMPOSSIBLE");
