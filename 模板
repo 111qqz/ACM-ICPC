@@ -750,9 +750,200 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 	    }
 	    }
 	}
+####线段树求逆序三元组
+
+	const int N=1E6+7;
+	int a[N];
+	int A[N];
+	int H[N];
+	int n;
+	int m;
+	int tree1[N<<2],tree2[N<<2];
+	pair<LL,LL>ans[N];
+	void PushUp(int rt,int *tree)
+	{
+	    tree[rt] = tree[rt<<1] + tree[rt<<1|1];
+	}
+	void update(int p,int l,int r,int rt,int *tree)
+	{
+	    if (l==r)
+	    {
+		tree[rt]++;
+		return;
+	    }
+	    int m = (l+r)>>1;
+	    if (p<=m) update(p,lson,tree);
+	    else update(p,rson,tree);
+	    PushUp(rt,tree);
+	}
+	int query(int L,int R,int l,int r,int rt,int *tree)
+	{
+	//    cout<<"L:"<<L<<" R:"<<R<<" l:"<<l<<" r:"<<r<<" rt:"<<rt<<endl;
+	    if (L>R) return 0; 
+	    if (L<=l&&r<=R) return tree[rt];
+	    int m = (l+r)>>1;
+	    int ret = 0 ;
+	    if (L<=m)
+	    {
+		int res = query(L,R,lson,tree);
+		ret+=res;
+	    }
+	    if (R>=m+1)
+	    {
+		int res =  query(L,R,rson,tree);
+		ret +=res;
+	    }
+	    return ret;
+	}
+	int Hash( int x)
+	{
+	    return lower_bound(H,H+m,x)-H;
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		cin>>n;
+		m = n;
+		for ( int i = 0 ; i < n ; i++)
+		{
+		    scanf("%d",&a[i]);
+		    H[i] = a[i];
+		}
+		sort(H,H+m);
+		m = unique(H,H+m)-H;
+		int mx = 0 ;
+		for ( int i = 0 ; i < n ; i++) A[i] = Hash(a[i])+1,mx = max(mx,A[i]);
+		ms(tree1,0);
+		ms(tree2,0);
+		for ( int i = n-1 ; i >=0 ; i--)
+		{
+		    LL tmp = LL(query(1,A[i]-1,1,mx,1,tree1));
+		    ans[i].fst = tmp;
+		    update(A[i],1,mx,1,tree1);
+		}
+		for ( int i =  0 ; i < n ; i++)
+		{
+		    LL tmp = LL(query(A[i]+1,mx,1,mx,1,tree2));
+		    ans[i].sec = tmp;
+		    update(A[i],1,mx,1,tree2);
+		}
+		LL res = 0LL;
+		for ( int i = 0 ; i < n ; i++) res = res + ans[i].fst*ans[i].sec;
+		cout<<res<<endl;
+	  #ifndef ONLINE_JUDGE  
+	  fclose(stdin);
+	  #endif
+	    return 0;
+	}
 	
+#####线段树动态维护区间最大子段和
+	const int N=5E5+7;
+	int n,m;
+	int a[N];
+	struct Tree
+	{
+	    int sum;
+	    int mxl;
+	    int mxr;
+	    int mx;
+	}tree[N<<2];
+	void PushUp(int rt)
+	{
+	    tree[rt].sum = tree[rt<<1].sum+tree[rt<<1|1].sum;
+	    if (tree[rt<<1].mxr>0&&tree[rt<<1|1].mxl>0)
+		tree[rt].mx = tree[rt<<1].mxr+tree[rt<<1|1].mxl;
+	    else tree[rt].mx = max(tree[rt<<1].mxr,tree[rt<<1|1].mxl);
+	    tree[rt].mx = max(tree[rt].mx,max(tree[rt<<1].mx,tree[rt<<1|1].mx));
+	    tree[rt].mxl=max(tree[rt<<1].mxl,tree[rt<<1].sum+tree[rt<<1|1].mxl);
+	    tree[rt].mxr=max(tree[rt<<1|1].mxr,tree[rt<<1|1].sum+tree[rt<<1].mxr);
+	}
+	void build(int l,int r,int rt)
+	{
+	 //   cout<<"l:"<<l<<" r:"<<r<< " rt:"<<rt<<endl;
+	    if (l==r)
+	    {
+		int tmp;
+		scanf("%d",&tmp);
+	//        cout<<"tmp:"<<tmp<<endl;
+		tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = tmp;
+		return ;
+	    }
+	    int m = (l+r)>>1;
+	    build(lson);
+	    build(rson);
+	    PushUp(rt);
+	}
+	void update( int p,int sc,int l,int r,int rt)
+	{
+	    if (l==r)
+	    {
+		tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = sc;
+		return ;
+	    }
+	    int m = (l+r)>>1;
+	    if (p<=m) update(p,sc,lson);
+	    else update(p,sc,rson);
+	    PushUp(rt);
+	}
+	Tree query(int L,int R,int l,int r,int rt)
+	{
+	    if (L<=l&&r<=R) return tree[rt];
+	    int m = (l+r)>>1;
+	    if (L<=m&&R>=m+1)
+	    {
+		Tree root,ltree,rtree;
+		ltree=query(L,R,lson);
+		rtree=query(L,R,rson);
+		root.sum = ltree.sum + rtree.sum;
+		if (ltree.mxr>0&&rtree.mxl>0)
+		    root.mx = ltree.mxr + rtree.mxl;
+		else root.mx = max(ltree.mxr,rtree.mxl);
+		root.mx = max(root.mx,max(ltree.mx,rtree.mx));
+		root.mxl = max(ltree.mxl,rtree.mxl+ltree.sum);
+		root.mxr = max(rtree.mxr,ltree.mxr+rtree.sum);
+		return root;
+	    }
+	    else
+	    if (L<=m) return query(L,R,lson);
+	    else   return query(L,R,rson);
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		scanf("%d%d",&n,&m);
+		build(1,n,1);
+		while (m--)
+		{
+		    int opt;
+		    scanf("%d",&opt);
+		    if (opt==1)
+		    {
+		        int a,b;
+		        scanf("%d%d",&a,&b);
+		        if (a>b) swap(a,b);
+		        int ans = query(a,b,1,n,1).mx;
+		        printf("%d\n",ans);
+		    }else
+		    {
+		        int p,x;
+		        scanf("%d%d",&p,&x);
+		        update(p,x,1,n,1);
+		    }
+		}
+	  #ifndef ONLINE_JUDGE  
+	  fclose(stdin);
+	  #endif
+	    return 0;
+	}
+ 
+ 
 #####线段树动态维护最大连续子段（hit oj 2687 ）
 给出n个数,m个修改，每次修改后询问整个区间的最大连续子段。
+
 	const int N=1E5+7;
 	int n,m;
 	struct
@@ -1764,7 +1955,142 @@ hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若�
 		cout<<ans<<endl;
 	    }
 	 
+####欧拉路
+如果图G中的一个路径包括每个边恰好一次，则该路径称为欧拉路径(Euler path)。
+如果一个回路是欧拉路径，则称为欧拉回路(Euler circuit)。
 
+* 有向图G为欧拉图(存在欧拉回路)，当且仅当G的基图连通（弱联通，），且所有顶点的入度等于出度。
+
+* 有向图G为半欧拉图(存在欧拉路)，当且仅当G的基图连通（弱联通），且存在顶点u的入度比出度大1、v的入度比出度小1，其它所有顶点的入度等于出度。
+
+*  无向图存在欧拉回路:  图连通，所有点都是偶数度，
+
+* 无向图存在欧拉路：图联通，只有两个点的度数为奇数。
+
+
+####交叉染色法判断无向图的奇偶环
+
+	const int N=1E5+7;
+	const int M=3E5+7;
+	int n,m;
+	int col[N];
+	bool even,odd;
+	bool vis[N];
+	int cnt ;
+	int head[N];
+	struct Edge
+	{
+	    int v;
+	    int nxt;
+	    bool vis;
+	}edge[2*M];  
+	void addedge( int u,int v)
+	{
+	    edge[cnt].v = v;
+	    edge[cnt].nxt = head[u];
+	    edge[cnt].vis = false;
+	    head[u] = cnt;
+	    cnt++;
+	}
+	void dfs( int u,int x,int fa)
+	{
+	    col[u] = x;
+	    for ( int i = head[u] ; i !=-1 ; i = edge[i].nxt)
+	    {
+		int v = edge[i].v;
+		if (v==fa) continue;交叉染色法判断无向图的奇偶环
+		if (col[v]!=-1)
+		{
+		    if (col[v]==x) odd = true;
+		    else even = true;
+		}
+		if (!edge[i].vis)
+		{
+		    edge[i].vis = true;
+		    dfs(v,1-x,u);
+		}
+	    }
+	    col[u] = -1;
+	}
+	void solve()
+	{
+	    odd = false;
+	    even = false;
+	    for ( int i = 1 ; i <= n ; i++){
+		if (col[i]==-1) dfs(i,0,-1);
+	    }
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		int T;
+		cin>>T;
+		while (T--)
+		{
+		    scanf("%d%d",&n,&m);
+		    ms(col,-1);
+		    ms(head,-1);
+		    cnt = 0 ;
+		    for ( int i = 1 ;i <= m ; i++)
+		    {
+			int u,v;
+			scanf("%d%d",&u,&v);
+			addedge(u,v);
+			addedge(v,u);
+		    }
+		    solve();
+		    if (odd) puts("YES");else puts("NO");
+		    if (even) puts("YES");else  puts("NO");
+		}
+	  #ifndef ONLINE_JUDGE  
+	  fclose(stdin);
+	  #endif
+	    return 0;
+	}
+	
+	
+####交叉染色法判断二分图
+	const int N=205;
+	vector <int>edge[N];
+	int n,m;
+	int col[N];
+	bool dfs( int u,int x)
+	{
+	    col[u] = x;
+	    int siz = edge[u].size();
+	    for ( int i = 0 ; i < siz ; i++)
+	    {
+		int v = edge[u][i];
+		if (col[v]==1-x) continue;
+		if (col[v]==x) return false;
+		if (!dfs(v,1-x)) return false;
+	    }
+	    return true;
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		while (~scanf("%d",&n))
+		{
+		    if (n==0) break;
+		    ms(col,-1);
+		    for ( int i =  0 ;i <= n ; i++) edge[i].clear();
+		    scanf("%d",&m);
+		    for ( int i = 1 ; i <= m ; i++)
+		    {
+		        int u,v;
+		        scanf("%d%d",&u,&v);
+		        edge[u].push_back(v);
+		        edge[v].push_back(u);
+		    }
+		    if (dfs(0,0))
+		        puts("BICOLORABLE.");
+		    else puts("NOT BICOLORABLE.");
+		}
 ####匈牙利算法
 	bool dfs(int u)
 	{
@@ -2901,7 +3227,12 @@ O(1)版本：
   如果(n&m)==m，那么C(n,m)为奇数，否则为偶数
   求C(n,0),C(n,1)...C(n,n)中有多少个奇数 (1=< n <=1E8),答案就是：1<<(n的二进制表示中1的个数)
   
- 
+#####统计一段区间中某数出现的次数
+建一个val和该val对应下标的pair，然后排序（pair默认按照val第一关键字，pair第二关键字升序排）
+
+排序之后，val相同的都在一起了，我们只需要找一段最大的区间，使得这段区间中的第二关键字在[l,r]范围内，然后这段区间的长度就是[l,r]区间中该数出现的次数.
+
+
 ####BSGS算法
 B^L == N (mod P)，求L,保证B，p 互质
 
