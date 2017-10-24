@@ -415,8 +415,115 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 	}
 	 
 	 
- 
+####单调队列
+#####求每连续k个元素的最大值
+
+	const int N=3E4+7;
+	int a[N];
+	int f[N];
+	int n,k;
+	deque<int>dq;
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		scanf("%d",&k);
+		n = 0 ;
+		while (scanf("%d",&a[++n])!=EOF)
+		{
+		    if (a[n]==-1) 
+		    {
+		        n--;
+		        break;
+		    }
+		}
+		//for ( int i = 1 ; i <= n ; i++) cout<<"a[i]:"<<a[i]<<endl;
+		dq.clear();
+		for (  int i = 1 ; i <= n ; i++)
+		{
+		    while (!dq.empty()&&dq.front()<i-k+1) dq.pop_front(); //不断删除队首过期元素。以第i个元素结尾的连续K个元素的开头位置是i-k+1,在这之前的已经“失效”，因此出队.
+		    while (!dq.empty()&&a[dq.back()]<=a[i]) dq.pop_back();//不断删除队尾破坏单调性的元素。能删除的原因是比i早出现并且不比i大的元素一定不会成为答案。
+		    dq.push_back(i);
+		   // cout<<"dq.size():"<<dq.size()<<endl;
+		    //cout<<"i:"<<i<<" "<<dq.front()<<endl;
+		    if (i>=k)
+		        printf("%d\n",a[dq.front()]);
+		}
 ####线段树
+####线段树单点更新询问区间最大值模板
+
+	int n,m;
+	int a[N];
+	int MAX[N<<2];//MAX[i]表示的是第i个节点所存储的信息，根据题目会有所变化，这道题存储的是以i节点为根节点的子树的最大值（也就是i节点所表示的区间的最大值）
+	void PushUp(int rt)
+	{
+	    MAX[rt] = max(MAX[rt<<1],MAX[rt<<1|1]);  //线段树上每一个节点代表一段区间，该区间的最大值是把区间分成两部分，每一部分的最大值的最大值，也就是该节点（rt)的两个子节点取最大值。
+	}                                           //编号为i节点的两个子节点的编号为i*2和 i*2+1,写成位运算也就是 rt<<1和rt<<1|1（因为左移动一位以后末尾肯定为0，“或”1就相当于+1
+		                                    //写成位运算是因为不用考虑优先级的问题。。因为加法的优先级比位移高，而或运算的优先级比位移低。
+	void update(int p,int sc,int l,int r,int rt) //p表示要更新的的节点的位置，sc表示要更新成什么，l,r,rt三个参数表示当前的树，初始就是整个线段树。
+	{
+	   // printf("p:%d sc:%d l:%d r:%d rt:%d\n",p,sc,l,r,rt);
+	    if (l==r) //此时该区间只有一个数，说明已经到了线段树的底部（叶子节点），一个数的最大值就是本身。直接更新
+	    {
+		MAX[rt]= sc;
+		return ;
+	    }
+	    int m = (l+r)>>1; //单点更新的时候，要更新所有包含该单点的子区间（子树）
+	    if (p<=m) update(p,sc,lson);
+	    else update(p,sc,rson);
+	 
+	    PushUp(rt);//当前区间的子区间更新完成后，可能对当前区间的答案有影响，记得更新（从下往上)
+	}
+	void build(int l,int r,int rt)
+	{
+	 //   printf("l:%d r:%d rt:%d\n",l,r,rt);
+	    if (l==r)
+	    {
+		scanf("%d",&MAX[rt]);
+		return;
+	    }
+	    int m = (l+r)>>1;//当前树的两个子树对应到区间的角度，就是把当前区间分成尽可能相同长度的两部分，m为分界点，前一半区间为[l,m]后一半为[m+1,r].
+	    build(lson);
+	    build(rson);  //递归建树，建一棵树只需要先建该树的两棵子树，递归的终点是(l==r)，此时到达线段树的叶子节点，对应区间中只有一个数。
+	    PushUp(rt);  //当当前树的左右子树都建好，就可以向上更新了。
+	}
+	int query(int L,int R,int l,int r,int rt) //L,R为当前询问的区间，l,r,rt表示当前的子树,初始是在整棵线段树中查询。
+	{
+	    if ( L<=l&&r<=R ) //如果当前询问的区间可以完整覆盖当前树的区间，那么这棵子树所代表的区间的最大值就有可能成为当前查询区间的答案，因此直接返回。
+	    {
+		return MAX[rt];
+	    }
+	    int m = (l+r)>>1;  //如果当前询问的区间不能完整覆盖当前树的区间，那么就继续查询当前树的区间的子区间（子树），因为子树表示的区间越来越小，总会完全覆盖。
+	    int ret = 0 ;
+	    if (L<=m){// 只有当前询问区间和左子树的区间由交点时，左子树对应的区间的答案才会对当前询问的区间有意义。
+		int res = query(L,R,lson);
+		ret = max(ret,res); //答案是所有当前询问区间所能覆盖到的树上的子区间所代表的最大值中的最大值。
+	    }
+	    if (R>m){//其实是R>=m+1，同理。
+		int res = query(L,R,rson);
+		ret = max(res,ret);
+	    }
+	    return ret;
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+	 
+		while (~scanf("%d%d",&n,&m))
+		{
+		    build(1,n,1);//直接建树的时候读入，根节点为1.
+		    while(m--)
+		    {
+		        char opt[10];
+		        int a,b;
+		        scanf("%s%d%d",opt,&a,&b);
+		        if (opt[0]=='Q') printf("%d\n",query(a,b,1,n,1));
+		        else update(a,b,1,n,1);
+		    }
+		}
 #####线段树+扫描线 求矩形面积并
 
 	const int N=205;
@@ -1954,7 +2061,83 @@ hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若�
 		}
 		cout<<ans<<endl;
 	    }
-	 
+
+####树的直径
+	const int N=1E3+7;
+	char maze[N][N];
+	bool vis[N][N];
+	int ans;
+	int n,m;
+	struct Point
+	{
+	    int x,y;
+	    int d;
+	    bool ok ()
+	    {
+		if (x<0||y<0||x>=n||y>=m) return false;
+		if (maze[x][y]=='#') return false;
+		if (vis[x][y]) return false;
+		return true;
+	    }
+	    void out()
+	    {
+		cout<<"x:"<<x<<" y:"<<y<<endl;
+	    }
+	}S,lst;
+	void bfs(Point S)
+	{
+	    queue<Point>q;
+	    S.d = 0;
+	    q.push(S);
+	    ms(vis,false);
+	    vis[S.x][S.y] = true;
+	    while (!q.empty())
+	    {
+		Point cur = q.front();
+		q.pop();
+		for ( int i = 0 ; i < 4 ; i++)
+		{
+		    Point nxt;
+		    nxt.x = cur.x + dx4[i];
+		    nxt.y = cur.y + dy4[i];
+		    nxt.d = cur.d + 1;
+		    if (!nxt.ok()) continue;
+		    q.push(nxt);
+		    vis[nxt.x][nxt.y] = true;
+		    if (ans<nxt.d)
+		    {
+			ans = nxt. d;
+			lst = nxt;
+		    }
+		}
+	//	cout<<"ans:"<<ans<<endl;
+	    }
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		int T;
+		cin>>T;
+		while(T--)
+		{
+		    ms(vis,false);
+		    scanf("%d%d",&m,&n);
+		    for ( int i =  0; i  < n ; i++) scanf("%s",maze[i]);
+		    for ( int i = 0 ; i < n ; i++)
+			for ( int j = 0 ; j < m ; j++)
+			    if (maze[i][j]=='.')
+			    {
+				S.x = i ;
+				S.y = j ;
+			    }
+		    ans  = 0;
+		    bfs(S);
+		    ans = 0 ;
+		    bfs(lst);
+		    printf("Maximum rope length is %d.\n",ans);
+		}	 
 ####欧拉路
 如果图G中的一个路径包括每个边恰好一次，则该路径称为欧拉路径(Euler path)。
 如果一个回路是欧拉路径，则称为欧拉回路(Euler circuit)。
@@ -2866,6 +3049,333 @@ manacher求最长回文子串的开始结束位置
 	    }
 	    
 	}
+	
+	
+####后缀数组
+#####给出一个字符串，问所有不同的字串的个数。
+
+	const int N=1E3+7;
+	int n;
+	char s[N];
+	int sa[N],rk[N],t[N],t2[N],cnt[N];
+	int height[N];
+	int cmp(int *r,int a,int b,int l){return r[a]==r[b]&&r[a+l]==r[b+l];}
+	 
+	void getSa(int n,int m)
+	{
+	    int *x = t,*y = t2;
+	    ms(cnt,0);
+	    for ( int i = 0 ; i < n ; i++) cnt[x[i]=s[i]]++;
+	    for ( int i = 1 ; i < m ; i++) cnt[i] += cnt[i-1];
+	    for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] = i ;
+	    for ( int k = 1 ; k <=  n;  k <<=1 )
+	    {
+		int p = 0 ;
+		for ( int i = n-k ; i < n; i ++) y[p++] = i;
+		for (  int i = 0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k;
+		ms(cnt,0);
+		for ( int i = 0 ; i < n ; i++) cnt[x[y[i]]]++;
+		for ( int i = 0 ; i < m ; i++) cnt[i]+=cnt[i-1];
+		for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
+		swap(x,y);
+		p = 1;
+		x[sa[0]] = 0;
+		for ( int i = 1 ; i < n ; i++)
+		    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+		if (p>=n) break;
+		m = p;
+	    }
+	}
+	 
+	void getHeight( int n)
+	{
+	    int k = 0 ;
+	    for ( int i = 0 ; i < n ;i ++) rk[sa[i]] = i ;
+	    height[0] = 0 ;
+	    for ( int i = 0 ; i < n;  i++)
+	    {
+		if (rk[i]==0) continue;
+		if (k) k--;
+		int j = sa[rk[i]-1];
+		while (s[i+k]==s[j+k]) k++;
+		height[rk[i]] = k ;
+	    }
+	}
+	 
+	int getSuffix( char s[])
+	{
+	    int len = strlen(s);
+	    int up = 0;
+	    for ( int i = 0 ; i < len ; i++)
+	    {
+		int val = s[i];
+		up = max(up,val);
+	    }
+	    s[len++]='$';
+	    getSa(len,up+1);
+	    getHeight(len);
+	    return len;
+	}
+	 
+	int solve( int n)
+	{
+	  //  for ( int i = 0 ; i < n ; i++) cout<<"i:"<<i<<" height[i]:"<<height[i]<<endl;
+	    
+	    ms(cnt,0); //cnt在求完sa之后就没用了，所以拿来用一下，嘿嘿嘿
+	    int up = 0 ;
+	    for ( int i = 0 ; i < n; i++) cnt[height[i]]++,up=max(up,height[i]);
+	 
+	    for ( int i = up-1 ; i >=1 ; i--) cnt[i] = cnt[i]+cnt[i+1];
+	    int res = 0 ;
+	    //for ( int i = 1 ; i <= up; i++) cout<<"cnt[i]:"<<cnt[i]<<endl;
+	    for ( int i = 1 ; i <= up ; i++ )
+		res += cnt[i];
+	    return res;
+	}
+	 
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+	 
+		int T;
+		scanf("%d",&T);
+		while (T--)
+		{
+		    scanf("%s",s);
+		   int len = getSuffix(s);
+		   int ans = len*(len-1)/2;
+		    ans-=solve(len);
+		    printf("%d\n",ans);
+	 
+		}
+		
+#####给出两个字符串，问最长的公共连续字串	（模板题）
+首先要理解后缀，后缀数组（sa[]），名次数组(rk[])，height数组，lcp 这些概念
+
+先从定义入手，得到sa数组的n2logn的求法...
+
+由于复杂度爆炸，所以有了两个算法来优化求sa的过程，一个是nlogn的倍增，还有一个是O(n)的dc3。。。
+
+倍增的算法中用到了radix sort
+
+上面这些，都是在说如何求sa,但是如果只有sa一个数组的话，就没有办法很好感受 后缀数组的power.
+
+于是引入了height数组。
+
+定义 height[i]=suffix(sa[i-1])和 suffix(sa[i])的最长公
+共前缀,也就是排名相邻的两个后缀的最长公共前缀。那么对于 j 和 k,不妨设
+rank[j]<rank[k],则有以下性质:
+suffix(j) 和 suffix(k) 的 最 长 公 共 前 缀 为 height[rank[j]+1],
+height[rank[j]+2], height[rank[j]+3], ... ,height[rank[k]]中的最小值。
+
+有很多问题都是基于height数组的，慢慢感受。
+
+ 
+
+再说这道题：我们可以把两个字符串中间用一个特殊符号连接起来。
+
+那么两个字符串的最长公共字串，就变成了求合并后的字符串的所有后缀的最长公共前缀。（原因是字符串的任何一个字串都可以看成是该字符串的某个后缀的前缀）
+
+那么容易知道，该最长公共前缀的长度一定是某个height值（原因是，height[i]表示的是排名相邻的两个后缀的最长公共前缀的长度，如果不相邻，那么取的是他们排名之间所有height的最小值，只会越来越小。）
+
+还需要注意的是，必须满足得到该height的两个后缀分别出现在原来的两个字符串中...
+
+要怎么办到呢？ 其实很容易，由于sa[i]数组存放的是排名第i的后缀是后缀几(定义从第x个字符开始的后缀就是后缀x)
+
+设初始第一个字符串的长度为len1,那么如果是第一个字符串的后缀，一定有sa[i]<len1,如果是第二个字符串的后缀，就一定有sa[i]>len1  (sa[i]==len1的是插入的特殊符号开始的后缀)
+
+	const int N=2E5+7;
+	char s[N];
+	int sa[N],t[N],t2[N],cnt[N],n;
+	int c[N];
+	int w[N];
+	int rk[N],height[N];
+	int cmp( int *r,int a,int b,int l){ return r[a]==r[b]&&r[a+l]==r[b+l] ;};
+	void build_sa(int n,int m) //其实我觉得。。。sa怎么得到的不用管。。这部分讲道理不会变。。。反正知道能nlogn得到sa就对了2333
+	{
+	    int *x=t,*y=t2;
+	    // 基数排序（不是计数排序！） radix sort...
+	    for ( int i = 0 ; i < m ; i++) c[i] = 0 ; //ms(cnt,0);
+	    for ( int i = 0 ; i < n;  i++) c[x[i]=s[i]]++; //x[i]相当于保存了rank的相对大小，由于只是为了比较大小，所以没必要求出真实的rank值。
+	    for ( int i = 1 ; i < m ; i++) c[i]+=c[i-1];
+	    for ( int i = n-1 ; i >= 0 ;i--) sa[--c[x[i]]] =  i;
+	 
+	    
+	    for ( int k = 1 ; k <= n ; k<<=1)  //进行若干次基数排序，每次对长度为k的字符串排序
+	    {
+		int p  = 0 ;
+		for ( int i = n-k ; i < n ; i++)  y[p++] = i;  
+		for ( int i = 0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k; //y保存对第二关键字排序的结果，可以直接用上一次求得的sa算出。
+		for ( int  i = 0 ; i < m  ;  i++) c[i] = 0;
+		for ( int i = 0 ; i < n ; i++) c[x[y[i]]]++;
+		for ( int i = 0 ; i < m ; i++) c[i]+=c[i-1];
+		for ( int i = n-1 ; i >= 0 ; i--) sa[--c[x[y[i]]]] = y[i];
+		swap(x,y);
+		p = 1;
+		x[sa[0]] = 0 ;
+		for ( int i = 1 ; i < n ; i++)
+		    x[sa[i]]= cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+		if (p>=n) break;
+		m = p;
+	    }
+	}
+	void getHeight( int n)
+	{
+	    int k = 0 ;
+	    for ( int i = 0 ; i < n ; i++) rk[sa[i]] = i;
+	    height[0] = 0 ;
+	    for ( int i = 0 ; i < n ; i++) 
+	    {
+		if (rk[i]==0) continue;
+		if (k) k--;
+		int j = sa[rk[i]-1];
+		while (s[i+k]==s[j+k]) k++;
+		height[rk[i]] = k;
+	    }
+	}
+	int getSuffix(char s[])
+	{
+	    int len = strlen(s);
+	    int up = 0 ;
+	    for ( int i =  0 ; i < len ; i++)
+	    {
+		w[i] = s[i];
+		up = max(up,w[i]);
+	    }
+	    w[len++] = 0 ;
+	    build_sa(len,up+1);
+	    getHeight(len);
+	    return len;
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		string st1,st2,st;
+		cin>>st1>>st2;
+		int len1 = st1.length();
+		st = st1 + "$" + st2;
+		strcpy(s,st.c_str());
+		int len = getSuffix(s);
+	//        cout<<"s:"<<s<<endl;
+	//        for ( int i = 0 ; i < len ; i++) cout<<s[i]<<" "<<w[i]<<endl;
+	//        for ( int i = 0 ; i < len ; i++) cout<<"sa[i]:"<<sa[i]<<endl;
+	//        for ( int i = 0 ; i < len ; i++) cout<<"height[i]:"<<height[i]<<endl;
+		
+		int ans = 0 ;
+	     //  cout<<"len1:"<<len1<<endl;        
+		for ( int i = 2 ; i < len ; i++)
+		if (height[i]>ans)
+		{
+		    if (0<=sa[i-1]&&sa[i-1]<len1&&len1<sa[i]) ans = height[i];
+		    if (0<=sa[i]&&sa[i]<len1&&len1<sa[i-1]) ans = height[i];
+		}
+		printf("%d\n",ans);
+#####给一个字符串，要求找出至少出现k次的最长重复子串...
+然后再次用到了根据height数组对后缀进行分组的套路...二分判定合法性，对于当前的最长长度x,分组使得每组中的height[i]都大于等于x,所不同的是，判定变成了存在一个组，后缀的个数至少为k个（因为这样，就可以对于大于等于k个的后缀，同时取前x长度，得到的就是出现了至少k次且长度为x的前缀）1A,蛤蛤蛤
+
+
+
+	const int N=2E4+7;
+	const  int M=2E6+11;
+	const int C = 5;
+	int n,sa[N],rk[N],t[N],t2[N],cnt[M];
+	int height[N];
+	int s[N];
+	int k;
+	int cmp(int *r,int a,int b,int l){ return r[a]==r[b]&&r[a+l]==r[b+l];}
+	void getSa( int n,int m)
+	{
+	    int *x = t;
+	    int *y = t2;
+	    ms(cnt,0);
+	    for ( int i = 0 ; i < n;  i++) cnt[x[i]=s[i]]++;
+	    for ( int i = 1 ; i < m ; i++) cnt[i]+=cnt[i-1];
+	    for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] =  i;
+	    for ( int k = 1 ; k <= n ; k<<=1)
+	    {
+		int p = 0;
+		for ( int i = n-k ; i < n;  i++) y[p++] = i ;
+		for ( int i = 0 ; i < n;  i++) if (sa[i]>=k) y[p++] = sa[i]-k;
+		ms(cnt,0);
+		for ( int i = 0 ; i <n ; i++) cnt[x[y[i]]]++;
+		for ( int i = 0 ; i <m ; i++) cnt[i]+=cnt[i-1];
+		for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
+		swap(x,y);
+		p = 1;
+		x[sa[0]] = 0 ;
+		for ( int i = 1 ; i < n; i++)
+		    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+		if (p>=n) break;
+		m = p;
+	    }
+	}
+	void getHeight( int n)
+	{
+	    int k = 0 ;
+	    for ( int i = 0 ; i < n; i++) rk[sa[i]] = i ;
+	    height[0] =  0;
+	    for ( int i = 0 ; i < n; i ++)
+	    {
+		if (rk[i]==0) continue;
+		if (k) k--;
+		int j = sa[rk[i]-1];
+		while (s[i+k]==s[j+k]) k++;
+		height[rk[i]] = k ;
+	    }
+	}
+	int getSuffix( int s[],int len)
+	{
+	    int up = 0 ;
+	    for ( int i = 0 ; i < len ; i++)
+	    {
+		up = max(up,s[i]);
+	    }
+	    s[len++] = 0 ;
+	    getSa(len,up+1);
+	    getHeight(len);
+	    return len;
+	}
+	bool check( int x,int k,int n)
+	{
+	    int cnt = 1 ;
+	    for ( int i = 2; i  <= n ; i++)
+	    {
+		if (height[i]>=x&&i<n)
+		{
+		    cnt++;
+		    continue;
+		}
+		if (cnt>=k) return true;
+		cnt = 1;
+	    }
+	    return false;
+	}
+	int main()
+	{
+		#ifndef  ONLINE_JUDGE 
+		freopen("code/in.txt","r",stdin);
+	  #endif
+		scanf("%d %d",&n,&k);
+		for ( int i = 0 ; i < n ; i++) scanf("%d",&s[i]),s[i]+=C;
+		n = getSuffix(s,n);
+	//        for ( int i = 0 ; i < n; i++) cout<<"s[i]:"<<s[i]<<endl;
+		int l = 1,r = n;
+		int ans = 0 ;
+		while (l<=r)
+		{
+		    int mid = (l+r)/2;
+		    if (check(mid,k,n))
+		    {
+		        ans = mid;
+		        l = mid + 1;
+		    }
+		    else r = mid-1;
+		}
+		printf("%d\n",ans);
 ##dp
 ####最大连续前缀和
 	for ( int i = 1 ; i <= n ; i++ )
@@ -3177,6 +3687,86 @@ b进制数位dp
 		cout<<ans<<endl;
 	 
 ##博弈论
+
+
+##数值/不确定性算法
+####模拟退火
+给出一个矩形区域的长宽，给出区域中若干点，问距离所有点的最近距离的最大值是多少。
+
+	#define INF 1e8
+	#define MAX 1e6
+	#define MAXN 1005
+	double X,Y;
+	int n;
+	struct Point {
+	    double x, y;
+	    double d;
+	    Point() {}
+	    Point(double _x, double _y) : x(_x), y(_y) {}
+	    Point operator +(const Point &p) const {
+		return Point(x + p.x, y + p.y);
+	    }
+	    Point operator -(const Point &p) const {
+		return Point(x - p.x, y - p.y);
+	    }
+	    Point operator *(double k) const {
+		return Point(x * k, y * k);
+	    }
+	    bool ok ()
+	    {
+		if (x<0||y<0||x>X||y>Y) return false;
+		return true;
+	    }
+	} p[MAXN];
+	const Point d[4] = {Point(-1, 0), Point(0, -1), Point(1, 0), Point(0, 1)};
+	double dis(const Point &a, const Point &b) {
+	    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+	}
+	void solve(const Point *p, int n, Point &ret) {
+	    int i, j;
+	    double x, cur, ans = 0;
+	    const double delta = 0.95;
+	    bool tag;
+	    Point nxt;
+	    for (ret = p[0], x = (X+Y)/10; x > eps; x *= delta) {
+		for (tag = true; tag;) {
+		    for (tag = (i = 0); i < 4; ++i) {
+		        nxt.x = ret.x + dx4[i] * x * X;
+		        nxt.y = ret.y + dy4[i] * x * Y;
+		        if (!nxt.ok()) continue;
+		        for (cur=inf, j = 0; j < n; ++j) cur = min(cur,dis(nxt,p[j]));
+		        if (cur > ans) {
+		            ans = cur; ret = nxt; tag = true;
+		            break;
+		        }
+		    }
+		}
+	    }
+	    
+	}
+	int main()
+	{
+	#ifndef  ONLINE_JUDGE 
+	    freopen("code/in.txt","r",stdin);
+	#endif
+	    int T;
+	    cin>>T;
+	    while (T--)
+	    {
+		scanf("%lf%lf%d",&X,&Y,&n);
+		for ( int i = 0 ;  i < n ; i++)
+		    scanf("%lf %lf",&p[i].x,&p[i].y);
+		Point ans;
+		solve(p,n,ans);
+	 
+		printf("The safest point is (%.1f, %.1f).\n",ans.x,ans.y);
+	 
+	    }
+	#ifndef ONLINE_JUDGE  
+	    fclose(stdin);
+	#endif
+	    return 0;
+
 
 ##数学结论
 ####降幂公式
