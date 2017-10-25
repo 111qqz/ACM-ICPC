@@ -31,61 +31,40 @@ const double eps = 1E-8;
 const int dx4[4]={1,0,0,-1};
 const int dy4[4]={0,-1,1,0};
 const int inf = 0x3f3f3f3f;
+const int N=2503;
 int n,m,q;
-
-struct Rec
-{
-    int left,top;
-};
-void prset( multiset<int>se)
-{
-    for ( auto it =se.begin () ; it !=se.end() ; it++)
-	printf("%d ",*it);
-    puts("");
-}
-multiset<int>X,Y; //维护左边界的横坐标和上坐标的纵坐标
+int px[N],py[N];
 int main()
 {
 	#ifndef  ONLINE_JUDGE 
 	freopen("./in.txt","r",stdin);
   #endif
+
+	ms(px,0);
+	ms(py,0);
 	cin>>n>>m>>q;
-	int r1,r2,c1,c2;
-	X.insert(0);
-	X.insert(n+1);
-	Y.insert(0);
-	Y.insert(m+1);
-	int opt;
 	while (q--)
 	{
 	    scanf("%d%d%d%d%d",&opt,&r1,&r2,&c1,&c2);
 	    if (opt==1)
 	    {
-		X.insert(r1);
-		Y.insert(c2);
+		px[r1] += c2;
+		px[r2+1] -= -c2; //维护上边界
+
+		py[c1] += r1;
+		py[c2+1] -= r1; //维护左边界
 	    }else if (opt==2)
 	    {
-		auto it = X.find(r1);
-		X.erase(it);
-		auto it2 = Y.find(c2);
-		Y.erase(it2);
-	    }else
+		px[r1]-=c2;
+		px[r2+1]+=c2;
+
+		py[c1]-=r1;
+		py[c2+1]+=r1;
+	    }
+	    else
 	    {
-		auto itx = X.lower_bound(r1);
-		auto ity = Y.lower_bound(r2);
-		auto itx2 = X.lower_bound(c1);
-		auto ity2 = Y.lower_bound(c2);
-		cout<<"X Y:"<<endl;
-		cout<<*itx<<" "<<*itx2<<endl;
-		cout<<*ity<<" "<<*ity2<<endl;
-		if (itx==itx2&&ity==ity2)
-		{
-		    puts("Yes");
-		}
-		else
-		{
-		    puts("No");
-		}
+
+
 	    }
 	    prset(X);
 //	    prset(Y);
