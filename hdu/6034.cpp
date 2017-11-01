@@ -68,6 +68,8 @@ int main()
 		    int v = st[i][j]-'a';
 		    cnt[v][len-j-1]++;
 		}
+		//如果只有一个字母，不要打首字母标记
+		if (len>1)
 		Beg[st[i][0]-'a'] = true;
 		//忘了不能右前导0的条件了。。。
 	    }
@@ -90,19 +92,28 @@ int main()
 		for ( int j = i+1 ; j < 26 ; j++)
 		    if (small(cnt[id[i]],cnt[id[j]]))
 			swap(id[i],id[j]);
-	for (int i = 0 ; i < 26 ; i++) printf("id[%d]:%c%c",i,char(id[i]+'a'),i==25?'\n':'\n');
+//	for (int i = 0 ; i < 26 ; i++) printf("id[%d]:%c%c",i,char(id[i]+'a'),i==25?'\n':'\n');
+
+	int notBEG = -1;
 	    if (Beg[id[25]])
 	    {
 		for ( int i = 24 ;  i >= 0 ; i--)
 		{
 		    if (!Beg[id[i]])
 		    {
-			swap(id[25],id[i]);
+			notBEG = i;
 			break;
 		    }
 		}
 	    }
-	    for ( int i = 0 ; i < 26 ; i++) printf("id[%d]:%c\n",i,char(id[i]+'a'));
+	    //cout<<"notBEG:"<<notBEG<<endl;
+	    if (notBEG!=-1)
+	    {
+		int tmp = id[notBEG];
+		for ( int i = notBEG +1 ; i < 26 ; i++) id[i-1] = id[i];
+		id[25] = tmp;
+	    }
+	    //for ( int i = 0 ; i < 26 ; i++) printf("id[%d]:%c\n",i,char(id[i]+'a'));
 
 	    for ( int i = 0 ; i < 26 ; i++) power[id[i]] = 25-i;
 	    LL ans = 0;
@@ -114,6 +125,7 @@ int main()
 		    int pos = len-j-1;
 		    int v = st[i][j]-'a';
 		    LL tmp = (base26[pos]*power[v])%mod;
+		//    cout<<"tmp:"<<tmp<<endl;
 		    ans = (ans + tmp)%mod;
 		}
 	    }
