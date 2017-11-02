@@ -1,36 +1,6 @@
-7
-abcdefghijklmnopqrstuvwxyz
-zz
-yy
-xx
-ww
-uu
-vv
-26
-zyxwvutsrqponmlkjihgfedcba
-aazzzzzzzzzzzzzzzzzzzzzzzz
-bbzzzzzzzzzzzzzzzzzzzzzzzz
-cczzzzzzzzzzzzzzzzzzzzzzzz
-ddzzzzzzzzzzzzzzzzzzzzzzzz
-eezzzzzzzzzzzzzzzzzzzzzzzz
-ffzzzzzzzzzzzzzzzzzzzzzzzz
-ggzzzzzzzzzzzzzzzzzzzzzzzz
-hhzzzzzzzzzzzzzzzzzzzzzzzz
-iizzzzzzzzzzzzzzzzzzzzzzzz
-jjzzzzzzzzzzzzzzzzzzzzzzzz
-kk
-llzzzzzzzzzzzzzzzzzzzzzzzz
-mmzzzzzzzzzzzzzzzzzzzzzzzz
-nnzzzzzzzzzzzzzzzzzzzzzzzz
-oozzzzzzzzzzzzzzzzzzzzzzzz
-ppzzzzzzzzzzzzzzzzzzzzzzzz
-qqzzzzzzzzzzzzzzzzzzzzzzzz
-rrzzzzzzzzzzzzzzzzzzzzzzzz
-sszzzzzzzzzzzzzzzzzzzzzzzz
-ttzzzzzzzzzzzzzzzzzzzzzzzz
-uuzzzzzzzzzzzzzzzzzzzzzzzz
-vvzzzzzzzzzzzzzzzzzzzzzzzz
-wwzzzzzzzzzzzzzzzzzzzzzzzz
-xyzzzzzzzzzzzzzzzzzzzzzzzz
-xyyyyyyyyyyyyyyyyyyyyyyyyyyy
-
+3 2
+1 0 2
+0 1
+3 4
+2 0 1
+0 2 3 1
