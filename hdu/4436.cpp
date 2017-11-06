@@ -1,3 +1,8 @@
+/* ***********************************************
+Author :111qqz
+Created Time :2017年11月03日 星期五 18时20分42秒
+File Name :2774_SAM.cpp
+************************************************ */
 
 #include <bits/stdc++.h>
 #define PB push_back
@@ -15,27 +20,24 @@ const double eps = 1E-8;
 const int dx4[4]={1,0,0,-1};
 const int dy4[4]={0,-1,1,0};
 const int inf = 0x3f3f3f3f;
-const int N=2017;
-const int maxn = 4017;
-LL ret;
+
+const int maxn = 5E5;
 struct node{
     node*nxt[26],*fail;
     LL len,cnt;
-    void init()
-    {
-	for ( int i = 0 ; i < 26 ; i++) nxt[i]=NULL;
-	fail=NULL;
-	len=cnt=0;
-    }
+    int ind;
+    int occ;
 };
 struct SAM{
     node no[maxn];
+    int pos[maxn];
     node*root;
     int cnt;
-     node*  newnode(){
-	ms(no[cnt].nxt,0);
-	no[cnt].fail=NULL;
-	no[cnt].len=no[cnt].cnt=0;
+    bool cmp( int x,int y)
+    {
+	return no[x].len < no[y].len;
+    }
+    node*newnode(){
 	return &no[cnt++];
     }
     SAM(){
@@ -46,12 +48,10 @@ struct SAM{
     {
 	cnt = 0;
 	root =newnode();
-	no[0].init();
     }
     node*add(int c,node*p){
         node*cur = newnode();
         cur->len = p->len+1;
-	node *lst = cur;
         while(p&&!p->nxt[c]){
             p->nxt[c] = cur;
             p = p->fail;
@@ -60,7 +60,7 @@ struct SAM{
             cur->fail = root;
             return cur;
         }
-        node *q = p->nxt[c];
+        node*q = p->nxt[c];
         if(p->len+1==q->len){
             cur->fail = q;
         }else{
@@ -75,46 +75,33 @@ struct SAM{
         }
         return cur;
     }
-    LL calc(node *cur)
+    void solve()
     {
-	return cur->len - cur->fail->len;
-    }
+	for ( int i = 0 ; i < cnt ; i++) pos[i] = i;
+	sort(pos,pos+cnt,cmp);
+	for ( int i = 0 ; i < cnt ; i++)
+	{
+	    int u = pos[i];
+	    for ( int j = 0 ; j < 10 ; j++)
+		if (u==0&&j==0) continue;
+	    if (u-)
 };
 SAM sam;
-string A;
-LL ans[N][N];
+string st;
 int main()
 {
 	#ifndef  ONLINE_JUDGE 
-	freopen("./in.txt","r",stdin);
+//	freopen("./in.txt","r",stdin);
   #endif
-	int T;
-	cin>>T;
-	while (T--)
+    while (scanf("%d",&n)!=EOF)
+    {
+	sam.init();
+	node *cur = sam.root;
+	for ( int i = 1 ; i <= n ; i++)
 	{
-	    cin>>A;
-	    int q;
-	    ms(ans,0);
-	    int len = A.length();
-	    //预处理一下，就只需要2000个SAM了
-	    for ( int i = 0 ; i < len ; i++)
-	    {
-		sam.init();
-		node *cur = sam.root;
-		for ( int j = i ; j < len ; j++)
-		{
-		    cur = sam.add(A[j]-'a',cur);
-		    ans[i+1][j+1] = ans[i+1][j] + sam.calc(cur);
-
-		}
-	    }
-	    scanf("%d",&q);
-	    while (q--)
-	    {
-		int l,r;
-		scanf("%d %d",&l,&r);
-		printf("%lld\n",ans[l][r]);
-	    }
+	    cin>>st;
+	    for (auto i :st) cur = sam.add(i-'0',cur);
+	    cur = sam.add(10,cur);  //10是字符集合中没有出现的字符,起分割作用
 	}
 
   #ifndef ONLINE_JUDGE  
