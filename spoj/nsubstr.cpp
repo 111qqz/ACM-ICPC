@@ -87,7 +87,7 @@ int main()
 	for (int i = 1 ; i <= sz ; i++) cnt[st[i].len]++;
 	for ( int i = 1 ; i <= len ; i++) cnt[i]+=cnt[i-1];
 	for (int i = 1 ; i <= sz  ;i++) a[cnt[st[i].len]--] = i;
-	//将len按照从大到小的顺序存入临时数组a，a[1]表示len最长的状态的标号。
+	//将len按照从大到小的顺序存入临时数组a，a[1]表示len最短的状态的标号。
 
 	for ( int i = sz ; i >= 1 ; i--) Right[st[a[i]].link]+=Right[a[i]]; 
 	//按照len从大到小的顺序更新right集合。
