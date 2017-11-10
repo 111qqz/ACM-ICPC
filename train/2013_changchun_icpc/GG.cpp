@@ -36,30 +36,6 @@ void PushUpX( int rt)
 	printf("mxL:%d mxR:%d  rt:%d\n",tree[rt<<1][1].mx,tree[rt<<1|1][1].mx,rt);
 	tree[rt][1].mn = min(tree[rt<<1][1].mn,tree[rt<<1|1][1].mn);
 }
-void buildy(int id_rt,int _x,int l,int r,int rt)
-{
-	if (l==r)
-	{
-		tree[id_rt][rt].mx = tree[id_rt][rt].mn = a[_x][l];
-		return;
-	}
-	int m = (l+r)>>1;
-	buildy(id_rt,_x,lson);
-	buildy(id_rt,_x,rson);
-	PushUpY(id_rt,rt);
-}
-void buildx(int l,int r,int rt)
-{
-	if (l==r)
-	{
-		buildy(rt,l,1,n,1);
-		return;
-	}
-	int m = (l+r)>>1;
-	buildx(lson);
-	buildx(rson);
-	PushUpX(rt);
-}
 
 void updatey( int id_rt,int pos,int val,int l,int r,int rt)
 {
@@ -157,7 +133,6 @@ int main(){
 			    updatex(i,j,a[i][j],1,n,1);
 			}
 
-//		buildx(1,n,1);
 		//for ( int i = 1 ; i <= 5 ; i++) printf("mn: %d mx: %d\n",tree[i][1].mn,tree[i][1].mx);
 		
 		int q;
