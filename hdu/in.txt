@@ -1,4 +1,12 @@
+3
+2
+abab
+ab
+ba
+1
+aaa
+bbb
+2
 aaaa
-ababcabb
-aaaaaa
-#
+aa
+aaa

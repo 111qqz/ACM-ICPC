@@ -1,7 +1,7 @@
 /* ***********************************************
 Author :111qqz
 Created Time :2017年11月08日 星期三 18时50分18秒
-File Name :4436.cpp
+File Name :4416.cpp
 ************************************************ */
 
 #include <bits/stdc++.h>
@@ -31,7 +31,7 @@ state st[N*2];
 int sz, last,rt;
 char s[N];
 int cnt[2*N],rk[2*N];//for radix sort
-int dp[2*N],maxlen[2*N];
+int dp[2*N];
 void sa_init()
 {
     sz = 0;
@@ -74,30 +74,30 @@ void topo()
 	for (int i = 1 ; i <= sz  ;i++) rk[cnt[st[i].len]--] = i;
 }
 char ST[N];
+int n;
 int main()
 {
 #ifndef  ONLINE_JUDGE 
     	freopen("./in.txt","r",stdin);
 #endif
 
-    int flag = 1;
-    ms(maxlen,0x3f);
-    while (scanf("%s",ST)!=EOF)
+    int T;
+    int cas = 0 ;
+    cin>>T;
+    while (T--)
     {
-//	cout<<"ST:"<<ST<<endl;
-	if (flag)
+	scanf("%d",&n);
+	scanf("%s",ST);
+	sa_init();
+	for (int i = 0,len = strlen(ST);  i < len ; i++)
 	{
-	    sa_init();
-	    for (int i = 0,len = strlen(ST);  i < len ; i++)
-	    {
-		sa_extend(ST[i]-'a');
-	    }
-	    topo();
-	    flag = 0 ;
+	    sa_extend(ST[i]-'a');
 	}
-	else
+	topo();
+	ms(dp,0);
+	for ( int i = 0 ; i < n ; i++)
 	{
-	    ms(dp,0);
+	    scanf("%s",ST);
 	    int now = rt,len = 0;
 	    for ( int i = 0,_len = strlen(ST) ; i < _len ; i++)
 	    {
@@ -114,22 +114,22 @@ int main()
 		    if (now==-1) now=rt,len=0;else len = st[now].len + 1,now=st[now].nxt[ST[i]-'a'],dp[now] = max(dp[now],len);
 		}
 	    }
-	    for ( int i = sz ; i >= 1 ; i-- )
-	    {
-		int v = rk[i];
-		st[v].len = min(st[v].len,dp[v]);
-		dp[st[v].link] = max(dp[st[v].link],dp[v]);
-//		dp[v] = 0 ;  //其实只是为了清空，多次ms太慢了...
-	    }
 	}
-
+	LL ans = 0 ;
+	for ( int i = sz ; i >= 1 ; i-- )
+	{
+	    int v = rk[i];
+	    if (dp[v])
+	    {
+		dp[st[v].link] = max(dp[st[v].link],dp[v]);
+		if (dp[v]<st[v].len) ans += st[v].len-dp[v]; // 长度为[dp[v]+1,st[v].len]的串不在n个B串中出现，可以贡献答案。
+	    }else ans += st[v].len - st[st[v].link].len;
+	}
+	printf("Case %d: %lld\n",++cas,ans);
     }
 
-	int ans = 0 ;
-	for ( int i = 1 ; i <= sz ; i++) ans = max(ans,st[i].len);
-	printf("%d\n",ans);
-//	cout<<ans<<endl;
-    
+
+
 
 
 #ifndef ONLINE_JUDGE  
