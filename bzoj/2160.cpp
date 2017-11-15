@@ -107,9 +107,9 @@ int main()
 //	freopen("./in.txt","r",stdin);
   #endif
 	scanf("%d %lld",&n,&k);
-	cin>>S;
+	scanf("%s",S+1);
 	pam_init();
-	for ( int i = 0 ,_=strlen(S); i < _ ; i++) extend(S[i]-'a',i);
+	for ( int i = 1 ,_=strlen(S+1); i <= _ ; i++) extend(S[i]-'a',i);
 	LL ans = solve();
 	cout<<ans<<endl;
 

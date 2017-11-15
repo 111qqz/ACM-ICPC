@@ -58,8 +58,8 @@ struct PAM
     void build ()
     {
 	init();
-	int len = strlen(S);
-	for ( int i = 0 ; i < len ; i++) extend(S[i]-'a',i);
+	int len = strlen(S+1);
+	for ( int i = 1 ; i <= len ; i++) extend(S[i]-'a',i);
     }
 }A,B;
 
@@ -88,7 +88,7 @@ int main()
     cin>>T;
     while (T--)
     {
-	scanf("%s %s",A.S,B.S);
+	scanf("%s %s",A.S+1,B.S+1);
 //	cout<<A.S<<"  "<<B.S<<endl;
 	A.build();
 	B.build();

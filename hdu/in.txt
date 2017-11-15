@@ -1,1 +1,2 @@
-baacaabbacabb
+1
+ababa
