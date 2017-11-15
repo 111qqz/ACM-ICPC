@@ -1,4 +1,129 @@
-#ACM-ICPC 模板
+   
+
+
+
+
+
+
+
+#                       ACM-ICPC 模板
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+##　菜鸡退役了　　2017.11.15   by 111qqz
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[TOC]
+
+
+
 ##组合数学
 ####Mobius反演
 
@@ -20,13 +145,14 @@
 		}
 	}
 ####组合数取模
+
 求C(n,m)%p
 （1）1=<m<=n<=1000 和 1<=p<=1E9
  这个问题比较简单，组合数的计算可以靠杨辉三角，那么由于n和m的范围小，直接两层循环即可。
  （2）1<=m<=n<=1E18,2<=p<=1E5,p是素数
 
 	LL n,m,p;  
-	  
+
 	LL quick_mod(LL a, LL b)  
 	{  
 	    LL ans = 1;  
@@ -74,90 +200,90 @@
 	    }  
 	    return 0;  
 	}  
-	
+
  （3）1<=m<=n<=1E6,2<=p<=1E5,p可能是合数
  这样的话先采取暴力分解，然后快速幂即可。
- 
-	 const int N = 200005;  
-	  
-	bool prime[N];  
-	int p[N];  
-	int cnt;  
-	  
-	void isprime()  
+
+```
+ const int N = 200005;  
+bool prime[N];  
+int p[N];  
+int cnt;  
+void isprime()  
+{  
+    cnt = 0;  
+    memset(prime,true,sizeof(prime));  
+    for(int i=2; i<N; i++)  
+    {  
+	if(prime[i])  
 	{  
-	    cnt = 0;  
-	    memset(prime,true,sizeof(prime));  
-	    for(int i=2; i<N; i++)  
-	    {  
-		if(prime[i])  
-		{  
-		    p[cnt++] = i;  
-		    for(int j=i+i; j<N; j+=i)  
-		        prime[j] = false;  
-		}  
-	    }  
+	    p[cnt++] = i;  
+	    for(int j=i+i; j<N; j+=i)  
+	        prime[j] = false;  
 	}  
-	  
-	LL quick_mod(LL a,LL b,LL m)  
+    }  
+}  
+LL quick_mod(LL a,LL b,LL m)  
+{  
+    LL ans = 1;  
+    a %= m;  
+    while(b)  
+    {  
+	if(b & 1)  
 	{  
-	    LL ans = 1;  
-	    a %= m;  
-	    while(b)  
-	    {  
-		if(b & 1)  
-		{  
-		    ans = ans * a % m;  
-		    b--;  
-		}  
-		b >>= 1;  
-		a = a * a % m;  
-	    }  
-	    return ans;  
+	    ans = ans * a % m;  
+	    b--;  
 	}  
-	  
-	LL Work(LL n,LL p)  
-	{  
-	    LL ans = 0;  
-	    while(n)  
-	    {  
-		ans += n / p;  
-		n /= p;  
-	    }  
-	    return ans;  
-	}  
-	  
-	LL Solve(LL n,LL m,LL P)  
-	{  
-	    LL ans = 1;  
-	    for(int i=0; i<cnt && p[i]<=n; i++)  
-	    {  
-		LL x = Work(n, p[i]);  
-		LL y = Work(n - m, p[i]);  
-		LL z = Work(m, p[i]);  
-		x -= (y + z);  
-		ans *= quick_mod(p[i],x,P);  
-		ans %= P;  
-	    }  
-	    return ans;  
-	}  
-	  
-	int main()  
-	{  
-	    int T;  
-	    isprime();  
-	    cin>>T;  
-	    while(T--)  
-	    {  
-		LL n,m,P;  
-		cin>>n>>m>>P;  
-		n += m - 2;  
-		m--;  
-		cout<<Solve(n,m,P)<<endl;  
-	    }  
-	    return 0;  
-	}  
-	 
+	b >>= 1;  
+	a = a * a % m;  
+    }  
+    return ans;  
+}  
+LL Work(LL n,LL p)  
+{  
+    LL ans = 0;  
+    while(n)  
+    {  
+	ans += n / p;  
+	n /= p;  
+    }  
+    return ans;  
+}  
+LL Solve(LL n,LL m,LL P)  
+{  
+    LL ans = 1;  
+    for(int i=0; i<cnt && p[i]<=n; i++)  
+    {  
+	LL x = Work(n, p[i]);  
+	LL y = Work(n - m, p[i]);  
+	LL z = Work(m, p[i]);  
+	x -= (y + z);  
+	ans *= quick_mod(p[i],x,P);  
+	ans %= P;  
+    }  
+    return ans;  
+}  
+int main()  
+{  
+    int T;  
+    isprime();  
+    cin>>T;  
+   while(T--)  
+    {  
+	LL n,m,P;  
+	cin>>n>>m>>P;  
+	n += m - 2;  
+	m--;  
+	cout<<Solve(n,m,P)<<endl;  
+    }  
+    return 0;  
+
+}
+
+```
+
+
+
 ##数据结构
 
 ####kd树
@@ -333,7 +459,7 @@ hdu 4347 给出若干个点，在给出一个定点，求距离该定点最近�
 		for ( int i = m ; i >= 1 ; i--)  ret[i].print();
 		}
 	    }
-	    
+
 静态kd-tree
 hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离其最近的点的距离是多少。
 
@@ -413,8 +539,8 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 	  #endif
 	    return 0;
 	}
-	 
-	 
+
+
 ####单调队列
 #####求每连续k个元素的最大值
 
@@ -451,7 +577,7 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 		        printf("%d\n",a[dq.front()]);
 		}
 ####线段树
-####线段树单点更新询问区间最大值模板
+#####线段树单点更新询问区间最大值模板
 
 	int n,m;
 	int a[N];
@@ -607,7 +733,7 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 		printf("Test case #%d\nTotal explored area: %.2f\n\n",++cas,ans);
 		
 	    }   
-	 
+
 #####线段树+扫描线 求矩形面积交 （hdu 1255）
 
 	const int N=2E3+7;
@@ -704,8 +830,8 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 		ans = round(ans*100)*0.01;
 		printf("%.2f\n",ans);
 	    }
-	    
-	    
+
+
 #####线段树+扫描线 求 矩形周长并 (hdu 1828)
 以及一个小细节是，求面积的时候，最后一条扫描线对答案是没有贡献的（因为每次是求当前扫描线与下一条扫描线之间的面积）
 
@@ -818,8 +944,11 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 	  #endif
 	    return 0;
 	}
-	
-####线段树+扫描线，求矩形至少交三次的面积
+
+##### 线段树+扫描线，求矩形至少交三次的面积
+
+
+
 	void PushUp(int l,int r,int rt)
 	{
 	    //cout<<"l:"<<l<<" r:"<<r<<" rt:"<<rt<<" id:"<<id<<endl;
@@ -857,7 +986,9 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 	    }
 	    }
 	}
-####线段树求逆序三元组
+#####线段树求逆序三元组
+
+
 
 	const int N=1E6+7;
 	int a[N];
@@ -944,7 +1075,7 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 	  #endif
 	    return 0;
 	}
-	
+
 #####线段树动态维护区间最大子段和
 	const int N=5E5+7;
 	int n,m;
@@ -1046,8 +1177,8 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 	  #endif
 	    return 0;
 	}
- 
- 
+
+
 #####线段树动态维护最大连续子段（hit oj 2687 ）
 给出n个数,m个修改，每次修改后询问整个区间的最大连续子段。
 
@@ -1113,8 +1244,281 @@ hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离�
 		        printf("%d\n",tree[1].mx);
 		    }
 		}
-	 
+
+##### 二维线段树之四叉树模板（单点更新，区间询问最值）
+
+```
+const int N=805;
+int n;
+int a[N][N];
+struct Tree
+{
+    int mn,mx;
+    Tree()
+    {
+        mn = 1E9;
+        mx = 0;
+    }
+    void init()
+    {
+        mn = 1E9;
+        mx = 0;
+    }
+}tree[N*10000];
+int _max( int a,int b,int c,int d)
+{
+    int ret = max(a,b);
+    ret = max(ret,c);
+    ret = max(ret,d);
+    return ret;
+}
+int _min( int a,int b,int c,int d)
+{
+    int ret = min(a,b);
+    ret = min(ret,c);
+    ret = min(ret,d);
+    return ret;
+}
+void PushUp( int rt)
+{
+//  cout<<"rt:"<<rt<<endl;
+    tree[rt].mn = _min(tree[rt*4+1].mn,tree[rt*4+2].mn,tree[rt*4+3].mn,tree[rt*4+4].mn);
+    tree[rt].mx = _max(tree[rt*4+1].mx,tree[rt*4+2].mx,tree[rt*4+3].mx,tree[rt*4+4].mx);
+}
+ 
+ 
+void insert( int idx,int lx,int rx,int ly,int ry,int X,int Y,int val)
+{
+//  cout<<"val:"<<val<<endl;
+    if (lx==rx&&ly==ry)
+    {
+        tree[idx].mn = tree[idx].mx = val;
+//      cout<<"fuck"<<" val:"<<val<<" mn:"<<tree[idx].mn <<" mx:"<<tree[idx];
+        return;
+    }
+    int mx = (lx+rx) >> 1;
+    int my = (ly+ry) >> 1;
+    if (X<=mx&&Y<=my) insert(idx*4+1,lx,mx,ly,my,X,Y,val);
+    if (X<=mx&&Y>=my+1) insert(idx*4+2,lx,mx,my+1,ry,X,Y,val);
+    if (X>=mx+1&&Y<=my) insert(idx*4+3,mx+1,rx,ly,my,X,Y,val);
+    if (X>=mx+1&&Y>=my+1) insert(idx*4+4,mx+1,rx,my+1,ry,X,Y,val);
+//  puts("miao");
+    PushUp(idx);
+}
+int queryMN( int idx,int lx,int rx,int ly,int ry,int Lx,int Rx,int Ly,int Ry)
+{
+    if (Lx<=lx && Rx>=rx && Ly<=ly && Ry>=ry) return tree[idx].mn;
+    int mx = (lx+rx)>>1,my = (ly+ry)>>1,t=1E9;
+    if (Lx<=mx && Ly<=my)  t = min(t,queryMN(idx*4+1,lx,mx,ly,my,Lx,Rx,Ly,Ry));
+    if (Lx<=mx && Ry>my) t = min(t,queryMN(idx*4+2,lx,mx,my+1,ry,Lx,Rx,Ly,Ry));
+    if (Rx>mx  && Ly<=my) t = min (t,queryMN(idx*4+3,mx+1,rx,ly,my,Lx,Rx,Ly,Ry)); 
+    if (Rx>mx&&Ry>my) t = min (t,queryMN(idx*4+4,mx+1,rx,my+1,ry,Lx,Rx,Ly,Ry));
+    return t;
+}
+int queryMX( int idx,int lx,int rx,int ly,int ry,int Lx,int Rx,int Ly,int Ry)
+{
+    if (Lx<=lx && Rx>=rx && Ly<=ly && Ry>=ry) return tree[idx].mx;
+    int mx = (lx+rx)>>1,my = (ly+ry)>>1,t=0;
+    if (Lx<=mx && Ly<=my)  t = max(t,queryMX(idx*4+1,lx,mx,ly,my,Lx,Rx,Ly,Ry));
+    if (Lx<=mx && Ry>my) t = max(t,queryMX(idx*4+2,lx,mx,my+1,ry,Lx,Rx,Ly,Ry));
+    if (Rx>mx  && Ly<=my) t = max (t,queryMX(idx*4+3,mx+1,rx,ly,my,Lx,Rx,Ly,Ry)); 
+    if (Rx>mx&&Ry>my) t = max(t,queryMX(idx*4+4,mx+1,rx,my+1,ry,Lx,Rx,Ly,Ry));
+    return t;
+}
+void init()
+{
+    for ( int i = 0 ; i < 8E6 ; i++) tree[i].init();
+}
+int main(){
+#ifdef YourCodeHasBug
+//  freopen("in2","r",stdin);
+#endif
+    int T;
+    cin>>T;
+    int cas = 0 ;
+    while (T--)
+    {
+        init();
+        scanf("%d",&n);
+        for ( int i = 1 ; i <= n ; i++)
+            for ( int j = 1 ; j <= n ; j++)
+            {
+                scanf("%d",&a[i][j]);
+//              cout<<"a[i][j]:"<<a[i][j]<<endl;
+                insert(0,1,n,1,n,i,j,a[i][j]);
+            }
+//      for ( int i = 0 ; i <= 20 ; i++) printf("tree_mn:%d mx:%d\n",tree[i].mn,tree[i].mx);
+        int m;
+        scanf("%d",&m);
+            printf("Case #%d:\n",++cas);
+        while (m--)
+        {
+            int x,y,L;
+            scanf("%d %d %d",&x,&y,&L);
+            int Lx = max(x-L/2,1);
+            int Rx = min(n,x+L/2);
+            int Ly = max(y-L/2,1);
+            int Ry = min(n,y+L/2);
+//          printf("x:[%d,%d] y:[%d,%d]\n",Lx,Rx,Ly,Ry);
+            int mn = queryMN(0,1,n,1,n,Lx,Rx,Ly,Ry);
+            int mx = queryMX(0,1,n,1,n,Lx,Rx,Ly,Ry);
+            int newval = floor((mn+mx)/2);
+            //printf("mn:%d mx:%d %d\n",mn,mx,newval);
+            printf("%d\n",newval);
+            insert(0,1,n,1,n,x,y,newval);
+        }
+    }
+
+```
+
+##### 二维线段树之树套树（推荐写法）模板（单点更新，区间最值）
+
+```
+const int N=803;
+struct Treey
+{
+    int l,r;
+    int Max,Min;
+};
+int n;
+int rtx[N],rty[N] ; //rtx[i]表示横坐标为i的点属于哪棵线段树
+struct  Treex
+{
+    int l,r;
+    Treey treey[N<<2];
+    void build ( int _l,int _r,int rt)
+    {
+    treey[rt].l = _l;
+    treey[rt].r = _r;
+    treey[rt].Max = -inf;
+    treey[rt].Min = inf;
+    if (_l==_r)
+    {
+        rty[_l] = rt;
+        return;
+    }
+    int m = (_l + _r) / 2;
+    build (_l,m,rt<<1);
+    build(m+1,_r,rt<<1|1);
+    }
+    int QMin( int L,int R,int rt)
+    {
+    if (treey[rt].l >= L && treey[rt].r <= R) return treey[rt].Min;
+    int m = (treey[rt].l + treey[rt].r) / 2;
+    int ret = 1E9;
+    if (L<=m) ret = QMin(L,R,rt<<1);
+    if (R>=m+1) ret = min(ret,QMin(L,R,rt<<1|1));
+    return ret;
+    }
+    int QMax( int L,int R,int rt)
+    {
+    if (treey[rt].l >= L && treey[rt].r <= R) return treey[rt].Max;
+    int m = (treey[rt].l + treey[rt].r) / 2;
+    int ret = 0 ;
+    if (L<=m) ret = QMax (L,R,rt<<1);
+    if (R>=m+1) ret = max(ret,QMax(L,R,rt<<1|1));
+    return ret;
+    }
+}treex[N<<2];
+ 
+void build (int l,int r,int rt)
+{
+    treex[rt].l = l;
+    treex[rt].r = r;
+    treex[rt].build(1,n,1);
+    if (l==r)
+    {
+    rtx[l] = rt;
+    return;
+    }
+    int m = (l+r)>>1;
+    build (lson);
+    build (rson);
+}
+void update ( int x,int y,int val) //单点更新，更新a[x,y]到val
+{
+    int rx = rtx[x];
+    int ry = rty[y];
+    treex[rx].treey[ry].Min = treex[rx].treey[ry].Max = val;
+    for ( int i = rx ; i ; i >>=1)
+    for ( int j = ry ; j ; j >>=1)
+    {
+        if (i==rx && j==ry) continue; //上面更新过了
+        if (j==ry)
+        {
+        treex[i].treey[j].Min = min(treex[i<<1].treey[j].Min,treex[i<<1|1].treey[j].Min);
+        treex[i].treey[j].Max = max(treex[i<<1].treey[j].Max,treex[i<<1|1].treey[j].Max);
+        }
+        else
+        {
+            treex[i].treey[j].Min = min(treex[i].treey[j<<1].Min,treex[i].treey[j<<1|1].Min);
+        treex[i].treey[j].Max = max(treex[i].treey[j<<1].Max,treex[i].treey[j<<1|1].Max);
+        }
+    }
+}
+int QMin( int L1,int R1,int L2,int R2,int rt)
+{
+    if (treex[rt].l >= L1 && treex[rt].r <= R1) return treex[rt].QMin(L2,R2,1);
+    int m = (treex[rt].l + treex[rt].r)/2;
+    int ret = 1E9;
+    if (L1<=m) ret = QMin(L1,R1,L2,R2,rt<<1);
+    if (R1>=m+1) ret = min(ret,QMin(L1,R1,L2,R2,rt<<1|1));
+    return ret;
+}
+int QMax ( int L1,int R1,int L2,int R2,int rt)
+{
+ //   printf("rt:%d l:%d r:%d  L1:%d R1:%d \n",rt,treex[rt].l,treex[rt].r,L1,R1);
+    if (treex[rt].l >= L1 && treex[rt].r <=R1) return treex[rt].QMax(L2,R2,1);
+    int m = (treex[rt].l + treex[rt].r) / 2;
+    int ret = 0 ;
+    if (L1<=m) ret = QMax(L1,R1,L2,R2,rt<<1);
+    if (R1>=m+1) ret = max(ret, QMax(L1,R1,L2,R2,rt<<1|1));
+    return ret;
+}
+ 
+int main() 
+{
+#ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+#endif
+    int T,cas=0;
+    cin>>T;
+    while (T--)
+    {
+    printf("Case #%d:\n",++cas);
+    scanf("%d",&n);
+    build (1,n,1);
+    for ( int i = 1 ; i  <= n ; i++)
+        for ( int j = 1; j <= n ; j++)
+        {
+        int x;
+        scanf("%d",&x);
+        update(i,j,x);
+        }
+    int q;
+    scanf("%d",&q);
+    while (q--)
+    {
+        int x,y,L;
+        scanf("%d %d %d",&x,&y,&L);
+        int L1 = max(x-L/2,1);
+        int R1 = min(x+L/2,n);
+        int L2 = max(y-L/2,1);
+        int R2 = min(y+L/2,n);
+//      printf("[%d,%d] [%d,%d]\n",L1,R1,L2,R2);
+        int Mx = QMax(L1,R1,L2,R2,1);
+        int Mn = QMin(L1,R1,L2,R2,1);
+        int val = floor((Mx+Mn)/2);
+        printf("%d\n",val);
+        update(x,y,val);
+    }
+    }   
+```
+
+
+
 ####cdq分治 (离线算法，复杂度nlgn)
+
 #####cdq分治求三维偏序
 hdu5618 If two point such as (xi,yi,zi) and (xj,yj,zj) xi≥xj yi≥yj zi≥zj, the bigger one level add 1
 
@@ -1230,7 +1634,7 @@ cdq分治，先去重并统计相同的点的数量，需要注意要记录原id
 	  #endif
 	    return 0;
 	}
-	 
+
 
 
 
@@ -1253,14 +1657,14 @@ cdq分治，先去重并统计相同的点的数量，需要注意要记录原id
 	    while (1<<(k+1)<=(R-L+1)) k++;  //使得两倍的区间长度大于所查询的区间
 	    return max(mx[L][k],mx[R-(1<<k)+1][k]);
 	}
-	
+
 
 快速求log2(i)，不然可能被卡。
 
 	   LOG[0] = -1;
 	    for ( int i = 1 ; i < 2* N ; i++) LOG[i] =LOG[i>>1]+1;
 	    
-       int	   rmq( int l,int r)
+	   int	   rmq( int l,int r)
 	{
 	    if (l>r) return 0;
 	int k = log(double (r-l+1)/log2);
@@ -1271,9 +1675,9 @@ cdq分治，先去重并统计相同的点的数量，需要注意要记录原id
 	    int mn = min(dp2[l][k],dp2[r-(1<<k)+1][k]);
 	    return mx - mn;
 	}
-	    
+
   有时候可能需要返回最值的位置
-  
+
 	  int _min(int l,int r)
 	{
 	    if (a[l]<a[r]) return l;
@@ -1412,7 +1816,7 @@ cdq分治，先去重并统计相同的点的数量，需要注意要记录原id
 	  #endif
 	    return 0;
 	}
-	
+
 #####主席树，静态区间第k大 hdu 2665
 	const int N=1E5+7;
 	int a[N],H[N];
@@ -1454,9 +1858,9 @@ cdq分治，先去重并统计相同的点的数量，需要注意要记录原id
 	    return Query(tree[L].left,tree[R].left,l,mid,k);
 	    else return Query(tree[L].right,tree[R].right,mid+1,r,k-sum);
 	}
-	 
-	 
-	 
+
+
+​	 
 	int main()
 	{
 	    #ifndef  ONLINE_JUDGE 
@@ -1570,9 +1974,9 @@ cdq分治，先去重并统计相同的点的数量，需要注意要记录原id
 		int ans = query(r,1,n,root[l]);
 		printf("%d\n",ans);
 	    }
-	    
-	    
-	    
+
+
+​	    
 
 ##数论
 ####逆元
@@ -1658,8 +2062,8 @@ ax+by=d的有解条件是d是gcd(a,b)的整数倍
 		    for ( int i = 1 ; i <= n ; i++) scanf("%lld %lld",&a[i],&r[i]);
 		    printf("%lld\n",ex_crt(a,r,n));
 		}
-		
-		
+
+
 #####exgcd求解一般线性同余方程组解的个数（hdu 1573）
 	const int N =15;
 	LL a[N],r[N];
@@ -1966,14 +2370,15 @@ g(n) = 3g(n - 1) + g(n - 2)
 		#endif
 			return 0;
 		}
-	
-		 
-		 
+
+
+​		 
 求斐波那契循环节板子：
-	
+​	
 
 ##图论
-##并查集
+####并查集
+
 并查集判断无相图的连通性
 hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若干条边（至少一条边），问删完之后图依然联通的方案数。做法是：先把所有的点孤立出来，然后开始添加边，每次union成功（就是添加了一条边）的时候计数器+1，n个点如果能合并n-1次，也就是添加了n-1条有效边（最多也只可能是n-1条，那么说明这n个点之间是联通的。
 
@@ -1982,8 +2387,8 @@ hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若�
 	int f[N];
 	bool ban[N];
 	pi edge[N];
-	 
-	 
+
+
 	void init()
 	{
 	    ms(f,0);
@@ -2063,81 +2468,83 @@ hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若�
 	    }
 
 ####树的直径
-	const int N=1E3+7;
-	char maze[N][N];
-	bool vis[N][N];
-	int ans;
-	int n,m;
-	struct Point
-	{
-	    int x,y;
-	    int d;
-	    bool ok ()
-	    {
-		if (x<0||y<0||x>=n||y>=m) return false;
-		if (maze[x][y]=='#') return false;
-		if (vis[x][y]) return false;
-		return true;
-	    }
-	    void out()
-	    {
-		cout<<"x:"<<x<<" y:"<<y<<endl;
-	    }
-	}S,lst;
-	void bfs(Point S)
-	{
-	    queue<Point>q;
-	    S.d = 0;
-	    q.push(S);
-	    ms(vis,false);
-	    vis[S.x][S.y] = true;
-	    while (!q.empty())
-	    {
-		Point cur = q.front();
-		q.pop();
-		for ( int i = 0 ; i < 4 ; i++)
-		{
-		    Point nxt;
-		    nxt.x = cur.x + dx4[i];
-		    nxt.y = cur.y + dy4[i];
-		    nxt.d = cur.d + 1;
-		    if (!nxt.ok()) continue;
-		    q.push(nxt);
-		    vis[nxt.x][nxt.y] = true;
-		    if (ans<nxt.d)
-		    {
-			ans = nxt. d;
-			lst = nxt;
-		    }
-		}
-	//	cout<<"ans:"<<ans<<endl;
-	    }
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		int T;
-		cin>>T;
-		while(T--)
-		{
-		    ms(vis,false);
-		    scanf("%d%d",&m,&n);
-		    for ( int i =  0; i  < n ; i++) scanf("%s",maze[i]);
-		    for ( int i = 0 ; i < n ; i++)
-			for ( int j = 0 ; j < m ; j++)
-			    if (maze[i][j]=='.')
-			    {
-				S.x = i ;
-				S.y = j ;
-			    }
-		    ans  = 0;
-		    bfs(S);
-		    ans = 0 ;
-		    bfs(lst);
-		    printf("Maximum rope length is %d.\n",ans);
-		}	 
+
+poj 2631 一棵树中求两个点的最远距离。。
+
+```
+const int N=1E4+7;
+int n,m;
+vector < pi> edge[N];
+int lst;
+int ans;
+int d[N];
+bool vis[N];
+ 
+ 
+void bfs( int s)
+{
+    ms(d,0x3f);
+    ms(vis,false);
+    queue<int>q;
+    q.push(s);
+    vis[s] = true;
+    d[s] =  0 ;
+ 
+    while (!q.empty())
+    {
+        int u = q.front() ; q.pop();
+        lst = u ;
+//        cout<<"u:"<<u<<endl;
+        int siz = edge[u].size();
+ 
+        for ( int i = 0 ; i < siz ; i++)
+        {
+            int v = edge[u][i].fst;
+            if (vis[v]) continue;
+            vis[v] = true;
+            d[v] = d[u] + edge[u][i].sec;
+            ans = max(d[v],ans);
+            q.push(v);
+        }
+    }
+ 
+    int mx = 0;
+    for ( int i = 1 ; i <= n ; i++)
+    {
+//        cout<<"i:"<<i<<" d[i]:"<<d[i]<<endl;
+        if (d[i]>mx)
+        {
+            mx = d[i];
+            lst = i ;
+        }
+    }
+ 
+}
+int main()
+{
+        #ifndef  ONLINE_JUDGE 
+        freopen("code/in.txt","r",stdin);
+  #endif
+ 
+        int u,v,w;
+        m = 0;
+        n = 0;
+        while (scanf("%d%d%d",&u,&v,&w)!=EOF)
+        {
+            edge[u].push_back(make_pair(v,w));
+            edge[v].push_back(make_pair(u,w));
+            m++;
+            n = max(n,u);
+            n = max(n,v);
+        }
+        ans = inf;
+        bfs(1);
+        ans = 0;
+//        cout<<"lst:"<<lst<<endl;
+        bfs(lst);
+        cout<<ans<<endl;
+```
+
 ####欧拉路
 如果图G中的一个路径包括每个边恰好一次，则该路径称为欧拉路径(Euler path)。
 如果一个回路是欧拉路径，则称为欧拉回路(Euler circuit)。
@@ -2146,7 +2553,7 @@ hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若�
 
 * 有向图G为半欧拉图(存在欧拉路)，当且仅当G的基图连通（弱联通），且存在顶点u的入度比出度大1、v的入度比出度小1，其它所有顶点的入度等于出度。
 
-*  无向图存在欧拉回路:  图连通，所有点都是偶数度，
+* 无向图存在欧拉回路:  图连通，所有点都是偶数度，
 
 * 无向图存在欧拉路：图联通，只有两个点的度数为奇数。
 
@@ -2232,8 +2639,8 @@ hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若�
 	  #endif
 	    return 0;
 	}
-	
-	
+
+
 ####交叉染色法判断二分图
 	const int N=205;
 	vector <int>edge[N];
@@ -2319,7 +2726,10 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 
 
 
-###km算法
+#### km算法
+
+
+
 	const int N=305;
 	int w[N][N];
 	int n;
@@ -2351,7 +2761,7 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 	}
 	int KM()
 	{
-
+	
 	    ms(link,-1);//初始没有找到匹配，同hungary
 	    ms(ly,0);
 	    ms(lx,0);//因为要使得所有lx[i]+ly[j]-w[i][j]>=0,所以初始化的时候（不妨）lx[i]=max(w[i][j]),ly[i]=0;
@@ -2367,7 +2777,7 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 	    //  cout<<"mio mio mio "<<endl;
 		ms(visx,false);
 		ms(visy,false);
-
+	
 		if (find(i)) break;
 		int d = inf;
 		for ( int j = 1 ; j <= n ; j++)
@@ -2393,7 +2803,7 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 	int main()
 	{
 	    #ifndef  ONLINE_JUDGE
-
+	
 	    freopen("code/in.txt","r",stdin);
 	  #endif
 	    while (scanf("%d",&n)!=EOF)
@@ -2458,7 +2868,8 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 	    }
 	}
 ##计算几何
-###n个圆面积交，可以求出交恰好k次的面积(k属于1..n)
+####n个圆面积交，可以求出交恰好k次的面积(k属于1..n)
+
 	const double eps = 1e-10;  
 	const int MAXN = 1E3+7;  
 	const double PI = acos(-1.0);  
@@ -2606,7 +3017,7 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 	    solve();
 	    return 0;  
 	}
- 
+
 ####n个圆面积并
 	const double PI = acos(-1.0);
 	const int N =1e3+7;
@@ -2742,11 +3153,20 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 	  #endif
 	    return 0;
 	}
-	 
-	 
-	 
+
+
+​	 
 
 ##字符串
+
+#### 回文自动机
+
+
+
+
+
+
+
 ####kmp算法
 kmp算法中nxt[i]的含义：
 next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和后缀相同的长度。
@@ -2780,8 +3200,11 @@ next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和�
 如果不允许重叠。。。
 其实只要每次找到的时候j=0一下就好咯。
 
-#####最小覆盖子串：对于某个字符串s，它的最小覆盖子串指的是长度最小的子串p，p满足通过自身的多次连接得到q，最后能够使s成为q的子串。
-#####结论先行：最小覆盖子串（串尾多一小段时，用前缀覆盖）长度为n-next[n]（n-pre[n]），其中n为串长，串的最后一位为为s[n-1].
+######最小覆盖子串：对于某个字符串s，它的最小覆盖子串指的是长度最小的子串p，p满足通过自身的多次连接得到q，最后能够使s成为q的子串。
+
+结论先行：最小覆盖子串（串尾多一小段时，用前缀覆盖）长度为n-next[n]（n-pre[n]），其中n为串长，串的最后一位为为s[n-1].
+
+
 
 ####AC自动机
 	struct Trie
@@ -2865,8 +3288,8 @@ next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和�
 	    return res;
 	    }
 	}ac;
-	
-	
+
+
 ####trie 树
 #####带删除的静态trie树模板
 	int n;
@@ -3002,7 +3425,7 @@ next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和�
 	    return maxlen-1;  
 	    //这道题是问最长回文串的长度。。。如果是问回文串是什么的话。。。根据id和maxlen也可以构造出来。。。
 	}
-	
+
 manacher求最长回文子串的开始结束位置
 
 	void manacher(char *s)
@@ -3049,8 +3472,8 @@ manacher求最长回文子串的开始结束位置
 	    }
 	    
 	}
-	
-	
+
+
 ####后缀数组
 #####给出一个字符串，问所有不同的字串的个数。
 
@@ -3150,7 +3573,7 @@ manacher求最长回文子串的开始结束位置
 		    printf("%d\n",ans);
 	 
 		}
-		
+
 #####给出两个字符串，问最长的公共连续字串	（模板题）
 首先要理解后缀，后缀数组（sa[]），名次数组(rk[])，height数组，lcp 这些概念
 
@@ -3201,8 +3624,8 @@ height[rank[j]+2], height[rank[j]+3], ... ,height[rank[k]]中的最小值。
 	    for ( int i = 0 ; i < n;  i++) c[x[i]=s[i]]++; //x[i]相当于保存了rank的相对大小，由于只是为了比较大小，所以没必要求出真实的rank值。
 	    for ( int i = 1 ; i < m ; i++) c[i]+=c[i-1];
 	    for ( int i = n-1 ; i >= 0 ;i--) sa[--c[x[i]]] =  i;
-	 
-	    
+
+
 	    for ( int k = 1 ; k <= n ; k<<=1)  //进行若干次基数排序，每次对长度为k的字符串排序
 	    {
 		int p  = 0 ;
@@ -3383,8 +3806,8 @@ height[rank[j]+2], height[rank[j]+3], ... ,height[rank[k]]中的最小值。
 	    last = max(0,last)+a[i];
 	    ans = max(ans,last);
 	}
-	
-	
+
+
 ####数位dp
 hdu 2089 问区间[n,m]中，不含数字4，也不含数字串“62”的所有数的个数。
 
@@ -3448,9 +3871,9 @@ hdu 2089 问区间[n,m]中，不含数字4，也不含数字串“62”的所有
 	 
 		    printf("%d\n",ans);
 		}
-	 
-	
-	
+
+
+​	
 
 不允许前导0的数位dp
 hdu 5787 :给出l,r,k(k<=5)求区间[l,r]中满足任意相邻k个数字都不相同的数的个数.
@@ -3516,8 +3939,8 @@ hdu 5787 :给出l,r,k(k<=5)求区间[l,r]中满足任意相邻k个数字都不�
 		    LL ans = solve(r)-solve(l-1);
 		    printf("%lld\n",ans);
 		}
-		
-		
+
+
 ####带整除的数位dp
 hdu3652：给出n,问[1,n]中，满足包含“13”且这个数（不是各位的和）能被13整除的数的个数。做法是把能被13整除的数考虑成全集U,然后在U中做分划，一部分是含13的，另一部分是不含13的。dfs要一个参数记录从最高位到现在的pos位置的数字之和%13的结果
 
@@ -3525,8 +3948,8 @@ hdu3652：给出n,问[1,n]中，满足包含“13”且这个数（不是各位�
 	LL dp[20][15];
 	LL dp2[20][2][15];
 	int digit[20];
-	 
-	 
+
+
 	LL dfs (int pos,int sum,bool limit)
 	{
 	    if (pos==0) return sum==0;
@@ -3588,15 +4011,15 @@ hdu3652：给出n,问[1,n]中，满足包含“13”且这个数（不是各位�
 		    LL ans = solve (n);
 		    printf("%lld\n",ans);
 		}
-		
+
 b进制数位dp
 
 	int l,r;
 	int k,base;
 	int digit[700];
 	int dp[700][700];
-	 
-	 
+
+
 	int dfs( int pos , int cnt, bool limit)
 	{
 	    if (pos==0) return cnt==0;
@@ -3642,8 +4065,8 @@ b进制数位dp
 	int k,base;
 	int digit[700];
 	int dp[700][700];
-	 
-	 
+
+
 	int dfs( int pos , int cnt, bool limit)
 	{
 	    if (pos==0) return cnt==0;
@@ -3685,7 +4108,7 @@ b进制数位dp
 	//        cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
 		int ans = solve (r) - solve (l-1);
 		cout<<ans<<endl;
-	 
+
 ##博弈论
 
 
@@ -3802,8 +4225,8 @@ log版本
 	    }
 	    return ans;
 	}
-	
-	
+
+
 O(1)版本：
 
 	inline long long multi(long long x,long long y,long long mod)  
@@ -3811,12 +4234,12 @@ O(1)版本：
 	long long tmp=(x*y-(long long)((long double)x/mod*y+1.0e-8)*mod);  
 	return tmp<0 ? tmp+mod : tmp;  
 	}
-	  
+
 
 ####组合数奇偶性
   如果(n&m)==m，那么C(n,m)为奇数，否则为偶数
   求C(n,0),C(n,1)...C(n,n)中有多少个奇数 (1=< n <=1E8),答案就是：1<<(n的二进制表示中1的个数)
-  
+
 #####统计一段区间中某数出现的次数
 建一个val和该val对应下标的pair，然后排序（pair默认按照val第一关键字，pair第二关键字升序排）
 
@@ -3876,9 +4299,9 @@ B^L == N (mod P)，求L,保证B，p 互质
 		    if (ans==-1) printf("no solution\n");
 		    else printf("%lld\n",(ans%p+p)%p);
 		}
-		
-		
-		
+
+
+​		
 ####扩展BSGS算法       
 已知数a,p,b，求满足a^x≡b(mod p)的最小自然数x。需要注意这里没有保证(a,p)=1，因此不能直接使用BSGS算法。
 
@@ -3957,8 +4380,8 @@ B^L == N (mod P)，求L,保证B，p 互质
 	    if(sgn(ans-simpson(l,m)-simpson(m,r))==0)return ans; //在误差之内
 	    return di(l,m)+di(m,r); //不再误差之内就继续将区间缩小
 	}
-	
-	
+
+
 ####矩阵
 #####构造矩阵的一般思路
 
@@ -4003,13 +4426,13 @@ B^L == N (mod P)，求L,保证B，p 互质
 	    }
 	    return ret;
 	}
-	
-	
+
+
 #####给定一个有向图，问从A点恰好走k步（允许重复经过边）到达B点的方案数mod p的值
  把给定的图转为邻接矩阵，即A(i,j)=1当且仅当存在一条边i->j。令C=A*A，那么C(i,j)=ΣA(i,k)*A(k,j)，实际上就等于从点i到点j恰好经过2条边的路径数（枚举k为中转点）。类似地，C*A的第i行第j列就表示从i到j经过3条边的路径数。同理，如果要求经过k步的路径数，我们只需要快速幂求出A^k即可
 
 
-  
+
 
 
 
