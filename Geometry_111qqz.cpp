@@ -723,7 +723,7 @@ struct polygon
         return sum;
     }
     double getarea()
-    {
+   {
         double sum=0;
         int i;
         for (i=0;i<n;i++)
