@@ -128,23 +128,25 @@
 
 ####Mobius反演
 
-	void mobius(){
-		memset(flag,0,sizeof(flag));
-		tot=0;miu[1]=1;
-		for(int i=2;i<maxn;i++){
-			if(!flag[i]){
-				p[tot++]=i;
-				miu[i]=-1;
-			}
-			for(int j=0;j<tot && i*p[j]<maxn;j++){
-				flag[i*p[j]]=true;
-				if(i%p[j]) miu[i*p[j]]=-miu[i];
-				else{
-					miu[i*p[j]]=0;break;
-				}
+```c++
+oid mobius(){
+	memset(flag,0,sizeof(flag));
+	tot=0;miu[1]=1;
+	for(int i=2;i<maxn;i++){
+		if(!flag[i]){
+			p[tot++]=i;
+			miu[i]=-1;
+		}
+		for(int j=0;j<tot && i*p[j]<maxn;j++){
+			flag[i*p[j]]=true;
+			if(i%p[j]) miu[i*p[j]]=-miu[i];
+			else{
+				miu[i*p[j]]=0;break;
 			}
 		}
 	}
+}
+```
 ####组合数取模
 
 求C(n,m)%p
@@ -154,58 +156,60 @@
 
 	LL n,m,p;  
 
-	LL quick_mod(LL a, LL b)  
+```c++
+LL quick_mod(LL a, LL b)  
+{  
+    LL ans = 1;  
+    a %= p;  
+    while(b)  
+    {  
+	if(b & 1)  
 	{  
-	    LL ans = 1;  
-	    a %= p;  
-	    while(b)  
-	    {  
-		if(b & 1)  
-		{  
-		    ans = ans * a % p;  
-		    b--;  
-		}  
-		b >>= 1;  
-		a = a * a % p;  
-	    }  
-	    return ans;  
+	    ans = ans * a % p;  
+	    b--;  
 	}  
-	  
-	LL C(LL n, LL m)  
-	{  
-	    if(m > n) return 0;  
-	    LL ans = 1;  
-	    for(int i=1; i<=m; i++)  
-	    {  
-		LL a = (n + i - m) % p;  
-		LL b = i % p;  
-		ans = ans * (a * quick_mod(b, p-2) % p) % p;  
-	    }  
-	    return ans;  
-	}  
-	  
-	LL Lucas(LL n, LL m)  
-	{  
-	    if(m == 0) return 1;  
-	    return C(n % p, m % p) * Lucas(n / p, m / p) % p;  
-	}  
-	  
-	int main()  
-	{  
-	    int T;  
-	    scanf("%d", &T);  
-	    while(T--)  
-	    {  
-		scanf("%I64d%I64d%I64d", &n, &m, &p);  
-		printf("%I64d\n", Lucas(n,m));  
-	    }  
-	    return 0;  
-	}  
+	b >>= 1;  
+	a = a * a % p;  
+    }  
+    return ans;  
+}  
+  
+LL C(LL n, LL m)  
+{  
+    if(m > n) return 0;  
+    LL ans = 1;  
+    for(int i=1; i<=m; i++)  
+    {  
+	LL a = (n + i - m) % p;  
+	LL b = i % p;  
+	ans = ans * (a * quick_mod(b, p-2) % p) % p;  
+    }  
+    return ans;  
+}  
+  
+LL Lucas(LL n, LL m)  
+{  
+    if(m == 0) return 1;  
+    return C(n % p, m % p) * Lucas(n / p, m / p) % p;  
+}  
+  
+int main()  
+{  
+    int T;  
+    scanf("%d", &T);  
+    while(T--)  
+    {  
+	scanf("%I64d%I64d%I64d", &n, &m, &p);  
+	printf("%I64d\n", Lucas(n,m));  
+    }  
+    return 0;  
+}  
+```
 
  （3）1<=m<=n<=1E6,2<=p<=1E5,p可能是合数
  这样的话先采取暴力分解，然后快速幂即可。
 
-```
+```c++
  const int N = 200005;  
 bool prime[N];  
 int p[N];  
@@ -291,964 +295,988 @@ int main()
 #####动态k-d树（带插入），曼哈顿距离
 bzoj 2716 现在有n个在二维平面，m个操作，2种类型，一种是加入一个点，另一种是对于一个定点，询问距离其最近的点的距离。
 
-	const LL linf = 1LL<<60;
-	const int N=5E5+7;
-	int n,m;
-	int idx,rt;
-	LL ans;
-	struct KDT
-	{
-	    LL coor[2];
-	    LL mn[2],mx[2]; //需要维护四个方向的最值，是因为是曼哈顿距离。
-	    int son[2];
-	    bool operator < (const KDT &u)const{ return coor[idx]<u.coor[idx];}
-	    void init() { for ( int i = 0 ; i < 2 ;i++) mn[i]=mx[i]=coor[i];}
-	    void input() { for ( int i = 0 ; i < 2 ; i++) scanf("%lld",&coor[i]);}
-	}v[N<<1],tar; //开一倍空间是因为可能全都是插点。
-	inline LL getDis(KDT a,KDT b) {return abs(a.coor[0]-b.coor[0]) + abs(a.coor[1]-b.coor[1]);}
-	void up( int x)
-	{
-	    for ( int i = 0 ; i < 2 ; i++) if (v[x].son[i]){
-	    int y =v[x].son[i];
-	    for (int j = 0 ; j < 2 ; j++) 
-		v[x].mn[j]=min(v[x].mn[j],v[y].mn[j]),v[x].mx[j]=max(v[x].mx[j],v[y].mx[j]);
-	    }
-	}
-	int build( int l=1,int r=n,int dim=0)
-	{
-	    idx = dim;
-	    int mid = (l+r)>>1;
-	    nth_element(v+l,v+mid,v+r+1);
-	    v[mid].init();
-	    if (l!=mid) v[mid].son[0] = build(l,mid-1,1-dim);
-	    if (r!=mid) v[mid].son[1] = build(mid+1,r,1-dim);
-	    up(mid);
-	    return mid;
-	}
-	LL ask( int x,KDT p)
-	{
-	    LL ret=0;
-	    for ( int i = 0 ; i < 2 ; i++)
-	    {
-	    ret = ret +max(0LL,v[x].mn[i]-p.coor[i])+ max(0LL,p.coor[i]-v[x].mx[i]);
-	    }
-	    return ret;
-	}
-	void insert(int x=rt,int dim=0)
-	{
-	    bool fg=v[n].coor[dim]>v[x].coor[dim];
-	    if (v[x].son[fg]) insert(v[x].son[fg],1-dim);
-	    else v[x].son[fg]=n;
-	    up(x);
-	}
-	void query(int x=rt,int dim=0)
-	{
-	    LL dis=getDis(v[x],tar),dl=linf,dr=linf;
-	    ans=min(dis,ans);
-	    if (v[x].son[0]) dl=ask(v[x].son[0],tar);
-	    if (v[x].son[1]) dr=ask(v[x].son[1],tar);
-	    int xx = v[x].son[0],yy=v[x].son[1];
-	    if (dl>=dr) swap(dl,dr),swap(xx,yy);
-	    if (dl<ans) query(xx,1-dim);
-	    if (dr<ans) query(yy,1-dim);
-	}
-	 
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    cin>>n>>m;
-	    for ( int i = 1 ; i <= n ; i++) v[i].input();
-	    rt =build();
-	    while (m--)
-	    {
-		int t;
-		scanf("%d",&t);
-		ans=linf;
-		if (t==1) v[++n].input(),v[n].init(),insert();
-		else tar.input(),query(),printf("%lld\n",ans);
-	    }
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	} 
+```c++
+const LL linf = 1LL<<60;
+const int N=5E5+7;
+int n,m;
+int idx,rt;
+LL ans;
+struct KDT
+{
+    LL coor[2];
+    LL mn[2],mx[2]; //需要维护四个方向的最值，是因为是曼哈顿距离。
+    int son[2];
+    bool operator < (const KDT &u)const{ return coor[idx]<u.coor[idx];}
+    void init() { for ( int i = 0 ; i < 2 ;i++) mn[i]=mx[i]=coor[i];}
+    void input() { for ( int i = 0 ; i < 2 ; i++) scanf("%lld",&coor[i]);}
+}v[N<<1],tar; //开一倍空间是因为可能全都是插点。
+inline LL getDis(KDT a,KDT b) {return abs(a.coor[0]-b.coor[0]) + abs(a.coor[1]-b.coor[1]);}
+void up( int x)
+{
+    for ( int i = 0 ; i < 2 ; i++) if (v[x].son[i]){
+    int y =v[x].son[i];
+    for (int j = 0 ; j < 2 ; j++) 
+	v[x].mn[j]=min(v[x].mn[j],v[y].mn[j]),v[x].mx[j]=max(v[x].mx[j],v[y].mx[j]);
+    }
+}
+int build( int l=1,int r=n,int dim=0)
+{
+    idx = dim;
+    int mid = (l+r)>>1;
+    nth_element(v+l,v+mid,v+r+1);
+    v[mid].init();
+    if (l!=mid) v[mid].son[0] = build(l,mid-1,1-dim);
+    if (r!=mid) v[mid].son[1] = build(mid+1,r,1-dim);
+    up(mid);
+    return mid;
+}
+LL ask( int x,KDT p)
+{
+    LL ret=0;
+    for ( int i = 0 ; i < 2 ; i++)
+    {
+    ret = ret +max(0LL,v[x].mn[i]-p.coor[i])+ max(0LL,p.coor[i]-v[x].mx[i]);
+    }
+    return ret;
+}
+void insert(int x=rt,int dim=0)
+{
+    bool fg=v[n].coor[dim]>v[x].coor[dim];
+    if (v[x].son[fg]) insert(v[x].son[fg],1-dim);
+    else v[x].son[fg]=n;
+    up(x);
+}
+void query(int x=rt,int dim=0)
+{
+    LL dis=getDis(v[x],tar),dl=linf,dr=linf;
+    ans=min(dis,ans);
+    if (v[x].son[0]) dl=ask(v[x].son[0],tar);
+    if (v[x].son[1]) dr=ask(v[x].son[1],tar);
+    int xx = v[x].son[0],yy=v[x].son[1];
+    if (dl>=dr) swap(dl,dr),swap(xx,yy);
+    if (dl<ans) query(xx,1-dim);
+    if (dr<ans) query(yy,1-dim);
+}
+ 
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    cin>>n>>m;
+    for ( int i = 1 ; i <= n ; i++) v[i].input();
+    rt =build();
+    while (m--)
+    {
+	int t;
+	scanf("%d",&t);
+	ans=linf;
+	if (t==1) v[++n].input(),v[n].init(),insert();
+	else tar.input(),query(),printf("%lld\n",ans);
+    }
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+} 
+```
 #####kd-tree +优先队列，求M紧邻
 hdu 4347 给出若干个点，在给出一个定点，求距离该定点最近的m个点。
 （以及这次采用了轮盘转的策略划分维度，也就是按照深度，所有维度轮流作为split-method（实际用起来效果还是挺棒的orz）
 
-	const int N=5E4+7;
-	const int M = 10;
-	int n,m,k,t;
-	int idx;
-	struct Point
+```c++
+const int N=5E4+7;
+const int M = 10;
+int n,m,k,t;
+int idx;
+struct Point
+{
+    LL coor[M];
+    int id;
+    void print()
+    {
+    for ( int i = 1 ; i <= k ; i++)
+	printf("%lld%c",coor[i],i==k?'\n':' ');
+    }
+    bool operator < (const Point &u)const
+    {
+    return coor[idx]<u.coor[idx];
+    }
+}po[N];
+typedef pair< LL,Point >PI;
+priority_queue< PI >pq; //用优先队列一定要定义小于关系啊orz...我怎么这么傻
+struct KdTree
+{
+    Point p[N<<2];
+    bool leaf[N<<2];
+    void build ( int l,int r, int rt = 1,int dep=0)
+    {
+    if (l>r) return;
+    leaf[rt] = false;
+    leaf[rt<<1] = leaf[rt<<1|1] = true;
+    idx = dep % k;
+    int mid = (l+r)>>1;
+    nth_element(po+l,po+mid,po+r+1);
+    p[rt] = po[mid];
+    build(l,mid-1, rt<<1,dep+1);
+    build(mid+1,r,rt<<1|1,dep+1);
+    }
+    void query(Point tar,int rt=1,int dep=0)
+    {
+    if (leaf[rt]) return;
+    PI cur(0,p[rt]);
+    for ( int i = 1 ; i <= k ; i++) cur.fst += (p[rt].coor[i]-tar.coor[i])*(p[rt].coor[i]-tar.coor[i]);
+    int idx = dep%k;
+    int x=rt<<1,y=rt<<1|1,flag=0;
+    LL d = tar.coor[idx]-p[rt].coor[idx];
+    if (d>0) swap(x,y);
+    if (!leaf[x]) query(tar,x,dep+1);
+    if (pq.size()<m) pq.push(cur),flag=1;
+    else
+    {
+	if (cur.fst < pq.top().fst) pq.pop(),pq.push(cur);
+	if (d*d<pq.top().fst) flag = 1;
+    }
+    //cout<<pq.top().second.coor[0]<<" "<<pq.top().second.coor[1]<<endl;
+    if (!leaf[y]&&flag) query(tar,y,dep+1);
+    }
+}kd;
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    while (~scanf("%d %d",&n,&k))
+    {
+	for ( int i = 1 ;  i <= n ; i++)
 	{
-	    LL coor[M];
-	    int id;
-	    void print()
-	    {
-	    for ( int i = 1 ; i <= k ; i++)
-		printf("%lld%c",coor[i],i==k?'\n':' ');
-	    }
-	    bool operator < (const Point &u)const
-	    {
-	    return coor[idx]<u.coor[idx];
-	    }
-	}po[N];
-	typedef pair< LL,Point >PI;
-	priority_queue< PI >pq; //用优先队列一定要定义小于关系啊orz...我怎么这么傻
-	struct KdTree
+	for ( int j = 1 ; j <= k ; j++) scanf("%lld",&po[i].coor[j]);
+	}
+	scanf("%d",&t);
+	kd.build(1,n);
+	while (t--)
 	{
-	    Point p[N<<2];
-	    bool leaf[N<<2];
-	    void build ( int l,int r, int rt = 1,int dep=0)
-	    {
-	    if (l>r) return;
-	    leaf[rt] = false;
-	    leaf[rt<<1] = leaf[rt<<1|1] = true;
-	    idx = dep % k;
-	    int mid = (l+r)>>1;
-	    nth_element(po+l,po+mid,po+r+1);
-	    p[rt] = po[mid];
-	    build(l,mid-1, rt<<1,dep+1);
-	    build(mid+1,r,rt<<1|1,dep+1);
-	    }
-	    void query(Point tar,int rt=1,int dep=0)
-	    {
-	    if (leaf[rt]) return;
-	    PI cur(0,p[rt]);
-	    for ( int i = 1 ; i <= k ; i++) cur.fst += (p[rt].coor[i]-tar.coor[i])*(p[rt].coor[i]-tar.coor[i]);
-	    int idx = dep%k;
-	    int x=rt<<1,y=rt<<1|1,flag=0;
-	    LL d = tar.coor[idx]-p[rt].coor[idx];
-	    if (d>0) swap(x,y);
-	    if (!leaf[x]) query(tar,x,dep+1);
-	    if (pq.size()<m) pq.push(cur),flag=1;
-	    else
-	    {
-		if (cur.fst < pq.top().fst) pq.pop(),pq.push(cur);
-		if (d*d<pq.top().fst) flag = 1;
-	    }
-	    //cout<<pq.top().second.coor[0]<<" "<<pq.top().second.coor[1]<<endl;
-	    if (!leaf[y]&&flag) query(tar,y,dep+1);
-	    }
-	}kd;
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    while (~scanf("%d %d",&n,&k))
-	    {
-		for ( int i = 1 ;  i <= n ; i++)
-		{
-		for ( int j = 1 ; j <= k ; j++) scanf("%lld",&po[i].coor[j]);
-		}
-		scanf("%d",&t);
-		kd.build(1,n);
-		while (t--)
-		{
-		Point ask;
-		for ( int i = 1 ; i <= k ; i++) scanf("%lld",&ask.coor[i]);
-		scanf("%d",&m);
-		kd.query(ask);
-		printf("the closest %d points are:\n",m);
-		Point ret[20];
-		//cout<<"pq_siz:"<<pq.size()<<" pq.top()"<<pq.top().sec.coor[1]<<endl;
-		for ( int i = 1 ; !pq.empty() ; i++) ret[i] = pq.top().second,pq.pop();
-		for ( int i = m ; i >= 1 ; i--)  ret[i].print();
-		}
-	    }
+	Point ask;
+	for ( int i = 1 ; i <= k ; i++) scanf("%lld",&ask.coor[i]);
+	scanf("%d",&m);
+	kd.query(ask);
+	printf("the closest %d points are:\n",m);
+	Point ret[20];
+	//cout<<"pq_siz:"<<pq.size()<<" pq.top()"<<pq.top().sec.coor[1]<<endl;
+	for ( int i = 1 ; !pq.empty() ; i++) ret[i] = pq.top().second,pq.pop();
+	for ( int i = m ; i >= 1 ; i--)  ret[i].print();
+	}
+    }
+```
 
 静态kd-tree
 hdu 2966 给出二维平面上n(1E5)个点，问对于每个点，其他距离其最近的点的距离是多少。
 
-	const int N=1E5+7;
-	int n;
-	struct Point
-	{
-	    LL x,y;
-	}p[N],p2[N]; //复制一份，因为nth_element的时候会把顺序打乱。
-	bool dv[N]; //划分方式
-	bool cmpx( const Point & p1, const Point &p2)
-	{
-	    return p1.x<p2.x;
+```c++
+const int N=1E5+7;
+int n;
+struct Point
+{
+    LL x,y;
+}p[N],p2[N]; //复制一份，因为nth_element的时候会把顺序打乱。
+bool dv[N]; //划分方式
+bool cmpx( const Point & p1, const Point &p2)
+{
+    return p1.x<p2.x;
+}
+bool cmpy(const Point &p1 ,const Point &p2)
+{
+    return p1.y<p2.y;
+}
+LL getDis( Point a, Point b)
+{
+    return (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y);
+}
+void build ( int l,int r)
+{
+    if (l>r) return;
+    int mid = (l+r) >> 1;
+    int minx = min_element(p+l,p+r,cmpx)->x;
+    int miny = min_element(p+l,p+r,cmpy)->y;
+    int maxx = max_element(p+l,p+r,cmpx)->x;
+    int maxy = max_element(p+l,p+r,cmpy)->y;
+    dv[mid] = maxx-minx >= maxy-miny;
+    nth_element(p+l,p+mid,p+r+1,dv[mid]?cmpx:cmpy);
+    build(l,mid-1);
+    build(mid+1,r);
+    
+}
+LL res;
+void query( int l,int r,Point a)
+{
+    if (l>r) return;
+    int mid = (l+r)>>1;
+    LL dis = getDis(a,p[mid]);
+    //printf("%lld %lld  %lld %lld    %lld\n",a.x,a.y,p[mid].x,p[mid].y,dis);
+    if (dis>0) res = min(res,dis);//判掉和自己的距离。 
+    LL d = dv[mid]?(a.x-p[mid].x):(a.y-p[mid].y);
+    int l1=l,r1=mid-1,l2=mid+1,r2=r;
+    if (d>0) swap(l1,l2),swap(r1,r2);
+    query(l1,r1,a); //左儿子
+    if (d*d<res) query(l2,r2,a);//如果与分界线相交，则也要查询右儿子。
+}
+ 
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    int T;
+    cin>>T;
+    while (T--)
+    {
+	scanf("%d",&n);
+	for ( int i = 1 ; i <= n ; i++) {
+	scanf("%lld %lld",&p[i].x,&p[i].y);
+	p2[i] = p[i];
 	}
-	bool cmpy(const Point &p1 ,const Point &p2)
+	build (1,n);
+	for ( int i = 1 ; i <= n ; i++)
 	{
-	    return p1.y<p2.y;
+	res = 1LL<<60;
+	query(1,n,p2[i]);
+	printf("%lld\n",res);
 	}
-	LL getDis( Point a, Point b)
-	{
-	    return (a.x-b.x)*(a.x-b.x) + (a.y-b.y)*(a.y-b.y);
-	}
-	void build ( int l,int r)
-	{
-	    if (l>r) return;
-	    int mid = (l+r) >> 1;
-	    int minx = min_element(p+l,p+r,cmpx)->x;
-	    int miny = min_element(p+l,p+r,cmpy)->y;
-	    int maxx = max_element(p+l,p+r,cmpx)->x;
-	    int maxy = max_element(p+l,p+r,cmpy)->y;
-	    dv[mid] = maxx-minx >= maxy-miny;
-	    nth_element(p+l,p+mid,p+r+1,dv[mid]?cmpx:cmpy);
-	    build(l,mid-1);
-	    build(mid+1,r);
-	    
-	}
-	LL res;
-	void query( int l,int r,Point a)
-	{
-	    if (l>r) return;
-	    int mid = (l+r)>>1;
-	    LL dis = getDis(a,p[mid]);
-	    //printf("%lld %lld  %lld %lld    %lld\n",a.x,a.y,p[mid].x,p[mid].y,dis);
-	    if (dis>0) res = min(res,dis);//判掉和自己的距离。 
-	    LL d = dv[mid]?(a.x-p[mid].x):(a.y-p[mid].y);
-	    int l1=l,r1=mid-1,l2=mid+1,r2=r;
-	    if (d>0) swap(l1,l2),swap(r1,r2);
-	    query(l1,r1,a); //左儿子
-	    if (d*d<res) query(l2,r2,a);//如果与分界线相交，则也要查询右儿子。
-	}
-	 
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    int T;
-	    cin>>T;
-	    while (T--)
-	    {
-		scanf("%d",&n);
-		for ( int i = 1 ; i <= n ; i++) {
-		scanf("%lld %lld",&p[i].x,&p[i].y);
-		p2[i] = p[i];
-		}
-		build (1,n);
-		for ( int i = 1 ; i <= n ; i++)
-		{
-		res = 1LL<<60;
-		query(1,n,p2[i]);
-		printf("%lld\n",res);
-		}
-	 
-	    }
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+ 
+    }
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 
 ####单调队列
 #####求每连续k个元素的最大值
 
-	const int N=3E4+7;
-	int a[N];
-	int f[N];
-	int n,k;
-	deque<int>dq;
-	int main()
+```c++
+const int N=3E4+7;
+int a[N];
+int f[N];
+int n,k;
+deque<int>dq;
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	scanf("%d",&k);
+	n = 0 ;
+	while (scanf("%d",&a[++n])!=EOF)
 	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		scanf("%d",&k);
-		n = 0 ;
-		while (scanf("%d",&a[++n])!=EOF)
-		{
-		    if (a[n]==-1) 
-		    {
-		        n--;
-		        break;
-		    }
-		}
-		//for ( int i = 1 ; i <= n ; i++) cout<<"a[i]:"<<a[i]<<endl;
-		dq.clear();
-		for (  int i = 1 ; i <= n ; i++)
-		{
-		    while (!dq.empty()&&dq.front()<i-k+1) dq.pop_front(); //不断删除队首过期元素。以第i个元素结尾的连续K个元素的开头位置是i-k+1,在这之前的已经“失效”，因此出队.
-		    while (!dq.empty()&&a[dq.back()]<=a[i]) dq.pop_back();//不断删除队尾破坏单调性的元素。能删除的原因是比i早出现并且不比i大的元素一定不会成为答案。
-		    dq.push_back(i);
-		   // cout<<"dq.size():"<<dq.size()<<endl;
-		    //cout<<"i:"<<i<<" "<<dq.front()<<endl;
-		    if (i>=k)
-		        printf("%d\n",a[dq.front()]);
-		}
+	    if (a[n]==-1) 
+	    {
+	        n--;
+	        break;
+	    }
+	}
+	//for ( int i = 1 ; i <= n ; i++) cout<<"a[i]:"<<a[i]<<endl;
+	dq.clear();
+	for (  int i = 1 ; i <= n ; i++)
+	{
+	    while (!dq.empty()&&dq.front()<i-k+1) dq.pop_front(); //不断删除队首过期元素。以第i个元素结尾的连续K个元素的开头位置是i-k+1,在这之前的已经“失效”，因此出队.
+	    while (!dq.empty()&&a[dq.back()]<=a[i]) dq.pop_back();//不断删除队尾破坏单调性的元素。能删除的原因是比i早出现并且不比i大的元素一定不会成为答案。
+	    dq.push_back(i);
+	   // cout<<"dq.size():"<<dq.size()<<endl;
+	    //cout<<"i:"<<i<<" "<<dq.front()<<endl;
+	    if (i>=k)
+	        printf("%d\n",a[dq.front()]);
+	}
+```
 ####线段树
 #####线段树单点更新询问区间最大值模板
 
-	int n,m;
-	int a[N];
-	int MAX[N<<2];//MAX[i]表示的是第i个节点所存储的信息，根据题目会有所变化，这道题存储的是以i节点为根节点的子树的最大值（也就是i节点所表示的区间的最大值）
-	void PushUp(int rt)
+```c++
+int n,m;
+int a[N];
+int MAX[N<<2];//MAX[i]表示的是第i个节点所存储的信息，根据题目会有所变化，这道题存储的是以i节点为根节点的子树的最大值（也就是i节点所表示的区间的最大值）
+void PushUp(int rt)
+{
+    MAX[rt] = max(MAX[rt<<1],MAX[rt<<1|1]);  //线段树上每一个节点代表一段区间，该区间的最大值是把区间分成两部分，每一部分的最大值的最大值，也就是该节点（rt)的两个子节点取最大值。
+}                                           //编号为i节点的两个子节点的编号为i*2和 i*2+1,写成位运算也就是 rt<<1和rt<<1|1（因为左移动一位以后末尾肯定为0，“或”1就相当于+1
+	                                    //写成位运算是因为不用考虑优先级的问题。。因为加法的优先级比位移高，而或运算的优先级比位移低。
+void update(int p,int sc,int l,int r,int rt) //p表示要更新的的节点的位置，sc表示要更新成什么，l,r,rt三个参数表示当前的树，初始就是整个线段树。
+{
+   // printf("p:%d sc:%d l:%d r:%d rt:%d\n",p,sc,l,r,rt);
+    if (l==r) //此时该区间只有一个数，说明已经到了线段树的底部（叶子节点），一个数的最大值就是本身。直接更新
+    {
+	MAX[rt]= sc;
+	return ;
+    }
+    int m = (l+r)>>1; //单点更新的时候，要更新所有包含该单点的子区间（子树）
+    if (p<=m) update(p,sc,lson);
+    else update(p,sc,rson);
+ 
+    PushUp(rt);//当前区间的子区间更新完成后，可能对当前区间的答案有影响，记得更新（从下往上)
+}
+void build(int l,int r,int rt)
+{
+ //   printf("l:%d r:%d rt:%d\n",l,r,rt);
+    if (l==r)
+    {
+	scanf("%d",&MAX[rt]);
+	return;
+    }
+    int m = (l+r)>>1;//当前树的两个子树对应到区间的角度，就是把当前区间分成尽可能相同长度的两部分，m为分界点，前一半区间为[l,m]后一半为[m+1,r].
+    build(lson);
+    build(rson);  //递归建树，建一棵树只需要先建该树的两棵子树，递归的终点是(l==r)，此时到达线段树的叶子节点，对应区间中只有一个数。
+    PushUp(rt);  //当当前树的左右子树都建好，就可以向上更新了。
+}
+int query(int L,int R,int l,int r,int rt) //L,R为当前询问的区间，l,r,rt表示当前的子树,初始是在整棵线段树中查询。
+{
+    if ( L<=l&&r<=R ) //如果当前询问的区间可以完整覆盖当前树的区间，那么这棵子树所代表的区间的最大值就有可能成为当前查询区间的答案，因此直接返回。
+    {
+	return MAX[rt];
+    }
+    int m = (l+r)>>1;  //如果当前询问的区间不能完整覆盖当前树的区间，那么就继续查询当前树的区间的子区间（子树），因为子树表示的区间越来越小，总会完全覆盖。
+    int ret = 0 ;
+    if (L<=m){// 只有当前询问区间和左子树的区间由交点时，左子树对应的区间的答案才会对当前询问的区间有意义。
+	int res = query(L,R,lson);
+	ret = max(ret,res); //答案是所有当前询问区间所能覆盖到的树上的子区间所代表的最大值中的最大值。
+    }
+    if (R>m){//其实是R>=m+1，同理。
+	int res = query(L,R,rson);
+	ret = max(res,ret);
+    }
+    return ret;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+ 
+	while (~scanf("%d%d",&n,&m))
 	{
-	    MAX[rt] = max(MAX[rt<<1],MAX[rt<<1|1]);  //线段树上每一个节点代表一段区间，该区间的最大值是把区间分成两部分，每一部分的最大值的最大值，也就是该节点（rt)的两个子节点取最大值。
-	}                                           //编号为i节点的两个子节点的编号为i*2和 i*2+1,写成位运算也就是 rt<<1和rt<<1|1（因为左移动一位以后末尾肯定为0，“或”1就相当于+1
-		                                    //写成位运算是因为不用考虑优先级的问题。。因为加法的优先级比位移高，而或运算的优先级比位移低。
-	void update(int p,int sc,int l,int r,int rt) //p表示要更新的的节点的位置，sc表示要更新成什么，l,r,rt三个参数表示当前的树，初始就是整个线段树。
-	{
-	   // printf("p:%d sc:%d l:%d r:%d rt:%d\n",p,sc,l,r,rt);
-	    if (l==r) //此时该区间只有一个数，说明已经到了线段树的底部（叶子节点），一个数的最大值就是本身。直接更新
+	    build(1,n,1);//直接建树的时候读入，根节点为1.
+	    while(m--)
 	    {
-		MAX[rt]= sc;
-		return ;
+	        char opt[10];
+	        int a,b;
+	        scanf("%s%d%d",opt,&a,&b);
+	        if (opt[0]=='Q') printf("%d\n",query(a,b,1,n,1));
+	        else update(a,b,1,n,1);
 	    }
-	    int m = (l+r)>>1; //单点更新的时候，要更新所有包含该单点的子区间（子树）
-	    if (p<=m) update(p,sc,lson);
-	    else update(p,sc,rson);
-	 
-	    PushUp(rt);//当前区间的子区间更新完成后，可能对当前区间的答案有影响，记得更新（从下往上)
 	}
-	void build(int l,int r,int rt)
-	{
-	 //   printf("l:%d r:%d rt:%d\n",l,r,rt);
-	    if (l==r)
-	    {
-		scanf("%d",&MAX[rt]);
-		return;
-	    }
-	    int m = (l+r)>>1;//当前树的两个子树对应到区间的角度，就是把当前区间分成尽可能相同长度的两部分，m为分界点，前一半区间为[l,m]后一半为[m+1,r].
-	    build(lson);
-	    build(rson);  //递归建树，建一棵树只需要先建该树的两棵子树，递归的终点是(l==r)，此时到达线段树的叶子节点，对应区间中只有一个数。
-	    PushUp(rt);  //当当前树的左右子树都建好，就可以向上更新了。
-	}
-	int query(int L,int R,int l,int r,int rt) //L,R为当前询问的区间，l,r,rt表示当前的子树,初始是在整棵线段树中查询。
-	{
-	    if ( L<=l&&r<=R ) //如果当前询问的区间可以完整覆盖当前树的区间，那么这棵子树所代表的区间的最大值就有可能成为当前查询区间的答案，因此直接返回。
-	    {
-		return MAX[rt];
-	    }
-	    int m = (l+r)>>1;  //如果当前询问的区间不能完整覆盖当前树的区间，那么就继续查询当前树的区间的子区间（子树），因为子树表示的区间越来越小，总会完全覆盖。
-	    int ret = 0 ;
-	    if (L<=m){// 只有当前询问区间和左子树的区间由交点时，左子树对应的区间的答案才会对当前询问的区间有意义。
-		int res = query(L,R,lson);
-		ret = max(ret,res); //答案是所有当前询问区间所能覆盖到的树上的子区间所代表的最大值中的最大值。
-	    }
-	    if (R>m){//其实是R>=m+1，同理。
-		int res = query(L,R,rson);
-		ret = max(res,ret);
-	    }
-	    return ret;
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-	 
-		while (~scanf("%d%d",&n,&m))
-		{
-		    build(1,n,1);//直接建树的时候读入，根节点为1.
-		    while(m--)
-		    {
-		        char opt[10];
-		        int a,b;
-		        scanf("%s%d%d",opt,&a,&b);
-		        if (opt[0]=='Q') printf("%d\n",query(a,b,1,n,1));
-		        else update(a,b,1,n,1);
-		    }
-		}
+```
 #####线段树+扫描线 求矩形面积并
 
-	const int N=205;
-	int n;
-	 
-	double X[N]; //存储所有x坐标，用来离散化。
-	//扫描线
-	struct Seg
+```c++
+const int N=205;
+int n;
+ 
+double X[N]; //存储所有x坐标，用来离散化。
+//扫描线
+struct Seg
+{
+    double l,r,h;
+    //表示扫面线的起点，终点，所在的高度(y坐标）
+    int d;//1或者-1，表示扫描线对面积是正向影响还是负向影响
+    Seg(){}
+    Seg(double l,double r,double h,int d):l(l),r(r),h(h),d(d){}
+    bool operator < (const Seg &rhs)const
+    {
+    return h<rhs.h;
+    }
+    //从下向上处理扫描线。
+}seg[N];
+struct Tree
+{
+    int cnt;
+    double len;
+}tree[N<<2];
+void PushUp(int l,int r,int rt)
+{
+    /*由于线段树的节点表示的其实是长度为1的区间
+     * 因此线段树的区间[l,r]，对应的点的端点是l,r+1
+     */
+    if (tree[rt].cnt) tree[rt].len = X[r+1]-X[l]; //当前区间已经完全被线段覆盖
+    else if (l==r) tree[rt].len=0; //是叶子节点而且没有被覆盖。
+    else tree[rt].len = tree[rt<<1].len + tree[rt<<1|1].len; //没有完全被覆盖，从其子区间获得信息。
+}
+ 
+void update( int L,int R,int v,int l,int r,int rt)
+{
+    if (L<=l && r<=R)
+    {
+    tree[rt].cnt+=v;
+    PushUp(l,r,rt);
+    return;
+    }
+    int m = (l+r)>>1;
+    if (L<=m) update(L,R,v,lson);
+    if (R>=m+1) update(L,R,v,rson);
+    PushUp(l,r,rt);
+}
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    int cas = 0;
+    while (~scanf("%d",&n)&&n)
+    {
+	ms(tree,0);
+	for ( int i = 1 ; i <= n ; i++)
 	{
-	    double l,r,h;
-	    //表示扫面线的起点，终点，所在的高度(y坐标）
-	    int d;//1或者-1，表示扫描线对面积是正向影响还是负向影响
-	    Seg(){}
-	    Seg(double l,double r,double h,int d):l(l),r(r),h(h),d(d){}
-	    bool operator < (const Seg &rhs)const
-	    {
-	    return h<rhs.h;
-	    }
-	    //从下向上处理扫描线。
-	}seg[N];
-	struct Tree
-	{
-	    int cnt;
-	    double len;
-	}tree[N<<2];
-	void PushUp(int l,int r,int rt)
-	{
-	    /*由于线段树的节点表示的其实是长度为1的区间
-	     * 因此线段树的区间[l,r]，对应的点的端点是l,r+1
-	     */
-	    if (tree[rt].cnt) tree[rt].len = X[r+1]-X[l]; //当前区间已经完全被线段覆盖
-	    else if (l==r) tree[rt].len=0; //是叶子节点而且没有被覆盖。
-	    else tree[rt].len = tree[rt<<1].len + tree[rt<<1|1].len; //没有完全被覆盖，从其子区间获得信息。
+	double x1,y1,x2,y2;
+	scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
+	seg[i] = Seg(x1,x2,y1,1);
+	seg[i+n]= Seg(x1,x2,y2,-1);
+	X[i] = x1;
+	X[i+n] = x2;
 	}
-	 
-	void update( int L,int R,int v,int l,int r,int rt)
+	n<<=1;
+	sort(X+1,X+n+1);
+	int m = unique(X+1,X+1+n)-X-1;
+	
+	sort(seg+1,seg+n+1);
+	double ans = 0;
+	for ( int i = 1 ; i < n ; i++)
 	{
-	    if (L<=l && r<=R)
-	    {
-	    tree[rt].cnt+=v;
-	    PushUp(l,r,rt);
-	    return;
-	    }
-	    int m = (l+r)>>1;
-	    if (L<=m) update(L,R,v,lson);
-	    if (R>=m+1) update(L,R,v,rson);
-	    PushUp(l,r,rt);
+	int l = lower_bound(X+1,X+1+m,seg[i].l)-X;
+	int r = lower_bound(X+1,X+1+m,seg[i].r)-X;
+	if (l<r)
+	update(l,r-1,seg[i].d,1,m,1);
+	ans += tree[1].len * (seg[i+1].h-seg[i].h);
 	}
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    int cas = 0;
-	    while (~scanf("%d",&n)&&n)
-	    {
-		ms(tree,0);
-		for ( int i = 1 ; i <= n ; i++)
-		{
-		double x1,y1,x2,y2;
-		scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
-		seg[i] = Seg(x1,x2,y1,1);
-		seg[i+n]= Seg(x1,x2,y2,-1);
-		X[i] = x1;
-		X[i+n] = x2;
-		}
-		n<<=1;
-		sort(X+1,X+n+1);
-		int m = unique(X+1,X+1+n)-X-1;
-		
-		sort(seg+1,seg+n+1);
-		double ans = 0;
-		for ( int i = 1 ; i < n ; i++)
-		{
-		int l = lower_bound(X+1,X+1+m,seg[i].l)-X;
-		int r = lower_bound(X+1,X+1+m,seg[i].r)-X;
-		if (l<r)
-		update(l,r-1,seg[i].d,1,m,1);
-		ans += tree[1].len * (seg[i+1].h-seg[i].h);
-		}
-		printf("Test case #%d\nTotal explored area: %.2f\n\n",++cas,ans);
-		
-	    }   
+	printf("Test case #%d\nTotal explored area: %.2f\n\n",++cas,ans);
+	
+    }   
+```
 
 #####线段树+扫描线 求矩形面积交 （hdu 1255）
 
-	const int N=2E3+7;
-	int n;
-	struct Seg
+```c++
+const int N=2E3+7;
+int n;
+struct Seg
+{
+    double l,r,h;
+    int d;
+    Seg(){}
+    Seg(double l,double r,double h,int d):l(l),r(r),h(h),d(d){}
+    bool operator < (const Seg & rhs)const
+    {
+    return h<rhs.h;
+    }
+}a[N];
+struct Tree
+{
+    double one,two; //分别是被覆盖一次以上的长度和被覆盖两次以上的长度。
+    int cnt;
+}tree[N<<2];
+double X[N];
+void PushUp( int l,int r,int rt)
+{
+    //整段区间被完全覆盖2次，长度可以直接得到。
+    if (tree[rt].cnt>=2) tree[rt].one = tree[rt].two = X[r+1]-X[l];
+    else if (tree[rt].cnt==1)  
+    {
+    tree[rt].one = X[r+1]-X[l];
+    if (l==r) tree[rt].two = 0;
+    else tree[rt].two = tree[rt<<1].one + tree[rt<<1|1].one;
+    //父节点本身覆盖了一次，这样只需要左右子节点再至少覆盖一次即可。
+    //此处更新是本题唯一的难点。
+    }
+    else
+    {
+    if (l==r) tree[rt].one =  tree[rt].two = 0;
+    else 
+    {
+	tree[rt].one = tree[rt<<1].one + tree[rt<<1|1].one;
+	tree[rt].two = tree[rt<<1].two + tree[rt<<1|1].two;
+    }
+    }
+}
+void update(int L,int R,int val,int l,int r,int rt)
+{
+    if (L<=l && r<=R)
+    {
+    tree[rt].cnt+=val;
+    PushUp(l,r,rt);
+    return ;
+    }
+    int m = (l+r)>>1;
+    if (L<=m) update(L,R,val,lson);
+    if (R>=m+1) update(L,R,val,rson);
+    PushUp(l,r,rt);
+}
+ 
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    int T;
+    scanf("%d",&T);
+    while (T--)
+    {
+	    scanf("%d",&n);    
+	for ( int i = 1 ; i <= n ; i++)
 	{
-	    double l,r,h;
-	    int d;
-	    Seg(){}
-	    Seg(double l,double r,double h,int d):l(l),r(r),h(h),d(d){}
-	    bool operator < (const Seg & rhs)const
-	    {
-	    return h<rhs.h;
-	    }
-	}a[N];
-	struct Tree
-	{
-	    double one,two; //分别是被覆盖一次以上的长度和被覆盖两次以上的长度。
-	    int cnt;
-	}tree[N<<2];
-	double X[N];
-	void PushUp( int l,int r,int rt)
-	{
-	    //整段区间被完全覆盖2次，长度可以直接得到。
-	    if (tree[rt].cnt>=2) tree[rt].one = tree[rt].two = X[r+1]-X[l];
-	    else if (tree[rt].cnt==1)  
-	    {
-	    tree[rt].one = X[r+1]-X[l];
-	    if (l==r) tree[rt].two = 0;
-	    else tree[rt].two = tree[rt<<1].one + tree[rt<<1|1].one;
-	    //父节点本身覆盖了一次，这样只需要左右子节点再至少覆盖一次即可。
-	    //此处更新是本题唯一的难点。
-	    }
-	    else
-	    {
-	    if (l==r) tree[rt].one =  tree[rt].two = 0;
-	    else 
-	    {
-		tree[rt].one = tree[rt<<1].one + tree[rt<<1|1].one;
-		tree[rt].two = tree[rt<<1].two + tree[rt<<1|1].two;
-	    }
-	    }
+	double x1,y1,x2,y2;
+	//给的坐标实际是左下角和右上角，而不是“左上角和右下角”，题目说错了。
+	scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
+	X[i] = x1;
+	X[i+n]=x2;
+	a[i]=Seg(x1,x2,y1,1);
+	a[i+n]=Seg(x1,x2,y2,-1);
 	}
-	void update(int L,int R,int val,int l,int r,int rt)
+	n<<=1;
+	sort(X+1,X+n+1);
+	sort(a+1,a+n+1);
+	int m = unique(X+1,X+1+n)-X-1;
+	ms(tree,0);
+	double ans=0;
+	for (  int i = 1 ; i < n ; i++)
 	{
-	    if (L<=l && r<=R)
-	    {
-	    tree[rt].cnt+=val;
-	    PushUp(l,r,rt);
-	    return ;
-	    }
-	    int m = (l+r)>>1;
-	    if (L<=m) update(L,R,val,lson);
-	    if (R>=m+1) update(L,R,val,rson);
-	    PushUp(l,r,rt);
+	int l = lower_bound(X+1,X+m+1,a[i].l)-X;
+	int r = lower_bound(X+1,X+m+1,a[i].r)-X;
+    //  cout<<"l:"<<l<<" r:"<<r<<endl;
+	update(l,r-1,a[i].d,1,m,1);
+	ans+=tree[1].two * (a[i+1].h-a[i].h);
+    //  cout<<"len:"<<tree[1].two<<" h:"<<a[i+1].h-a[i].h<<" ans:"<<ans<<endl;
 	}
-	 
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    int T;
-	    scanf("%d",&T);
-	    while (T--)
-	    {
-		    scanf("%d",&n);    
-		for ( int i = 1 ; i <= n ; i++)
-		{
-		double x1,y1,x2,y2;
-		//给的坐标实际是左下角和右上角，而不是“左上角和右下角”，题目说错了。
-		scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
-		X[i] = x1;
-		X[i+n]=x2;
-		a[i]=Seg(x1,x2,y1,1);
-		a[i+n]=Seg(x1,x2,y2,-1);
-		}
-		n<<=1;
-		sort(X+1,X+n+1);
-		sort(a+1,a+n+1);
-		int m = unique(X+1,X+1+n)-X-1;
-		ms(tree,0);
-		double ans=0;
-		for (  int i = 1 ; i < n ; i++)
-		{
-		int l = lower_bound(X+1,X+m+1,a[i].l)-X;
-		int r = lower_bound(X+1,X+m+1,a[i].r)-X;
-	    //  cout<<"l:"<<l<<" r:"<<r<<endl;
-		update(l,r-1,a[i].d,1,m,1);
-		ans+=tree[1].two * (a[i+1].h-a[i].h);
-	    //  cout<<"len:"<<tree[1].two<<" h:"<<a[i+1].h-a[i].h<<" ans:"<<ans<<endl;
-		}
-		//是四舍五入保留2位小数，题目没说清楚。
-		ans = round(ans*100)*0.01;
-		printf("%.2f\n",ans);
-	    }
+	//是四舍五入保留2位小数，题目没说清楚。
+	ans = round(ans*100)*0.01;
+	printf("%.2f\n",ans);
+    }
+```
 
 
 #####线段树+扫描线 求 矩形周长并 (hdu 1828)
 以及一个小细节是，求面积的时候，最后一条扫描线对答案是没有贡献的（因为每次是求当前扫描线与下一条扫描线之间的面积）
 
 但是求周长的时候，最后一条扫描线是一定会对答案有贡献的。
-	const int N=1E4+7;
-	int n;
-	struct Seg
+```c++
+const int N=1E4+7;
+int n;
+struct Seg
+{
+    double l,r,h;
+    int d;
+    Seg(){}
+    Seg(double l,double r,double h,int d):l(l),r(r),h(h),d(d){}
+    bool operator < (const Seg &rhs)const
+    {
+    return h < rhs.h;
+    }
+}a[N],b[N];
+ 
+struct Tree
+{
+     int cnt;
+     double len; 
+}tree[N<<2];
+double X[N],Y[N];
+void pushUP(int l,int r,int rt,double *X)
+{
+    if (tree[rt].cnt) tree[rt].len = X[r+1] - X[l];
+    else
+    if (l==r) tree[rt].len = 0 ;
+    else tree[rt].len = tree[rt<<1].len + tree[rt<<1|1].len;
+}
+void update( int L,int R,int val,int l,int r,int rt,double *X)
+{
+    if (L<=l && r<=R)
+    {
+    tree[rt].cnt+=val;
+//  cout<<"val:"<<val<<" rt:"<<rt<<" tree[rt].cnt:"<<tree[rt].cnt<<endl;
+    pushUP(l,r,rt,X);
+    return;
+    }
+    int m = (l+r)>>1;
+    if (L<=m) update(L,R,val,lson,X);
+    if (R>=m+1) update(L,R,val,rson,X);
+    pushUP(l,r,rt,X);
+}
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    while (~scanf("%d",&n))
+    {
+	for ( int i = 1 ; i<= n ; i++)
 	{
-	    double l,r,h;
-	    int d;
-	    Seg(){}
-	    Seg(double l,double r,double h,int d):l(l),r(r),h(h),d(d){}
-	    bool operator < (const Seg &rhs)const
-	    {
-	    return h < rhs.h;
-	    }
-	}a[N],b[N];
-	 
-	struct Tree
-	{
-	     int cnt;
-	     double len; 
-	}tree[N<<2];
-	double X[N],Y[N];
-	void pushUP(int l,int r,int rt,double *X)
-	{
-	    if (tree[rt].cnt) tree[rt].len = X[r+1] - X[l];
-	    else
-	    if (l==r) tree[rt].len = 0 ;
-	    else tree[rt].len = tree[rt<<1].len + tree[rt<<1|1].len;
+	double x1,y1,x2,y2;
+	scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
+	X[i] = x1;
+	X[i+n] = x2;
+	Y[i] = y1;
+	Y[i+n] = y2;
+	a[i]=Seg(x1,x2,y1,1);
+	a[i+n]=Seg(x1,x2,y2,-1);
+	b[i] = Seg(y1,y2,x1,1);
+	b[i+n] = Seg(y1,y2,x2,-1); //从左到右扫描
+ 
 	}
-	void update( int L,int R,int val,int l,int r,int rt,double *X)
+ 
+	n=n<<1;
+	double ans =  0;
+	double lstlen = 0 ;
+	sort(X+1,X+n+1);
+	sort(a+1,a+n+1);
+ 
+	int m = unique(X+1,X+n+1)-X-1;
+	ms(tree,0);
+	//求面积的时候不需要计算最后一条扫描线（因为答案是0),但是求周长的时候要计算）
+	for ( int i = 1 ; i <= n ; i++)
 	{
-	    if (L<=l && r<=R)
-	    {
-	    tree[rt].cnt+=val;
-	//  cout<<"val:"<<val<<" rt:"<<rt<<" tree[rt].cnt:"<<tree[rt].cnt<<endl;
-	    pushUP(l,r,rt,X);
-	    return;
-	    }
-	    int m = (l+r)>>1;
-	    if (L<=m) update(L,R,val,lson,X);
-	    if (R>=m+1) update(L,R,val,rson,X);
-	    pushUP(l,r,rt,X);
+	int l = lower_bound(X+1,X+1+m,a[i].l)-X;
+	int r = lower_bound(X+1,X+1+m,a[i].r)-X;
+//      cout<<"l:"<<l<<" r:"<<r<<endl;
+	update(l,r-1,a[i].d,1,m,1,X);
+	ans += abs(tree[1].len-lstlen);
+	lstlen = tree[1].len;
+	//cout<<"lstlen:"<<lstlen<<endl;
 	}
-	int main()
+	//cout<<"ans:"<<ans<<endl;
+	
+	ms(tree,0);
+	sort(Y+1,Y+n+1);
+	sort(b+1,b+n+1);
+	m = unique(Y+1,Y+n+1)-Y-1;
+	lstlen = 0 ;
+//      cout<<"m:"<<m<<endl;
+	for ( int i = 1 ; i <= n ; i++)
 	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    while (~scanf("%d",&n))
-	    {
-		for ( int i = 1 ; i<= n ; i++)
-		{
-		double x1,y1,x2,y2;
-		scanf("%lf%lf%lf%lf",&x1,&y1,&x2,&y2);
-		X[i] = x1;
-		X[i+n] = x2;
-		Y[i] = y1;
-		Y[i+n] = y2;
-		a[i]=Seg(x1,x2,y1,1);
-		a[i+n]=Seg(x1,x2,y2,-1);
-		b[i] = Seg(y1,y2,x1,1);
-		b[i+n] = Seg(y1,y2,x2,-1); //从左到右扫描
-	 
-		}
-	 
-		n=n<<1;
-		double ans =  0;
-		double lstlen = 0 ;
-		sort(X+1,X+n+1);
-		sort(a+1,a+n+1);
-	 
-		int m = unique(X+1,X+n+1)-X-1;
-		ms(tree,0);
-		//求面积的时候不需要计算最后一条扫描线（因为答案是0),但是求周长的时候要计算）
-		for ( int i = 1 ; i <= n ; i++)
-		{
-		int l = lower_bound(X+1,X+1+m,a[i].l)-X;
-		int r = lower_bound(X+1,X+1+m,a[i].r)-X;
-	//      cout<<"l:"<<l<<" r:"<<r<<endl;
-		update(l,r-1,a[i].d,1,m,1,X);
-		ans += abs(tree[1].len-lstlen);
-		lstlen = tree[1].len;
-		//cout<<"lstlen:"<<lstlen<<endl;
-		}
-		//cout<<"ans:"<<ans<<endl;
-		
-		ms(tree,0);
-		sort(Y+1,Y+n+1);
-		sort(b+1,b+n+1);
-		m = unique(Y+1,Y+n+1)-Y-1;
-		lstlen = 0 ;
-	//      cout<<"m:"<<m<<endl;
-		for ( int i = 1 ; i <= n ; i++)
-		{
-		int l = lower_bound(Y+1,Y+1+m,b[i].l)-Y;
-		int r = lower_bound(Y+1,Y+1+m,b[i].r)-Y;
-	    //  cout<<"l:"<<l<<" r:"<<r<<endl;
-		update(l,r-1,b[i].d,1,m,1,Y);
-		ans += abs(tree[1].len - lstlen);
-		lstlen = tree[1].len;
-		}
-		printf("%.0f\n",ans);
-		
-	    }
-	 
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
+	int l = lower_bound(Y+1,Y+1+m,b[i].l)-Y;
+	int r = lower_bound(Y+1,Y+1+m,b[i].r)-Y;
+    //  cout<<"l:"<<l<<" r:"<<r<<endl;
+	update(l,r-1,b[i].d,1,m,1,Y);
+	ans += abs(tree[1].len - lstlen);
+	lstlen = tree[1].len;
 	}
+	printf("%.0f\n",ans);
+	
+    }
+ 
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 ##### 线段树+扫描线，求矩形至少交三次的面积
 
 
 
-	void PushUp(int l,int r,int rt)
-	{
-	    //cout<<"l:"<<l<<" r:"<<r<<" rt:"<<rt<<" id:"<<id<<endl;
-	    if (tree[rt].cnt>=3)
-	    {
-		tree[rt].one = tree[rt].two = tree[rt].three = X[r+1]-X[l];
-	    }
-	    else 
-	    if (tree[rt].cnt==2)
-	    {
-	    tree[rt].one = tree[rt].two = X[r+1]-X[l];
-	    
-	    if (l==r) tree[rt].three = 0 ;
-	    else tree[rt].three = tree[rt<<1].one + tree[rt<<1|1].one;
-	 
-	    }else if (tree[rt].cnt==1)
-	    {
-		tree[rt].one = X[r+1] - X[l];
-	 
-	    if (l==r) tree[rt].two = tree[rt].three = 0;
-	    else 
-	    {
-		tree[rt].two = tree[rt<<1].one + tree[rt<<1|1].one;
-		tree[rt].three = tree[rt<<1].two + tree[rt<<1|1].two;
-	    }
-	    }
-	    else
-	    {
-	    if (l==r) tree[rt].one = tree[rt].two =  tree[rt].three = 0;
-	    else 
-	    {
-		tree[rt].one = tree[rt<<1].one + tree[rt<<1|1].one;
-		tree[rt].two = tree[rt<<1].two + tree[rt<<1|1].two;
-		tree[rt].three = tree[rt<<1].three + tree[rt<<1|1].three;
-	    }
-	    }
-	}
+```c++
+void PushUp(int l,int r,int rt)
+{
+    //cout<<"l:"<<l<<" r:"<<r<<" rt:"<<rt<<" id:"<<id<<endl;
+    if (tree[rt].cnt>=3)
+    {
+	tree[rt].one = tree[rt].two = tree[rt].three = X[r+1]-X[l];
+    }
+    else 
+    if (tree[rt].cnt==2)
+    {
+    tree[rt].one = tree[rt].two = X[r+1]-X[l];
+    
+    if (l==r) tree[rt].three = 0 ;
+    else tree[rt].three = tree[rt<<1].one + tree[rt<<1|1].one;
+ 
+    }else if (tree[rt].cnt==1)
+    {
+	tree[rt].one = X[r+1] - X[l];
+ 
+    if (l==r) tree[rt].two = tree[rt].three = 0;
+    else 
+    {
+	tree[rt].two = tree[rt<<1].one + tree[rt<<1|1].one;
+	tree[rt].three = tree[rt<<1].two + tree[rt<<1|1].two;
+    }
+    }
+    else
+    {
+    if (l==r) tree[rt].one = tree[rt].two =  tree[rt].three = 0;
+    else 
+    {
+	tree[rt].one = tree[rt<<1].one + tree[rt<<1|1].one;
+	tree[rt].two = tree[rt<<1].two + tree[rt<<1|1].two;
+	tree[rt].three = tree[rt<<1].three + tree[rt<<1|1].three;
+    }
+    }
+}
+```
 #####线段树求逆序三元组
 
 
 
-	const int N=1E6+7;
-	int a[N];
-	int A[N];
-	int H[N];
-	int n;
-	int m;
-	int tree1[N<<2],tree2[N<<2];
-	pair<LL,LL>ans[N];
-	void PushUp(int rt,int *tree)
+```c++
+const int N=1E6+7;
+int a[N];
+int A[N];
+int H[N];
+int n;
+int m;
+int tree1[N<<2],tree2[N<<2];
+pair<LL,LL>ans[N];
+void PushUp(int rt,int *tree)
+{
+    tree[rt] = tree[rt<<1] + tree[rt<<1|1];
+}
+void update(int p,int l,int r,int rt,int *tree)
+{
+    if (l==r)
+    {
+	tree[rt]++;
+	return;
+    }
+    int m = (l+r)>>1;
+    if (p<=m) update(p,lson,tree);
+    else update(p,rson,tree);
+    PushUp(rt,tree);
+}
+int query(int L,int R,int l,int r,int rt,int *tree)
+{
+//    cout<<"L:"<<L<<" R:"<<R<<" l:"<<l<<" r:"<<r<<" rt:"<<rt<<endl;
+    if (L>R) return 0; 
+    if (L<=l&&r<=R) return tree[rt];
+    int m = (l+r)>>1;
+    int ret = 0 ;
+    if (L<=m)
+    {
+	int res = query(L,R,lson,tree);
+	ret+=res;
+    }
+    if (R>=m+1)
+    {
+	int res =  query(L,R,rson,tree);
+	ret +=res;
+    }
+    return ret;
+}
+int Hash( int x)
+{
+    return lower_bound(H,H+m,x)-H;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	cin>>n;
+	m = n;
+	for ( int i = 0 ; i < n ; i++)
 	{
-	    tree[rt] = tree[rt<<1] + tree[rt<<1|1];
+	    scanf("%d",&a[i]);
+	    H[i] = a[i];
 	}
-	void update(int p,int l,int r,int rt,int *tree)
+	sort(H,H+m);
+	m = unique(H,H+m)-H;
+	int mx = 0 ;
+	for ( int i = 0 ; i < n ; i++) A[i] = Hash(a[i])+1,mx = max(mx,A[i]);
+	ms(tree1,0);
+	ms(tree2,0);
+	for ( int i = n-1 ; i >=0 ; i--)
 	{
-	    if (l==r)
-	    {
-		tree[rt]++;
-		return;
-	    }
-	    int m = (l+r)>>1;
-	    if (p<=m) update(p,lson,tree);
-	    else update(p,rson,tree);
-	    PushUp(rt,tree);
+	    LL tmp = LL(query(1,A[i]-1,1,mx,1,tree1));
+	    ans[i].fst = tmp;
+	    update(A[i],1,mx,1,tree1);
 	}
-	int query(int L,int R,int l,int r,int rt,int *tree)
+	for ( int i =  0 ; i < n ; i++)
 	{
-	//    cout<<"L:"<<L<<" R:"<<R<<" l:"<<l<<" r:"<<r<<" rt:"<<rt<<endl;
-	    if (L>R) return 0; 
-	    if (L<=l&&r<=R) return tree[rt];
-	    int m = (l+r)>>1;
-	    int ret = 0 ;
-	    if (L<=m)
-	    {
-		int res = query(L,R,lson,tree);
-		ret+=res;
-	    }
-	    if (R>=m+1)
-	    {
-		int res =  query(L,R,rson,tree);
-		ret +=res;
-	    }
-	    return ret;
+	    LL tmp = LL(query(A[i]+1,mx,1,mx,1,tree2));
+	    ans[i].sec = tmp;
+	    update(A[i],1,mx,1,tree2);
 	}
-	int Hash( int x)
-	{
-	    return lower_bound(H,H+m,x)-H;
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		cin>>n;
-		m = n;
-		for ( int i = 0 ; i < n ; i++)
-		{
-		    scanf("%d",&a[i]);
-		    H[i] = a[i];
-		}
-		sort(H,H+m);
-		m = unique(H,H+m)-H;
-		int mx = 0 ;
-		for ( int i = 0 ; i < n ; i++) A[i] = Hash(a[i])+1,mx = max(mx,A[i]);
-		ms(tree1,0);
-		ms(tree2,0);
-		for ( int i = n-1 ; i >=0 ; i--)
-		{
-		    LL tmp = LL(query(1,A[i]-1,1,mx,1,tree1));
-		    ans[i].fst = tmp;
-		    update(A[i],1,mx,1,tree1);
-		}
-		for ( int i =  0 ; i < n ; i++)
-		{
-		    LL tmp = LL(query(A[i]+1,mx,1,mx,1,tree2));
-		    ans[i].sec = tmp;
-		    update(A[i],1,mx,1,tree2);
-		}
-		LL res = 0LL;
-		for ( int i = 0 ; i < n ; i++) res = res + ans[i].fst*ans[i].sec;
-		cout<<res<<endl;
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+	LL res = 0LL;
+	for ( int i = 0 ; i < n ; i++) res = res + ans[i].fst*ans[i].sec;
+	cout<<res<<endl;
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 #####线段树动态维护区间最大子段和
-	const int N=5E5+7;
-	int n,m;
-	int a[N];
-	struct Tree
+```c++
+const int N=5E5+7;
+int n,m;
+int a[N];
+struct Tree
+{
+    int sum;
+    int mxl;
+    int mxr;
+    int mx;
+}tree[N<<2];
+void PushUp(int rt)
+{
+    tree[rt].sum = tree[rt<<1].sum+tree[rt<<1|1].sum;
+    if (tree[rt<<1].mxr>0&&tree[rt<<1|1].mxl>0)
+	tree[rt].mx = tree[rt<<1].mxr+tree[rt<<1|1].mxl;
+    else tree[rt].mx = max(tree[rt<<1].mxr,tree[rt<<1|1].mxl);
+    tree[rt].mx = max(tree[rt].mx,max(tree[rt<<1].mx,tree[rt<<1|1].mx));
+    tree[rt].mxl=max(tree[rt<<1].mxl,tree[rt<<1].sum+tree[rt<<1|1].mxl);
+    tree[rt].mxr=max(tree[rt<<1|1].mxr,tree[rt<<1|1].sum+tree[rt<<1].mxr);
+}
+void build(int l,int r,int rt)
+{
+ //   cout<<"l:"<<l<<" r:"<<r<< " rt:"<<rt<<endl;
+    if (l==r)
+    {
+	int tmp;
+	scanf("%d",&tmp);
+//        cout<<"tmp:"<<tmp<<endl;
+	tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = tmp;
+	return ;
+    }
+    int m = (l+r)>>1;
+    build(lson);
+    build(rson);
+    PushUp(rt);
+}
+void update( int p,int sc,int l,int r,int rt)
+{
+    if (l==r)
+    {
+	tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = sc;
+	return ;
+    }
+    int m = (l+r)>>1;
+    if (p<=m) update(p,sc,lson);
+    else update(p,sc,rson);
+    PushUp(rt);
+}
+Tree query(int L,int R,int l,int r,int rt)
+{
+    if (L<=l&&r<=R) return tree[rt];
+    int m = (l+r)>>1;
+    if (L<=m&&R>=m+1)
+    {
+	Tree root,ltree,rtree;
+	ltree=query(L,R,lson);
+	rtree=query(L,R,rson);
+	root.sum = ltree.sum + rtree.sum;
+	if (ltree.mxr>0&&rtree.mxl>0)
+	    root.mx = ltree.mxr + rtree.mxl;
+	else root.mx = max(ltree.mxr,rtree.mxl);
+	root.mx = max(root.mx,max(ltree.mx,rtree.mx));
+	root.mxl = max(ltree.mxl,rtree.mxl+ltree.sum);
+	root.mxr = max(rtree.mxr,ltree.mxr+rtree.sum);
+	return root;
+    }
+    else
+    if (L<=m) return query(L,R,lson);
+    else   return query(L,R,rson);
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	scanf("%d%d",&n,&m);
+	build(1,n,1);
+	while (m--)
 	{
-	    int sum;
-	    int mxl;
-	    int mxr;
-	    int mx;
-	}tree[N<<2];
-	void PushUp(int rt)
-	{
-	    tree[rt].sum = tree[rt<<1].sum+tree[rt<<1|1].sum;
-	    if (tree[rt<<1].mxr>0&&tree[rt<<1|1].mxl>0)
-		tree[rt].mx = tree[rt<<1].mxr+tree[rt<<1|1].mxl;
-	    else tree[rt].mx = max(tree[rt<<1].mxr,tree[rt<<1|1].mxl);
-	    tree[rt].mx = max(tree[rt].mx,max(tree[rt<<1].mx,tree[rt<<1|1].mx));
-	    tree[rt].mxl=max(tree[rt<<1].mxl,tree[rt<<1].sum+tree[rt<<1|1].mxl);
-	    tree[rt].mxr=max(tree[rt<<1|1].mxr,tree[rt<<1|1].sum+tree[rt<<1].mxr);
-	}
-	void build(int l,int r,int rt)
-	{
-	 //   cout<<"l:"<<l<<" r:"<<r<< " rt:"<<rt<<endl;
-	    if (l==r)
+	    int opt;
+	    scanf("%d",&opt);
+	    if (opt==1)
 	    {
-		int tmp;
-		scanf("%d",&tmp);
-	//        cout<<"tmp:"<<tmp<<endl;
-		tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = tmp;
-		return ;
-	    }
-	    int m = (l+r)>>1;
-	    build(lson);
-	    build(rson);
-	    PushUp(rt);
-	}
-	void update( int p,int sc,int l,int r,int rt)
-	{
-	    if (l==r)
+	        int a,b;
+	        scanf("%d%d",&a,&b);
+	        if (a>b) swap(a,b);
+	        int ans = query(a,b,1,n,1).mx;
+	        printf("%d\n",ans);
+	    }else
 	    {
-		tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = sc;
-		return ;
+	        int p,x;
+	        scanf("%d%d",&p,&x);
+	        update(p,x,1,n,1);
 	    }
-	    int m = (l+r)>>1;
-	    if (p<=m) update(p,sc,lson);
-	    else update(p,sc,rson);
-	    PushUp(rt);
 	}
-	Tree query(int L,int R,int l,int r,int rt)
-	{
-	    if (L<=l&&r<=R) return tree[rt];
-	    int m = (l+r)>>1;
-	    if (L<=m&&R>=m+1)
-	    {
-		Tree root,ltree,rtree;
-		ltree=query(L,R,lson);
-		rtree=query(L,R,rson);
-		root.sum = ltree.sum + rtree.sum;
-		if (ltree.mxr>0&&rtree.mxl>0)
-		    root.mx = ltree.mxr + rtree.mxl;
-		else root.mx = max(ltree.mxr,rtree.mxl);
-		root.mx = max(root.mx,max(ltree.mx,rtree.mx));
-		root.mxl = max(ltree.mxl,rtree.mxl+ltree.sum);
-		root.mxr = max(rtree.mxr,ltree.mxr+rtree.sum);
-		return root;
-	    }
-	    else
-	    if (L<=m) return query(L,R,lson);
-	    else   return query(L,R,rson);
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		scanf("%d%d",&n,&m);
-		build(1,n,1);
-		while (m--)
-		{
-		    int opt;
-		    scanf("%d",&opt);
-		    if (opt==1)
-		    {
-		        int a,b;
-		        scanf("%d%d",&a,&b);
-		        if (a>b) swap(a,b);
-		        int ans = query(a,b,1,n,1).mx;
-		        printf("%d\n",ans);
-		    }else
-		    {
-		        int p,x;
-		        scanf("%d%d",&p,&x);
-		        update(p,x,1,n,1);
-		    }
-		}
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 
 #####线段树动态维护最大连续子段（hit oj 2687 ）
 给出n个数,m个修改，每次修改后询问整个区间的最大连续子段。
 
-	const int N=1E5+7;
-	int n,m;
-	struct
+```c++
+const int N=1E5+7;
+int n,m;
+struct
+{
+    int mx;
+    int mxr;
+    int mxl;
+    int sum;
+}tree[N<<2];
+void PushUp( int rt)
+{
+    tree[rt].sum = tree[rt<<1].sum + tree[rt<<1|1].sum;
+    if (tree[rt<<1].mxr>0&&tree[rt<<1|1].mxl>0) //区间合并
+	tree[rt].mx = tree[rt<<1].mxr + tree[rt<<1|1].mxl;
+    else tree[rt].mx = max(tree[rt<<1].mxr,tree[rt<<1|1].mxl);
+    tree[rt].mx = max(tree[rt].mx,max(tree[rt<<1].mx,tree[rt<<1|1].mx));
+    tree[rt].mxl = max(tree[rt<<1].mxl,tree[rt<<1|1].mxl+tree[rt<<1].sum);
+    tree[rt].mxr = max(tree[rt<<1|1].mxr,tree[rt<<1].mxr+tree[rt<<1|1].sum);
+}
+void build(int l,int r,int rt)
+{
+    if (l==r)
+    {
+	int x;
+	scanf("%d",&x);
+	tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = x;
+	return;
+    }
+    int m = (l+r)>>1;
+    build(lson);
+    build(rson);
+    PushUp(rt);
+}
+void update( int p,int sc,int l,int r,int rt)
+{
+    if (l==r)
+    {
+	tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = sc;
+	return;
+    }
+    int m = (l+r)>>1;
+    if (p<=m) update(p,sc,lson);
+    else update(p,sc,rson);
+    PushUp(rt);
+}
+ 
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	while (~scanf("%d%d",&n,&m))
 	{
-	    int mx;
-	    int mxr;
-	    int mxl;
-	    int sum;
-	}tree[N<<2];
-	void PushUp( int rt)
-	{
-	    tree[rt].sum = tree[rt<<1].sum + tree[rt<<1|1].sum;
-	    if (tree[rt<<1].mxr>0&&tree[rt<<1|1].mxl>0) //区间合并
-		tree[rt].mx = tree[rt<<1].mxr + tree[rt<<1|1].mxl;
-	    else tree[rt].mx = max(tree[rt<<1].mxr,tree[rt<<1|1].mxl);
-	    tree[rt].mx = max(tree[rt].mx,max(tree[rt<<1].mx,tree[rt<<1|1].mx));
-	    tree[rt].mxl = max(tree[rt<<1].mxl,tree[rt<<1|1].mxl+tree[rt<<1].sum);
-	    tree[rt].mxr = max(tree[rt<<1|1].mxr,tree[rt<<1].mxr+tree[rt<<1|1].sum);
-	}
-	void build(int l,int r,int rt)
-	{
-	    if (l==r)
+	    build(1,n,1);
+	    while (m--)
 	    {
-		int x;
-		scanf("%d",&x);
-		tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = x;
-		return;
+	        int p,x;
+	        scanf("%d%d",&p,&x);
+	        update(p,x,1,n,1);
+	        printf("%d\n",tree[1].mx);
 	    }
-	    int m = (l+r)>>1;
-	    build(lson);
-	    build(rson);
-	    PushUp(rt);
 	}
-	void update( int p,int sc,int l,int r,int rt)
-	{
-	    if (l==r)
-	    {
-		tree[rt].mx = tree[rt].mxl = tree[rt].mxr = tree[rt].sum = sc;
-		return;
-	    }
-	    int m = (l+r)>>1;
-	    if (p<=m) update(p,sc,lson);
-	    else update(p,sc,rson);
-	    PushUp(rt);
-	}
-	 
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		while (~scanf("%d%d",&n,&m))
-		{
-		    build(1,n,1);
-		    while (m--)
-		    {
-		        int p,x;
-		        scanf("%d%d",&p,&x);
-		        update(p,x,1,n,1);
-		        printf("%d\n",tree[1].mx);
-		    }
-		}
+```
 
 ##### 二维线段树之四叉树模板（单点更新，区间询问最值）
 
-```
+```c++
 const int N=805;
 int n;
 int a[N][N];
@@ -1374,7 +1402,7 @@ int main(){
 
 ##### 二维线段树之树套树（推荐写法）模板（单点更新，区间最值）
 
-```
+```c++
 const int N=803;
 struct Treey
 {
@@ -1526,115 +1554,117 @@ hdu5618 If two point such as (xi,yi,zi) and (xj,yj,zj) xi≥xj yi≥yj zi≥zj, 
 问每个point的level是多少。
 cdq分治，先去重并统计相同的点的数量，需要注意要记录原id对应到了哪个新id
 
-	const int N=1E5+7;
-	int n;
-	struct point
+```c++
+const int N=1E5+7;
+int n;
+struct point
+{
+    int x,y,z;
+    int id;
+    int cnt,sum;
+    void input( int _id)
+    {
+    scanf("%d %d %d",&x,&y,&z);
+    id=_id;
+    }
+    bool operator < (const point &b)const
+    {
+    if (x!=b.x) return x<b.x;
+    if (y!=b.y) return y<b.y;
+    return z<b.z;
+    }
+    bool operator !=(const point &b)const
+    {
+    return x!=b.x||y!=b.y||z!=b.z;
+    }
+}p[N];
+struct BIT
+{
+    int n,t[N];
+    void init( int _n)
+    {
+    n = _n;
+    ms(t,0);
+    }
+    inline int lowbit(int x){ return x&(-x);}
+    void update( int x,int delta)
+    {
+    for ( int i = x ; i <= n ; i+=lowbit(i)) t[i] +=delta;
+    }
+    int Sum( int x)
+    {
+    int ret = 0 ;
+    for ( int i = x ; i >=1 ;  i-=lowbit(i)) ret+=t[i];
+    return ret;
+    }
+}bit;
+bool cmpcdq(point a,point b){return a.y<b.y;}
+bool cmpid(point a,point b){return a.id < b.id;}
+void cdq( int l,int r)
+{
+    if (l==r) return;
+    int mid = (l+r)>>1;
+    cdq(l,mid);
+    cdq(mid+1,r);
+    sort(p+l,p+mid+1,cmpcdq);
+    sort(p+mid+1,p+r+1,cmpcdq);
+    int j = l;
+    for ( int i = mid + 1 ; i <= r ; i++)
+    {
+    for ( ; j <= mid && p[j].y <= p[i].y ; j++) bit.update(p[j].z,p[j].cnt);
+    p[i].sum+=bit.Sum(p[i].z);
+    }
+    for ( int i = l ; i < j ; i++) bit.update(p[i].z,-p[i].cnt);
+}
+int tot;
+int ans[N];
+int id[N]; //记录原id对应到了哪个新id
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    int T;
+    scanf("%d",&T);
+    while (T--)
+    {
+	tot=0;
+	ms(p,0); //多组数据orz
+	scanf("%d",&n);
+	bit.init(N-1);
+	for ( int i = 1 ; i <= n ; i++) p[i].input(i);
+	int cnt = 0;
+	sort(p+1,p+n+1);
+	for ( int i = 1 ; i <= n ; i++)
 	{
-	    int x,y,z;
-	    int id;
-	    int cnt,sum;
-	    void input( int _id)
-	    {
-	    scanf("%d %d %d",&x,&y,&z);
-	    id=_id;
-	    }
-	    bool operator < (const point &b)const
-	    {
-	    if (x!=b.x) return x<b.x;
-	    if (y!=b.y) return y<b.y;
-	    return z<b.z;
-	    }
-	    bool operator !=(const point &b)const
-	    {
-	    return x!=b.x||y!=b.y||z!=b.z;
-	    }
-	}p[N];
-	struct BIT
+	cnt++;
+	if (p[i]!=p[i+1])
 	{
-	    int n,t[N];
-	    void init( int _n)
-	    {
-	    n = _n;
-	    ms(t,0);
-	    }
-	    inline int lowbit(int x){ return x&(-x);}
-	    void update( int x,int delta)
-	    {
-	    for ( int i = x ; i <= n ; i+=lowbit(i)) t[i] +=delta;
-	    }
-	    int Sum( int x)
-	    {
-	    int ret = 0 ;
-	    for ( int i = x ; i >=1 ;  i-=lowbit(i)) ret+=t[i];
-	    return ret;
-	    }
-	}bit;
-	bool cmpcdq(point a,point b){return a.y<b.y;}
-	bool cmpid(point a,point b){return a.id < b.id;}
-	void cdq( int l,int r)
-	{
-	    if (l==r) return;
-	    int mid = (l+r)>>1;
-	    cdq(l,mid);
-	    cdq(mid+1,r);
-	    sort(p+l,p+mid+1,cmpcdq);
-	    sort(p+mid+1,p+r+1,cmpcdq);
-	    int j = l;
-	    for ( int i = mid + 1 ; i <= r ; i++)
-	    {
-	    for ( ; j <= mid && p[j].y <= p[i].y ; j++) bit.update(p[j].z,p[j].cnt);
-	    p[i].sum+=bit.Sum(p[i].z);
-	    }
-	    for ( int i = l ; i < j ; i++) bit.update(p[i].z,-p[i].cnt);
+	    p[i].cnt = cnt;
+	    id[p[i].id]=tot+1;
+	    p[++tot]=p[i];
+	    p[tot].id = tot;
+	    cnt=0;
 	}
-	int tot;
-	int ans[N];
-	int id[N]; //记录原id对应到了哪个新id
-	int main()
+	else
 	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    int T;
-	    scanf("%d",&T);
-	    while (T--)
-	    {
-		tot=0;
-		ms(p,0); //多组数据orz
-		scanf("%d",&n);
-		bit.init(N-1);
-		for ( int i = 1 ; i <= n ; i++) p[i].input(i);
-		int cnt = 0;
-		sort(p+1,p+n+1);
-		for ( int i = 1 ; i <= n ; i++)
-		{
-		cnt++;
-		if (p[i]!=p[i+1])
-		{
-		    p[i].cnt = cnt;
-		    id[p[i].id]=tot+1;
-		    p[++tot]=p[i];
-		    p[tot].id = tot;
-		    cnt=0;
-		}
-		else
-		{
-		    id[p[i].id] = tot+1;
-		}
-	 
-		}
-		cdq(1,tot);
-		//for ( int i = 1 ; i <= n ; i++)  ans[id[p[i].id]] = p[i].sum ;
-		//for ( int i = 1 ; i <= n ; i++) printf("%d\n",ans[i]);
-		
-		sort(p+1,p+tot+1,cmpid);
-		for ( int i = 1 ; i <= n ; i++) printf("%d\n",p[id[i]].sum+p[id[i]].cnt-1);
-	    }
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
+	    id[p[i].id] = tot+1;
 	}
+ 
+	}
+	cdq(1,tot);
+	//for ( int i = 1 ; i <= n ; i++)  ans[id[p[i].id]] = p[i].sum ;
+	//for ( int i = 1 ; i <= n ; i++) printf("%d\n",ans[i]);
+	
+	sort(p+1,p+tot+1,cmpid);
+	for ( int i = 1 ; i <= n ; i++) printf("%d\n",p[id[i]].sum+p[id[i]].cnt-1);
+    }
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 
 
@@ -1645,336 +1675,350 @@ cdq分治，先去重并统计相同的点的数量，需要注意要记录原id
 	int mi[N][20];
 
 
-	void init_mx()
-	{
-	    for ( int i = 1 ; i <= n ; i++)  mx[i][0] = a[i];  //初始化
-	    for ( int j = 1 ; (1<<j)<=n ; j ++)  //循环外面是j,里面是i的原因是，当更新一个长度为4的区间的最值时，依赖于长度为2的区间的最值。
-	    for ( int i =1 ; i + (1<<j)-1<= n ; i++)  //因此要先完全更新完区间长度为2^j的，才能更新区间长度为2^(j+1)的
-		mx[i][j] = max(mx[i][j-1],mx[i+(1<<(j-1))][j-1]);
-	}
-	int rmq_max(int L,int R)
-	{
-	    int k = 0 ;
-	    while (1<<(k+1)<=(R-L+1)) k++;  //使得两倍的区间长度大于所查询的区间
-	    return max(mx[L][k],mx[R-(1<<k)+1][k]);
-	}
+```c++
+void init_mx()
+{
+    for ( int i = 1 ; i <= n ; i++)  mx[i][0] = a[i];  //初始化
+    for ( int j = 1 ; (1<<j)<=n ; j ++)  //循环外面是j,里面是i的原因是，当更新一个长度为4的区间的最值时，依赖于长度为2的区间的最值。
+    for ( int i =1 ; i + (1<<j)-1<= n ; i++)  //因此要先完全更新完区间长度为2^j的，才能更新区间长度为2^(j+1)的
+	mx[i][j] = max(mx[i][j-1],mx[i+(1<<(j-1))][j-1]);
+}
+int rmq_max(int L,int R)
+{
+    int k = 0 ;
+    while (1<<(k+1)<=(R-L+1)) k++;  //使得两倍的区间长度大于所查询的区间
+    return max(mx[L][k],mx[R-(1<<k)+1][k]);
+}
+```
 
 
 快速求log2(i)，不然可能被卡。
 
-	   LOG[0] = -1;
-	    for ( int i = 1 ; i < 2* N ; i++) LOG[i] =LOG[i>>1]+1;
-	    
-	   int	   rmq( int l,int r)
-	{
-	    if (l>r) return 0;
-	int k = log(double (r-l+1)/log2);
-	//int k = LOG[r-l+1];
-	//int k = 0;
-	//while (1<<(k+1)<=r-l+1) k++;
-	    int mx = max(dp[l][k],dp[r-(1<<k)+1][k]);
-	    int mn = min(dp2[l][k],dp2[r-(1<<k)+1][k]);
-	    return mx - mn;
-	}
+```c++
+   LOG[0] = -1;
+    for ( int i = 1 ; i < 2* N ; i++) LOG[i] =LOG[i>>1]+1;
+    
+   int	   rmq( int l,int r)
+{
+    if (l>r) return 0;
+int k = log(double (r-l+1)/log2);
+//int k = LOG[r-l+1];
+//int k = 0;
+//while (1<<(k+1)<=r-l+1) k++;
+    int mx = max(dp[l][k],dp[r-(1<<k)+1][k]);
+    int mn = min(dp2[l][k],dp2[r-(1<<k)+1][k]);
+    return mx - mn;
+}
+```
 
   有时候可能需要返回最值的位置
 
-	  int _min(int l,int r)
-	{
-	    if (a[l]<a[r]) return l;
-	    return r;
-	}
+```c++
+  int _min(int l,int r)
+{
+    if (a[l]<a[r]) return l;
+    return r;
+}
+```
 
 ####主席树
 #####主席树套BIT,求区间动态第k大
-	const int N = 2E5+7;
-	int n,m;
-	int a[N],H[N];
-	int root[N];
-	int cnt,p[2];
-	int num;
-	int prefix_l[100],prefix_r[100];
-	 
-	struct node
+```c++
+const int N = 2E5+7;
+int n,m;
+int a[N],H[N];
+int root[N];
+int cnt,p[2];
+int num;
+int prefix_l[100],prefix_r[100];
+ 
+struct node
+{
+    int a,b,c;
+    char opt[3];
+}querys[N];
+struct PTree
+{
+    int sum;
+    int left,right;
+}tree[N*30];
+int Hash( int x){ return lower_bound(H+1,H+num+1,x)-H;}
+inline int lowbit( int x) { return x&(-x);}
+inline int add_node( int _sum,int _left,int _right)
+{
+    int idx = ++cnt;
+    tree[idx].sum = _sum;
+    tree[idx].left = _left;
+    tree[idx].right = _right;
+    return idx;
+}
+void build( int &root,int pre_rt,int pos,int l,int r)
+{
+    root = add_node(tree[pre_rt].sum+1,tree[pre_rt].left,tree[pre_rt].right);
+    if (l==r) return;
+    int mid = (l+r)>>1;
+    if (pos<=mid)
+    build(tree[root].left,tree[root].left,pos,l,mid);
+    else
+    build(tree[root].right,tree[root].right,pos,mid+1,r);
+}
+void Insert( int &root,int pos,int l,int r,int val)
+{
+    if (!root) root = add_node(0,0,0);
+    tree[root].sum += val;
+    if (l==r) return;
+    int mid = (l+r)>>1;
+    if (pos<=mid)
+    Insert(tree[root].left,pos,l,mid,val);
+    else
+    Insert(tree[root].right,pos,mid+1,r,val);
+}
+int query(int l,int r,int k)
+{
+    if (l==r) return l;
+    int mid = (l+r)>>1,sum=0;
+    for ( int i = 0 ; i < p[0] ; i++)
+    sum += tree[tree[prefix_r[i]].left].sum;
+    for ( int i = 0 ; i < p[1] ; i++)
+    sum -= tree[tree[prefix_l[i]].left].sum;
+    if (k<=sum)
+    {
+    for (int i = 0 ; i < p[0] ; i++)
+	prefix_r[i] = tree[prefix_r[i]].left;
+    for ( int i = 0 ; i < p[1] ; i++)
+	prefix_l[i] = tree[prefix_l[i]].left;
+    return query(l,mid,k);
+    }
+    else
+    {
+    for ( int i = 0 ; i < p[0] ; i++)
+	prefix_r[i] = tree[prefix_r[i]].right;
+    for ( int i = 0 ; i < p[1] ; i++)
+	prefix_l[i] = tree[prefix_l[i]].right;
+    return query(mid+1,r,k-sum);
+    }
+}
+ 
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif 
+    scanf("%d %d",&n,&m);
+    int p_val = n;
+    ms(root,0);
+    for ( int i = 1 ; i <= n ; i++) scanf("%d",a+i),H[i] = a[i];
+    cnt = 0;
+    for ( int i = 0 ; i < m; i++) //读入所有操作是为了离散化
+    {
+	scanf("%s %d %d",querys[i].opt,&querys[i].a,&querys[i].b);
+	if (querys[i].opt[0]=='Q') scanf("%d",&querys[i].c);
+	else H[++p_val] = querys[i].b;
+    }
+    sort(H+1,H+p_val+1);
+    num = unique(H+1,H+p_val+1)-(H+1);
+    for ( int i = 1 ; i <= n ; i++)
+    {
+	a[i] = Hash(a[i]);
+    }
+//  for ( int i = 1 ; i <= n ; i++) printf("a[%d]=%d\n",i,a[i]);
+    for ( int i = 1 ; i <= n ; i++)
+    {
+	build(root[i+n],root[(i-1)+n],a[i],1,num);
+    }
+    for ( int i = 0 ; i < m ; i++)
+    {
+	if (querys[i].opt[0]=='Q')
 	{
-	    int a,b,c;
-	    char opt[3];
-	}querys[N];
-	struct PTree
-	{
-	    int sum;
-	    int left,right;
-	}tree[N*30];
-	int Hash( int x){ return lower_bound(H+1,H+num+1,x)-H;}
-	inline int lowbit( int x) { return x&(-x);}
-	inline int add_node( int _sum,int _left,int _right)
-	{
-	    int idx = ++cnt;
-	    tree[idx].sum = _sum;
-	    tree[idx].left = _left;
-	    tree[idx].right = _right;
-	    return idx;
+	p[0] = p[1] = 1;
+	prefix_r[0] = root[querys[i].b + n];
+	prefix_l[0] = root[querys[i].a-1==0?0:querys[i].a-1+n];
+	for ( int arr = querys[i].b; arr ; arr-=lowbit(arr))
+	    prefix_r[p[0]++] = root[arr];
+	for ( int arr = querys[i].a-1 ; arr ; arr-=lowbit(arr))
+	    prefix_l[p[1]++] = root[arr];
+	int id = query(1,num,querys[i].c);
+	printf("%d\n",H[id]);
 	}
-	void build( int &root,int pre_rt,int pos,int l,int r)
+	else
 	{
-	    root = add_node(tree[pre_rt].sum+1,tree[pre_rt].left,tree[pre_rt].right);
-	    if (l==r) return;
-	    int mid = (l+r)>>1;
-	    if (pos<=mid)
-	    build(tree[root].left,tree[root].left,pos,l,mid);
-	    else
-	    build(tree[root].right,tree[root].right,pos,mid+1,r);
+	for ( int j = querys[i].a ; j <= n ; j+=lowbit(j))
+	    Insert(root[j],a[querys[i].a],1,num,-1);
+	a[querys[i].a] = Hash(querys[i].b);
+	for ( int j = querys[i].a ; j <= n ; j+=lowbit(j))
+	    Insert(root[j],a[querys[i].a],1,num,1);
 	}
-	void Insert( int &root,int pos,int l,int r,int val)
-	{
-	    if (!root) root = add_node(0,0,0);
-	    tree[root].sum += val;
-	    if (l==r) return;
-	    int mid = (l+r)>>1;
-	    if (pos<=mid)
-	    Insert(tree[root].left,pos,l,mid,val);
-	    else
-	    Insert(tree[root].right,pos,mid+1,r,val);
-	}
-	int query(int l,int r,int k)
-	{
-	    if (l==r) return l;
-	    int mid = (l+r)>>1,sum=0;
-	    for ( int i = 0 ; i < p[0] ; i++)
-	    sum += tree[tree[prefix_r[i]].left].sum;
-	    for ( int i = 0 ; i < p[1] ; i++)
-	    sum -= tree[tree[prefix_l[i]].left].sum;
-	    if (k<=sum)
-	    {
-	    for (int i = 0 ; i < p[0] ; i++)
-		prefix_r[i] = tree[prefix_r[i]].left;
-	    for ( int i = 0 ; i < p[1] ; i++)
-		prefix_l[i] = tree[prefix_l[i]].left;
-	    return query(l,mid,k);
-	    }
-	    else
-	    {
-	    for ( int i = 0 ; i < p[0] ; i++)
-		prefix_r[i] = tree[prefix_r[i]].right;
-	    for ( int i = 0 ; i < p[1] ; i++)
-		prefix_l[i] = tree[prefix_l[i]].right;
-	    return query(mid+1,r,k-sum);
-	    }
-	}
-	 
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif 
-	    scanf("%d %d",&n,&m);
-	    int p_val = n;
-	    ms(root,0);
-	    for ( int i = 1 ; i <= n ; i++) scanf("%d",a+i),H[i] = a[i];
-	    cnt = 0;
-	    for ( int i = 0 ; i < m; i++) //读入所有操作是为了离散化
-	    {
-		scanf("%s %d %d",querys[i].opt,&querys[i].a,&querys[i].b);
-		if (querys[i].opt[0]=='Q') scanf("%d",&querys[i].c);
-		else H[++p_val] = querys[i].b;
-	    }
-	    sort(H+1,H+p_val+1);
-	    num = unique(H+1,H+p_val+1)-(H+1);
-	    for ( int i = 1 ; i <= n ; i++)
-	    {
-		a[i] = Hash(a[i]);
-	    }
-	//  for ( int i = 1 ; i <= n ; i++) printf("a[%d]=%d\n",i,a[i]);
-	    for ( int i = 1 ; i <= n ; i++)
-	    {
-		build(root[i+n],root[(i-1)+n],a[i],1,num);
-	    }
-	    for ( int i = 0 ; i < m ; i++)
-	    {
-		if (querys[i].opt[0]=='Q')
-		{
-		p[0] = p[1] = 1;
-		prefix_r[0] = root[querys[i].b + n];
-		prefix_l[0] = root[querys[i].a-1==0?0:querys[i].a-1+n];
-		for ( int arr = querys[i].b; arr ; arr-=lowbit(arr))
-		    prefix_r[p[0]++] = root[arr];
-		for ( int arr = querys[i].a-1 ; arr ; arr-=lowbit(arr))
-		    prefix_l[p[1]++] = root[arr];
-		int id = query(1,num,querys[i].c);
-		printf("%d\n",H[id]);
-		}
-		else
-		{
-		for ( int j = querys[i].a ; j <= n ; j+=lowbit(j))
-		    Insert(root[j],a[querys[i].a],1,num,-1);
-		a[querys[i].a] = Hash(querys[i].b);
-		for ( int j = querys[i].a ; j <= n ; j+=lowbit(j))
-		    Insert(root[j],a[querys[i].a],1,num,1);
-		}
-	    }
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+    }
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 #####主席树，静态区间第k大 hdu 2665
-	const int N=1E5+7;
-	int a[N],H[N];
-	int cnt;
-	int Hash( int x){ return lower_bound(H,H+cnt,x)-H;}
-	int n,m;
-	int tot;//线段树的总数。
-	int root[N];//每个元素对应的根节点
-	struct PTree
-	{
-	    int sum,left,right;
-	}tree[N*30];
-	inline int add_node( int _sum,int _left,int _right)
-	{
-	    int idx = ++tot;
-	    tree[idx].sum = _sum;
-	    tree[idx].left = _left;
-	    tree[idx].right = _right;
-	    return idx;
-	}
-	void Insert( int &root,int pre_rt,int pos,int l,int r)
-	{
-	    root = add_node(tree[pre_rt].sum + 1,tree[pre_rt].left,tree[pre_rt].right);
-	    //printf("l:%d r %d root:%d\n",l,r,root);
-	    if (l==r) return;
-	    int mid = (l+r)>>1;
-	    if (pos<=mid)
-	    Insert(tree[root].left,tree[pre_rt].left,pos,l,mid);
-	    else
-	    Insert(tree[root].right,tree[pre_rt].right,pos,mid+1,r);
-	}
-	int Query( int L,int R,int l,int r,int k)//区间第k大
-	{
-	    if (l==r) return l;
-	    int mid = (l+r)>>1;
-	    int sum = tree[tree[R].left].sum - tree[tree[L].left].sum;
-	    //sum表示 左区间的元素个数
-	    if (k<=sum)
-	    return Query(tree[L].left,tree[R].left,l,mid,k);
-	    else return Query(tree[L].right,tree[R].right,mid+1,r,k-sum);
-	}
+```c++
+const int N=1E5+7;
+int a[N],H[N];
+int cnt;
+int Hash( int x){ return lower_bound(H,H+cnt,x)-H;}
+int n,m;
+int tot;//线段树的总数。
+int root[N];//每个元素对应的根节点
+struct PTree
+{
+    int sum,left,right;
+}tree[N*30];
+inline int add_node( int _sum,int _left,int _right)
+{
+    int idx = ++tot;
+    tree[idx].sum = _sum;
+    tree[idx].left = _left;
+    tree[idx].right = _right;
+    return idx;
+}
+void Insert( int &root,int pre_rt,int pos,int l,int r)
+{
+    root = add_node(tree[pre_rt].sum + 1,tree[pre_rt].left,tree[pre_rt].right);
+    //printf("l:%d r %d root:%d\n",l,r,root);
+    if (l==r) return;
+    int mid = (l+r)>>1;
+    if (pos<=mid)
+    Insert(tree[root].left,tree[pre_rt].left,pos,l,mid);
+    else
+    Insert(tree[root].right,tree[pre_rt].right,pos,mid+1,r);
+}
+int Query( int L,int R,int l,int r,int k)//区间第k大
+{
+    if (l==r) return l;
+    int mid = (l+r)>>1;
+    int sum = tree[tree[R].left].sum - tree[tree[L].left].sum;
+    //sum表示 左区间的元素个数
+    if (k<=sum)
+    return Query(tree[L].left,tree[R].left,l,mid,k);
+    else return Query(tree[L].right,tree[R].right,mid+1,r,k-sum);
+}
+```
 
 
 ​	 
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    int T;
-	    cin>>T;
-	    while (T--){
-	    tot = 0 ;
-	    scanf("%d%d",&n,&m);
-	    for ( int i = 1 ; i <= n ; i++) scanf("%d",a+i),H[i] = a[i];
-	    root[0] = 0;
-	    sort(H+1,H+n+1);
-	    cnt = unique(H+1,H+n+1)-(H+1);
-	    for ( int i = 1; i <= n ; i++)
-	    {
-		int pos = Hash(a[i]);
-		//printf("pos:%d\n",pos);
-		Insert(root[i],root[i-1],pos,1,cnt);
-		//cout<<"i"<<i<<endl;
-	    }
-	    while (m--)
-	    {
-		int l,r,k;
-		scanf("%d %d %d",&l,&r,&k);
-		int pos = Query(root[l-1],root[r],1,cnt,k);
-		printf("%d\n",H[pos]);
-	    }
-	    }
+```c++
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    int T;
+    cin>>T;
+    while (T--){
+    tot = 0 ;
+    scanf("%d%d",&n,&m);
+    for ( int i = 1 ; i <= n ; i++) scanf("%d",a+i),H[i] = a[i];
+    root[0] = 0;
+    sort(H+1,H+n+1);
+    cnt = unique(H+1,H+n+1)-(H+1);
+    for ( int i = 1; i <= n ; i++)
+    {
+	int pos = Hash(a[i]);
+	//printf("pos:%d\n",pos);
+	Insert(root[i],root[i-1],pos,1,cnt);
+	//cout<<"i"<<i<<endl;
+    }
+    while (m--)
+    {
+	int l,r,k;
+	scanf("%d %d %d",&l,&r,&k);
+	int pos = Query(root[l-1],root[r],1,cnt,k);
+	printf("%d\n",H[pos]);
+    }
+    }
+```
 
 
 #####主席树求在线[l,r]中不同数的个数
-	const int N=3E4+7;
-	const int M=2E5+7;
-	int n,Q;
-	int a[N],root[N];
-	map<int,int>mp;
-	int cnt;
-	struct Ptree
+```c++
+const int N=3E4+7;
+const int M=2E5+7;
+int n,Q;
+int a[N],root[N];
+map<int,int>mp;
+int cnt;
+struct Ptree
+{
+    int sum;
+    int left,right;
+}tree[N*30];
+void build (int &rt,int l,int r)
+{
+    rt =++cnt;
+    tree[rt].sum = 0 ;
+    if (l==r) return;
+    int mid = (l+r)>>1;
+    build (tree[rt].left,l,mid);
+    build (tree[rt].right,mid+1,r);
+}
+inline int add_node(int _sum,int _left,int _right)
+{
+    int idx = ++cnt;
+    tree[idx].sum = _sum;
+    tree[idx].left = _left;
+    tree[idx].right = _right;
+    return idx;
+}
+void Insert(int &root,int pre_rt,int pos,int val,int l,int r)
+{
+//    printf("l:%d r:%d\n",l,r);
+    root = add_node(tree[pre_rt].sum + val,tree[pre_rt].left,tree[pre_rt].right);
+   // root = ++cnt;
+   // tree[root].sum = tree[pre_rt].sum+ val;
+   // tree[root].left = tree[pre_rt].left;
+   // tree[root].right = tree[pre_rt].right;
+    if (l==r) return;
+    int mid = (l+r)>>1;
+    if (pos<=mid) Insert(tree[root].left,tree[pre_rt].left,pos,val,l,mid);
+    else Insert(tree[root].right,tree[pre_rt].right,pos,val,mid+1,r);
+}
+int query(int pos,int l,int r,int rt)
+{
+    if (l==r) return tree[rt].sum;
+    int mid = (l+r)>>1;
+    if (pos<=mid) return query(pos,l,mid,tree[rt].left);
+    else return tree[tree[rt].left].sum + query(pos,mid+1,r,tree[rt].right);
+}
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+    ms(tree,0);
+    cnt = 0 ;
+    cin>>n;
+    for ( int i = 1 ; i <= n ; i++) scanf("%d",&a[i]);
+    build (root[n+1],1,n);
+    mp.clear();
+    for ( int i = n ; i >= 1 ; i--)
+    {
+	if (mp.find(a[i])==mp.end())
 	{
-	    int sum;
-	    int left,right;
-	}tree[N*30];
-	void build (int &rt,int l,int r)
-	{
-	    rt =++cnt;
-	    tree[rt].sum = 0 ;
-	    if (l==r) return;
-	    int mid = (l+r)>>1;
-	    build (tree[rt].left,l,mid);
-	    build (tree[rt].right,mid+1,r);
+	Insert(root[i],root[i+1],i,1,1,n);
 	}
-	inline int add_node(int _sum,int _left,int _right)
+	else
 	{
-	    int idx = ++cnt;
-	    tree[idx].sum = _sum;
-	    tree[idx].left = _left;
-	    tree[idx].right = _right;
-	    return idx;
+	Insert(root[i],root[i+1],mp[a[i]],-1,1,n);
+	Insert(root[i],root[i],i,1,1,n);
 	}
-	void Insert(int &root,int pre_rt,int pos,int val,int l,int r)
-	{
-	//    printf("l:%d r:%d\n",l,r);
-	    root = add_node(tree[pre_rt].sum + val,tree[pre_rt].left,tree[pre_rt].right);
-	   // root = ++cnt;
-	   // tree[root].sum = tree[pre_rt].sum+ val;
-	   // tree[root].left = tree[pre_rt].left;
-	   // tree[root].right = tree[pre_rt].right;
-	    if (l==r) return;
-	    int mid = (l+r)>>1;
-	    if (pos<=mid) Insert(tree[root].left,tree[pre_rt].left,pos,val,l,mid);
-	    else Insert(tree[root].right,tree[pre_rt].right,pos,val,mid+1,r);
-	}
-	int query(int pos,int l,int r,int rt)
-	{
-	    if (l==r) return tree[rt].sum;
-	    int mid = (l+r)>>1;
-	    if (pos<=mid) return query(pos,l,mid,tree[rt].left);
-	    else return tree[tree[rt].left].sum + query(pos,mid+1,r,tree[rt].right);
-	}
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	    ms(tree,0);
-	    cnt = 0 ;
-	    cin>>n;
-	    for ( int i = 1 ; i <= n ; i++) scanf("%d",&a[i]);
-	    build (root[n+1],1,n);
-	    mp.clear();
-	    for ( int i = n ; i >= 1 ; i--)
-	    {
-		if (mp.find(a[i])==mp.end())
-		{
-		Insert(root[i],root[i+1],i,1,1,n);
-		}
-		else
-		{
-		Insert(root[i],root[i+1],mp[a[i]],-1,1,n);
-		Insert(root[i],root[i],i,1,1,n);
-		}
-		mp[a[i]] = i;
-	    }
-	    cin>>Q;
-	    while (Q--)
-	    {
-		int l,r;
-		scanf("%d %d",&l,&r);
-	       // printf("l:%d r:%d\n",l,r);
-		int ans = query(r,1,n,root[l]);
-		printf("%d\n",ans);
-	    }
+	mp[a[i]] = i;
+    }
+    cin>>Q;
+    while (Q--)
+    {
+	int l,r;
+	scanf("%d %d",&l,&r);
+       // printf("l:%d r:%d\n",l,r);
+	int ans = query(r,1,n,root[l]);
+	printf("%d\n",ans);
+    }
+```
 
 
 ​	    
@@ -2001,380 +2045,593 @@ ax+by=d的有解条件是d是gcd(a,b)的整数倍
 
 ####扩展欧几里得算法
 问a*x+b*y=1的一组x>0的解，如果无解输出sorry.
-	int exgcd( int a,int b,int &x,int &y)
-	{
-	    if (b==0)
-	    {
-		x = 1;
-		y = 0;
-		return a;
-	    }
-	    int ret = exgcd(b,a%b,x,y);
-	    int tmp = x;
-	    x = y;
-	    y = tmp - a/b*y;
-	    return ret;
-	}
+```c++
+cint exgcd( int a,int b,int &x,int &y)
+{
+    if (b==0)
+    {
+	x = 1;
+	y = 0;
+	return a;
+    }
+    int ret = exgcd(b,a%b,x,y);
+    int tmp = x;
+    x = y;
+    y = tmp - a/b*y;
+    return ret;
+}
+```
 
 #####扩展欧几里得算法解一般线性同余方程组
 给出k个方程，形式为 x%a1==r1,求最小的正数x，无解输出-1.
 
-	const int N=1E6+7;
-	int n;
-	LL a[N],r[N];
-	 
-	LL exgcd( LL a,LL b,LL &x,LL &y)
+```c++
+const int N=1E6+7;
+int n;
+LL a[N],r[N];
+ 
+LL exgcd( LL a,LL b,LL &x,LL &y)
+{
+    if (b==0)
+    {
+	x = 1;
+	y = 0;
+	return a;
+    }
+    LL ret = exgcd(b,a%b,y,x);
+    y-=x*(a/b); //简化版本的exgcd...
+    return ret;
+}
+LL ex_crt( LL *m, LL *r,int n)
+{
+    LL M = m[1],R = r[1],x,y,gcd;
+    for ( int i = 2 ; i <= n ; i++)
+    {
+	gcd = exgcd(M,m[i],x,y);
+	if ((r[i]-R)%gcd) return -1;
+	LL gx = m[i]/gcd;
+	x = x*(r[i]-R)/gcd;
+	x = x % gx;
+	R = R + x*M;
+	M = M / gcd * m[i];
+	R%=M;
+    }
+    return R>0?R:R+M;
+}
+ 
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+ 
+	while (~scanf("%d",&n))
 	{
-	    if (b==0)
-	    {
-		x = 1;
-		y = 0;
-		return a;
-	    }
-	    LL ret = exgcd(b,a%b,y,x);
-	    y-=x*(a/b); //简化版本的exgcd...
-	    return ret;
+	    for ( int i = 1 ; i <= n ; i++) scanf("%lld %lld",&a[i],&r[i]);
+	    printf("%lld\n",ex_crt(a,r,n));
 	}
-	LL ex_crt( LL *m, LL *r,int n)
-	{
-	    LL M = m[1],R = r[1],x,y,gcd;
-	    for ( int i = 2 ; i <= n ; i++)
-	    {
-		gcd = exgcd(M,m[i],x,y);
-		if ((r[i]-R)%gcd) return -1;
-		LL gx = m[i]/gcd;
-		x = x*(r[i]-R)/gcd;
-		x = x % gx;
-		R = R + x*M;
-		M = M / gcd * m[i];
-		R%=M;
-	    }
-	    return R>0?R:R+M;
-	}
-	 
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-	 
-		while (~scanf("%d",&n))
-		{
-		    for ( int i = 1 ; i <= n ; i++) scanf("%lld %lld",&a[i],&r[i]);
-		    printf("%lld\n",ex_crt(a,r,n));
-		}
+```
 
 
 #####exgcd求解一般线性同余方程组解的个数（hdu 1573）
-	const int N =15;
-	LL a[N],r[N];
-	LL nn;
-	int m;
-	LL exgcd(LL a,LL b,LL &x,LL &y)
+```c++
+const int N =15;
+LL a[N],r[N];
+LL nn;
+int m;
+LL exgcd(LL a,LL b,LL &x,LL &y)
+{
+    if (b==0)
+    {
+	x = 1;
+	y = 0 ;
+	return a;
+    }
+    LL ret = exgcd( b, a%b,y,x);
+    y-=x*(a/b);
+    return ret;
+}
+LL ex_crt(LL *m,LL *r,int n)
+{
+     LL M = m[1] , R = r[1],x,y,gcd;
+     for ( int i = 2 ; i <= n ; i++)
 	{
-	    if (b==0)
-	    {
-		x = 1;
-		y = 0 ;
-		return a;
-	    }
-	    LL ret = exgcd( b, a%b,y,x);
-	    y-=x*(a/b);
-	    return ret;
+	    gcd = exgcd(M,m[i],x,y);
+	    if ((r[i]-R)%gcd) return 0;
+	    LL gx = m[i]/gcd;
+	    x = x*(r[i]-R)/gcd;
+	    x %=gx;
+	    R += x*M;
+	    M = M / gcd * m[i];
+	    R%=M;
 	}
-	LL ex_crt(LL *m,LL *r,int n)
+     if (R<=0) R+=M;
+     if (nn<R) return 0;
+     return (nn-R)/M + 1;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	int T;
+	cin>>T;
+	while (T--)
 	{
-	     LL M = m[1] , R = r[1],x,y,gcd;
-	     for ( int i = 2 ; i <= n ; i++)
-		{
-		    gcd = exgcd(M,m[i],x,y);
-		    if ((r[i]-R)%gcd) return 0;
-		    LL gx = m[i]/gcd;
-		    x = x*(r[i]-R)/gcd;
-		    x %=gx;
-		    R += x*M;
-		    M = M / gcd * m[i];
-		    R%=M;
+	    scanf("%lld %d",&nn,&m);
+	    for ( int i = 1 ; i <= m ; i++) scanf("%lld",&a[i]);
+	    for ( int i = 1 ; i <= m ; i++) scanf("%lld",&r[i]);
+	    LL res = ex_crt(a,r,m);
+	    printf("%lld\n",res);
+	}
+```
+####线性筛
+
+```c++
+#include<cstdio>
+#include<cstring>
+using namespace std;
+const int maxn=1000;
+const int maxl=10000;
+int tot=0;
+int prime[maxn];
+bool check[maxl];
+void Euler_sieve(){
+	memset(check,0,sizeof(check));
+	for(int i=2;i<maxl;i++){
+		if(!check[i]) prime[tot++]=i;
+		for(int j=0;j<tot;j++){
+			if(i*prime[j]>maxl) break;
+			check[i*prime[j]]=1;
+			if(!i%prime[j]) break;
 		}
-	     if (R<=0) R+=M;
-	     if (nn<R) return 0;
-	     return (nn-R)/M + 1;
 	}
+	return;
+}
+```
+####广义斐波那契循环节
+g(n) = 3g(n - 1) + g(n - 2)
+
+```c++
+	struct Mat
+	{
+	    LL mat[2][2];
+	    void clear()
+	    {
+		ms(mat,0);
+	    }
+	}M,M1;
+	Mat mul (Mat a,Mat b,LL mod)
+	{
+	    Mat c;
+	    c.clear();
+	    for ( int i = 0 ; i < 2 ; i++)
+		for ( int j = 0 ; j < 2 ; j++)
+		    for ( int k  = 0 ; k < 2 ; k++)
+			c.mat[i][j] = (c.mat[i][j] + a.mat[i][k] * b.mat[k][j]%mod)%mod;
+	    return c;
+	}
+	Mat mat_ksm(Mat a,LL b,LL mod)
+	{
+	    Mat res;
+	    res.clear();
+	    for ( int i = 0 ; i < 2 ; i++) res.mat[i][i] = 1;
+	    while (b>0)
+	    {
+		if (b&1) res = mul(res,a,mod);
+		b = b >> 1LL;
+		a = mul(a,a,mod);
+	    }
+	    return res;
+	}
+	LL gcd(LL a,LL b)
+	{
+	    return b?gcd(b,a%b):a;
+	}
+	const int N = 1E6+7;
+	bool prime[N];
+	int p[N];
+	void isprime() //一个普通的筛
+	{
+	    int cnt = 0 ;
+	    ms(prime,true);
+	    for ( int i = 2 ; i < N ; i++)
+	    {
+		if (prime[i])
+		{
+		    p[cnt++] = i ;
+		    for ( int j = i+i ; j < N ; j+=i) prime[j] = false;
+		}
+	    }
+	}
+	LL ksm( LL a,LL b,LL mod)
+	{
+	   LL res = 1;
+	   while (b>0)
+	   {
+	       if (b&1) res = (res * a) % mod;
+	       b = b >> 1LL;
+	       a = a * a % mod;
+	   }
+	   return res;
+	}
+	LL legendre(LL a,LL p) //勒让德符号,判断二次剩余
+	{
+	    if (ksm(a,(p-1)>>1,p)==1) return 1;
+	    return -1;
+	}
+	LL pri[N],num[N];//分解质因数的底数和指数。
+	int cnt; //质因子的个数
+	void solve(LL n,LL pri[],LL num[])
+	{
+	    cnt = 0 ;
+	    for ( int  i = 0 ; p[i] * p[i] <= n ; i++)
+	    {
+		if (n%p[i]==0)
+		{
+		    int Num = 0 ;
+		    pri[cnt] = p[i];
+		    while (n%p[i]==0)
+		    {
+			Num++;
+			n/=p[i];
+		    }
+		    num[cnt] = Num;
+		    cnt++;
+		}
+	    }
+	    if (n>1)
+	    {
+		pri[cnt] = n;
+		num[cnt] = 1;
+		cnt++;
+	    }
+	}
+	LL fac[N];
+	int cnt2; //n的因子的个数
+	void get_fac(LL n)//得到n的所有因子
+	{
+	    cnt2 = 0 ;
+	    for (int i =  1 ; i*i <= n ; i++)
+	    {
+		if (n%i==0)
+		{
+		    if (i*i!=n)
+		    {
+			fac[cnt2++] = i ;
+			fac[cnt2++] = n/i;
+		    }
+		    else fac[cnt2++] = i;
+		}
+	    }
+	}
+	int get_loop( LL p) //暴力得到不大于13的素数的循环节。
+	{                    
+	    LL a,b,c;
+	    a = 0 ;
+	    b = 1 ;
+	    for ( int i = 2; ; i++)
+	    {
+		c = (a+3*b%p)%p;
+		a = b;
+		b = c;
+		if (a==0&&b==1) return i-1;
+	    }
+	}
+	/*
+	    2->3
+	    3->2
+	    5->12
+	    7->16
+	    11->8
+	    13->52
+	    */
+	const LL LOOP[10]={3,2,12,16,8,52};
+	LL ask_loop(int id)
+	{
+	    return LOOP[id];
+	}
+	LL find_loop(LL n)
+	{
+	    solve(n,pri,num);
+	    LL ans = 1;
+	    for ( int i = 0 ; i < cnt ; i++)
+	    {
+		LL rec = 1;
+		if (pri[i]<=13) rec = ask_loop(i);
+		else
+		{
+		    if (legendre(13,pri[i])==1)  //13就是delta值
+			get_fac(pri[i]-1);
+		    else get_fac((pri[i]+1)*(3-1)); //为什么可以假设循环节不大于2*(p+1)???
+		    sort(fac,fac+cnt2);
+		    for ( int j = 0 ; j < cnt2 ; j++) //挨个验证因子
+		    {
+			Mat tmp = mat_ksm(M,fac[j],pri[i]); //下标从0开始，验证fac[j]为循环节，应该看fib[0]==fib[fac[j]]和fib[1]==fib[fac[j]+1]是否成立
+			tmp = mul(tmp,M1,pri[i]);
+			if (tmp.mat[0][0]==0&&tmp.mat[1][0]==1)
+			{
+			    rec = fac[j];
+			    break;
+			}
+		    }
+	 
+		}
+		for ( int j = 1 ; j < num[i] ; j++)
+		    rec *=pri[i];
+		ans = ans / gcd(ans,rec) * rec;
+	    }
+	    return ans;
+	}
+	void init()
+	{
+	    M.clear();
+	    M.mat[0][1] = M.mat[1][0] = 1;
+	    M.mat[1][1] = 3;
+	    M1.clear();
+	    M1.mat[1][0] = 1;
+	}
+	LL n;
+	LL loop0 = 1E9+7;
+	LL loop1,loop2;
 	int main()
 	{
 		#ifndef  ONLINE_JUDGE 
 		freopen("code/in.txt","r",stdin);
 	  #endif
-		int T;
-		cin>>T;
-		while (T--)
-		{
-		    scanf("%lld %d",&nn,&m);
-		    for ( int i = 1 ; i <= m ; i++) scanf("%lld",&a[i]);
-		    for ( int i = 1 ; i <= m ; i++) scanf("%lld",&r[i]);
-		    LL res = ex_crt(a,r,m);
-		    printf("%lld\n",res);
-		}
-####线性筛
-
-	#include<cstdio>
-	#include<cstring>
-	using namespace std;
-	const int maxn=1000;
-	const int maxl=10000;
-	int tot=0;
-	int prime[maxn];
-	bool check[maxl];
-	void Euler_sieve(){
-		memset(check,0,sizeof(check));
-		for(int i=2;i<maxl;i++){
-			if(!check[i]) prime[tot++]=i;
-			for(int j=0;j<tot;j++){
-				if(i*prime[j]>maxl) break;
-				check[i*prime[j]]=1;
-				if(!i%prime[j]) break;
-			}
-		}
-		return;
-	}
-####广义斐波那契循环节
-g(n) = 3g(n - 1) + g(n - 2)
-
-		struct Mat
-		{
-		    LL mat[2][2];
-		    void clear()
-		    {
-			ms(mat,0);
-		    }
-		}M,M1;
-		Mat mul (Mat a,Mat b,LL mod)
-		{
-		    Mat c;
-		    c.clear();
-		    for ( int i = 0 ; i < 2 ; i++)
-			for ( int j = 0 ; j < 2 ; j++)
-			    for ( int k  = 0 ; k < 2 ; k++)
-				c.mat[i][j] = (c.mat[i][j] + a.mat[i][k] * b.mat[k][j]%mod)%mod;
-		    return c;
-		}
-		Mat mat_ksm(Mat a,LL b,LL mod)
-		{
-		    Mat res;
-		    res.clear();
-		    for ( int i = 0 ; i < 2 ; i++) res.mat[i][i] = 1;
-		    while (b>0)
-		    {
-			if (b&1) res = mul(res,a,mod);
-			b = b >> 1LL;
-			a = mul(a,a,mod);
-		    }
-		    return res;
-		}
-		LL gcd(LL a,LL b)
-		{
-		    return b?gcd(b,a%b):a;
-		}
-		const int N = 1E6+7;
-		bool prime[N];
-		int p[N];
-		void isprime() //一个普通的筛
-		{
-		    int cnt = 0 ;
-		    ms(prime,true);
-		    for ( int i = 2 ; i < N ; i++)
-		    {
-			if (prime[i])
-			{
-			    p[cnt++] = i ;
-			    for ( int j = i+i ; j < N ; j+=i) prime[j] = false;
-			}
-		    }
-		}
-		LL ksm( LL a,LL b,LL mod)
-		{
-		   LL res = 1;
-		   while (b>0)
-		   {
-		       if (b&1) res = (res * a) % mod;
-		       b = b >> 1LL;
-		       a = a * a % mod;
-		   }
-		   return res;
-		}
-		LL legendre(LL a,LL p) //勒让德符号,判断二次剩余
-		{
-		    if (ksm(a,(p-1)>>1,p)==1) return 1;
-		    return -1;
-		}
-		LL pri[N],num[N];//分解质因数的底数和指数。
-		int cnt; //质因子的个数
-		void solve(LL n,LL pri[],LL num[])
-		{
-		    cnt = 0 ;
-		    for ( int  i = 0 ; p[i] * p[i] <= n ; i++)
-		    {
-			if (n%p[i]==0)
-			{
-			    int Num = 0 ;
-			    pri[cnt] = p[i];
-			    while (n%p[i]==0)
-			    {
-				Num++;
-				n/=p[i];
-			    }
-			    num[cnt] = Num;
-			    cnt++;
-			}
-		    }
-		    if (n>1)
-		    {
-			pri[cnt] = n;
-			num[cnt] = 1;
-			cnt++;
-		    }
-		}
-		LL fac[N];
-		int cnt2; //n的因子的个数
-		void get_fac(LL n)//得到n的所有因子
-		{
-		    cnt2 = 0 ;
-		    for (int i =  1 ; i*i <= n ; i++)
-		    {
-			if (n%i==0)
-			{
-			    if (i*i!=n)
-			    {
-				fac[cnt2++] = i ;
-				fac[cnt2++] = n/i;
-			    }
-			    else fac[cnt2++] = i;
-			}
-		    }
-		}
-		int get_loop( LL p) //暴力得到不大于13的素数的循环节。
-		{                    
-		    LL a,b,c;
-		    a = 0 ;
-		    b = 1 ;
-		    for ( int i = 2; ; i++)
-		    {
-			c = (a+3*b%p)%p;
-			a = b;
-			b = c;
-			if (a==0&&b==1) return i-1;
-		    }
-		}
 		/*
-		    2->3
-		    3->2
-		    5->12
-		    7->16
-		    11->8
-		    13->52
-		    */
-		const LL LOOP[10]={3,2,12,16,8,52};
-		LL ask_loop(int id)
+		printf("%d\n",get_loop(2));
+		printf("%d\n",get_loop(3));
+		printf("%d\n",get_loop(5));
+		printf("%d\n",get_loop(7));
+		printf("%d\n",get_loop(11));
+		printf("%d\n",get_loop(13));
+		*/
+		init();
+		isprime();
+		while (~scanf("%lld\n",&n))
 		{
-		    return LOOP[id];
-		}
-		LL find_loop(LL n)
-		{
-		    solve(n,pri,num);
-		    LL ans = 1;
-		    for ( int i = 0 ; i < cnt ; i++)
+		    if (n==0||n==1)
 		    {
-			LL rec = 1;
-			if (pri[i]<=13) rec = ask_loop(i);
-			else
-			{
-			    if (legendre(13,pri[i])==1)  //13就是delta值
-				get_fac(pri[i]-1);
-			    else get_fac((pri[i]+1)*(3-1)); //为什么可以假设循环节不大于2*(p+1)???
-			    sort(fac,fac+cnt2);
-			    for ( int j = 0 ; j < cnt2 ; j++) //挨个验证因子
-			    {
-				Mat tmp = mat_ksm(M,fac[j],pri[i]); //下标从0开始，验证fac[j]为循环节，应该看fib[0]==fib[fac[j]]和fib[1]==fib[fac[j]+1]是否成立
-				tmp = mul(tmp,M1,pri[i]);
-				if (tmp.mat[0][0]==0&&tmp.mat[1][0]==1)
-				{
-				    rec = fac[j];
-				    break;
-				}
-			    }
-		 
-			}
-			for ( int j = 1 ; j < num[i] ; j++)
-			    rec *=pri[i];
-			ans = ans / gcd(ans,rec) * rec;
+			printf("%lld\n",n);
+			continue;
 		    }
-		    return ans;
+		    LL loop1 = find_loop(loop0);
+		    LL loop2 = find_loop(loop1);
+	//            printf("loop1:%lld loop2:%lld\n",loop1,loop2);
+		    LL cur = n;
+		    Mat ans = mat_ksm(M,cur-1,loop2);
+		    ans = mul(ans,M1,loop2);
+		    cur = ans.mat[1][0];
+		    if (cur!=0&&cur!=1)
+		    {
+			Mat ans = mat_ksm(M,cur-1,loop1);
+			ans = mul(ans,M1,loop1);
+			cur = ans.mat[1][0];
+		    }
+		    if (cur!=0&&cur!=1)
+		    {
+			Mat ans = mat_ksm(M,cur-1,loop0);
+			ans = mul(ans,M1,loop0);
+			cur = ans.mat[1][0];
+		    }
+		    printf("%lld\n",cur);
+	 
 		}
-		void init()
-		{
-		    M.clear();
-		    M.mat[0][1] = M.mat[1][0] = 1;
-		    M.mat[1][1] = 3;
-		    M1.clear();
-		    M1.mat[1][0] = 1;
-		}
-		LL n;
-		LL loop0 = 1E9+7;
-		LL loop1,loop2;
-		int main()
-		{
-			#ifndef  ONLINE_JUDGE 
-			freopen("code/in.txt","r",stdin);
-		  #endif
-			/*
-			printf("%d\n",get_loop(2));
-			printf("%d\n",get_loop(3));
-			printf("%d\n",get_loop(5));
-			printf("%d\n",get_loop(7));
-			printf("%d\n",get_loop(11));
-			printf("%d\n",get_loop(13));
-			*/
-			init();
-			isprime();
-			while (~scanf("%lld\n",&n))
-			{
-			    if (n==0||n==1)
-			    {
-				printf("%lld\n",n);
-				continue;
-			    }
-			    LL loop1 = find_loop(loop0);
-			    LL loop2 = find_loop(loop1);
-		//            printf("loop1:%lld loop2:%lld\n",loop1,loop2);
-			    LL cur = n;
-			    Mat ans = mat_ksm(M,cur-1,loop2);
-			    ans = mul(ans,M1,loop2);
-			    cur = ans.mat[1][0];
-			    if (cur!=0&&cur!=1)
-			    {
-				Mat ans = mat_ksm(M,cur-1,loop1);
-				ans = mul(ans,M1,loop1);
-				cur = ans.mat[1][0];
-			    }
-			    if (cur!=0&&cur!=1)
-			    {
-				Mat ans = mat_ksm(M,cur-1,loop0);
-				ans = mul(ans,M1,loop0);
-				cur = ans.mat[1][0];
-			    }
-			    printf("%lld\n",cur);
-		 
-			}
-		 
-		#ifndef ONLINE_JUDGE  
-			fclose(stdin);
-		#endif
-			return 0;
-		}
-
+	 
+	#ifndef ONLINE_JUDGE  
+		fclose(stdin);
+	#endif
+		return 0;
+	}
+```
 
 ​		 
-求斐波那契循环节板子：
+求斐波那契循环节板子：（hdu4794）
+
+```c++
+struct Mat
+{
+    LL mat[2][2];
+    void clear()
+    {
+    ms(mat,0);
+    }
+    void pr()
+    {
+    for ( int i = 0 ; i < 2 ; i++)
+        for ( int j = 0 ; j < 2 ; j++)
+        printf("%lld%c",mat[i][j],j==1?'\n':' ');
+    }
+}M,M1;
+const Mat P = {1,1,1,0};
+Mat mul (Mat a,Mat b,LL mod)
+{
+    Mat c;
+    c.clear();
+    for ( int i = 0 ; i < 2 ; i++)
+    for ( int j = 0 ; j < 2 ; j++)
+        for ( int k  = 0 ; k < 2 ; k++)
+        c.mat[i][j] = (c.mat[i][j] + a.mat[i][k] * b.mat[k][j]%mod)%mod;
+    return c;
+}
+Mat mat_ksm(Mat a,LL b,LL mod)
+{
+    Mat res;
+    res.clear();
+    for ( int i = 0 ; i < 2 ; i++) res.mat[i][i] = 1;
+    while (b>0)
+    {
+    if (b&1) res = mul(res,a,mod);
+    b = b >> 1LL;
+    a = mul(a,a,mod);
+    }
+    return res;
+}
+LL gcd(LL a,LL b)
+{
+    return b?gcd(b,a%b):a;
+}
+const int N = 5E6+7;
+bool prime[N];
+int p[N];
+int pri_tot;
+void Lineisprime() //换成线性晒了。
+{
+   // int cnt = 0 ;
+    ms(prime,true);
+    for ( int i = 2 ; i < N ; i++)
+    {
+    if (prime[i]) p[pri_tot++] = i ;
+    for ( int j =  1 ;  j < pri_tot && i*p[j] < N ; j++)
+    {
+        prime[i*p[j]] = false;
+        if (i%p[j]==0) break;
+    }
+    }
+}
+ 
+LL ksm( LL a,LL b,LL mod)
+{
+   LL res = 1;
+   while (b>0)
+   {
+       if (b&1) res = (res * a) % mod;
+       b = b >> 1LL;
+       a = a * a % mod;
+   }
+   return res;
+}
+LL legendre(LL a,LL p) //勒让德符号,判断二次剩余
+{
+    if (ksm(a,(p-1)>>1,p)==1) return 1;
+    return -1;
+}
+ 
+LL pri[N],num[N];//分解质因数的底数和指数。
+int cnt; //质因子的个数
+void solve(LL n,LL *pri,LL *num)
+{
+    cnt = 0 ;
+    for ( int  i = 0 ; 1LL*p[i] * p[i] <= n  && i < pri_tot ; i++)
+    {
+    if (n%p[i]==0)
+    {
+        int Num = 0 ;
+        pri[cnt] = p[i];
+        while (n%p[i]==0)
+        {
+        Num++;
+        n/=p[i];
+        }
+        num[cnt] = Num;
+        cnt++;
+    }
+    }
+    if (n>1)
+    {
+    pri[cnt] = n;
+    num[cnt] = 1;
+    cnt++;
+    }
+}
+LL fac[N];
+int cnt2; //n的因子的个数
+void get_fac(LL n)//得到n的所有因子
+{
+    cnt2 = 0 ;
+    for (int i =  1 ; i*i <= n ; i++)
+    {
+    if (n%i==0)
+    {
+        if (i*i!=n)
+        {
+        fac[cnt2++] = i ;
+        fac[cnt2++] = n/i;
+        }
+        else fac[cnt2++] = i;
+    }
+    }
+}
+LL delta;
+const LL LOOP[10]={3,8,20};
+LL ask_loop(int id) //我好傻啊。。并不一定所有因子都有啊。。。
+{
+    return LOOP[id];
+}
+LL find_loop(LL n)
+{
+    //cout<<"n:"<<n<<endl;
+    solve(n,pri,num);
+    //puts("pri:");
+   // for ( int i = 0 ; i < cnt ; i++)  printf("i:%d %lld\n",i,pri[i]);
+    LL ans = 1;
+    //cout<<"CNT:"<<cnt<<endl;
+    for ( int i = 0 ; i < cnt ; i++)
+    {
+    LL rec = 1;
+    if (pri[i]==2) rec =  3;
+    else if (pri[i]==3) rec = 8;
+    else if (pri[i]==5) rec = 20;
+    else
+    {
+        if (legendre(5,pri[i])==1)
+        get_fac(pri[i]-1);
+        else get_fac((pri[i]+1LL)*(3-1)); //为什么可以假设循环节不大于2*(p+1)???
+        sort(fac,fac+cnt2);
+       // for  ( int qqq = 0; qqq < cnt2 ; qqq++) printf("fac: %lld  ",fac[qqq]);
+        for ( int j = 0 ; j < cnt2 ; j++) //挨个验证因子
+        {
+        Mat tmp = mat_ksm(M,fac[j],pri[i]); //下标从0开始，验证fac[j]为循环节，应该看fib[0]==fib[fac[j]]和fib[1]==fib[fac[j]+1]是否成立
+        tmp = mul(tmp,M1,pri[i]);
+        if (tmp.mat[0][0]==1&&tmp.mat[1][0]==0)
+        {
+            rec = fac[j];
+            break;
+        }
+        }
+ 
+    }
+    for ( LL j = 1 ; j < num[i] ; j++)
+        rec *=pri[i];
+    ans = ans / gcd(ans,rec) * rec;
+    }
+    return ans;
+}
+void init()
+{
+    M.clear();
+    M.mat[0][0] = M.mat[0][1] = M.mat[1][0] = 1;
+    M1.clear();
+    M1.mat[0][0] = 1;
+}
+LL n;
+int main()
+{
+    
+    
+    init();
+    Lineisprime();
+    while (~scanf("%llu",&n))
+    {
+      //  cout<<"n:"<<n<<endl
+        if (n==2) puts("3");
+        else 
+        printf("%llu\n",find_loop(n)/2);
+ 
+    }
+ 
+#ifndef ONLINE_JUDGE  
+    fclose(stdin);
+#endif
+    return 0;
+}
+ 
+ 
+ 
+ 
+```
+
 ​	
 
 ##图论
@@ -2383,96 +2640,100 @@ g(n) = 3g(n - 1) + g(n - 2)
 并查集判断无相图的连通性
 hdu 5631给出一张n个点n+1（n<=100）条边的无向图，现在删除若干条边（至少一条边），问删完之后图依然联通的方案数。做法是：先把所有的点孤立出来，然后开始添加边，每次union成功（就是添加了一条边）的时候计数器+1，n个点如果能合并n-1次，也就是添加了n-1条有效边（最多也只可能是n-1条，那么说明这n个点之间是联通的。
 
-	const int N=105;
-	int n;
-	int f[N];
-	bool ban[N];
-	pi edge[N];
+```c++
+const int N=105;
+int n;
+int f[N];
+bool ban[N];
+pi edge[N];
+```
 
 
-	void init()
+```c++
+void init()
+{
+    ms(f,0);
+    for ( int i = 0 ; i < N ; i++) f[i] =  i;
+}
+ 
+int root ( int x)
+{
+    if (f[x]!=x)
+    f[x]=root(f[x]);
+    return f[x];
+}
+ 
+int Union( int x,int y)
+{
+    int rootx = root(x);
+    int rooty = root(y);
+  //  cout<<"rootx:"<<rootx<<" rooty:"<<rooty<<endl;
+    if (rootx!=rooty)
+    {
+    f[rootx]=rooty;
+    
+    return 1;
+    }
+    return 0;
+}
+ 
+int solve()       //用并查集判断图连通性。如果是联通图，那么一定会合并(union)n-1次（得到一棵生成树）      
+    //每次合并相当于添加了一条边，而且是不会使得图出现环的边。
+{
+    init();  //对于每一种情况，都要初始化一次。
+ 
+    int cnt_merge = 0;
+    
+    for ( int i = 0 ; i <= n ; i++)
+    {
+    if (!ban[i])
+    {
+	cnt_merge+=Union(edge[i].fst,edge[i].sec);
+    }
+    }
+    return cnt_merge==n-1;
+}
+int main()
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("code/in.txt","r",stdin);
+  #endif
+ 
+    ios::sync_with_stdio(false);
+    int T;
+    cin>>T;          
+    while (T--)
+    {
+      //  init();
+	cin>>n;
+	for ( int i = 0 ; i <= n ; i++) cin>>edge[i].fst>>edge[i].sec;
+ 
+	ms(ban,false);
+ 
+	int ans = 0  ;
+	for ( int i = 0 ; i <= n ; i++)
 	{
-	    ms(f,0);
-	    for ( int i = 0 ; i < N ; i++) f[i] =  i;
+	ban[i] = true;
+	ans +=solve();
+	for ( int j = i+1 ; j <= n ; j++)
+	{
+	    ban[j] = true;
+	    ans +=solve();
+	    ban[j] = false; //回溯
+	//    cout<<"ans:"<<ans<<endl;
 	}
-	 
-	int root ( int x)
-	{
-	    if (f[x]!=x)
-	    f[x]=root(f[x]);
-	    return f[x];
+	ban[i] = false ;//回溯
+	
 	}
-	 
-	int Union( int x,int y)
-	{
-	    int rootx = root(x);
-	    int rooty = root(y);
-	  //  cout<<"rootx:"<<rootx<<" rooty:"<<rooty<<endl;
-	    if (rootx!=rooty)
-	    {
-	    f[rootx]=rooty;
-	    
-	    return 1;
-	    }
-	    return 0;
-	}
-	 
-	int solve()       //用并查集判断图连通性。如果是联通图，那么一定会合并(union)n-1次（得到一棵生成树）      
-	    //每次合并相当于添加了一条边，而且是不会使得图出现环的边。
-	{
-	    init();  //对于每一种情况，都要初始化一次。
-	 
-	    int cnt_merge = 0;
-	    
-	    for ( int i = 0 ; i <= n ; i++)
-	    {
-	    if (!ban[i])
-	    {
-		cnt_merge+=Union(edge[i].fst,edge[i].sec);
-	    }
-	    }
-	    return cnt_merge==n-1;
-	}
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("code/in.txt","r",stdin);
-	  #endif
-	 
-	    ios::sync_with_stdio(false);
-	    int T;
-	    cin>>T;          
-	    while (T--)
-	    {
-	      //  init();
-		cin>>n;
-		for ( int i = 0 ; i <= n ; i++) cin>>edge[i].fst>>edge[i].sec;
-	 
-		ms(ban,false);
-	 
-		int ans = 0  ;
-		for ( int i = 0 ; i <= n ; i++)
-		{
-		ban[i] = true;
-		ans +=solve();
-		for ( int j = i+1 ; j <= n ; j++)
-		{
-		    ban[j] = true;
-		    ans +=solve();
-		    ban[j] = false; //回溯
-		//    cout<<"ans:"<<ans<<endl;
-		}
-		ban[i] = false ;//回溯
-		
-		}
-		cout<<ans<<endl;
-	    }
+	cout<<ans<<endl;
+    }
+```
 
 ####树的直径
 
 poj 2631 一棵树中求两个点的最远距离。。
 
-```
+```c++
 const int N=1E4+7;
 int n,m;
 vector < pi> edge[N];
@@ -2561,155 +2822,161 @@ int main()
 
 ####交叉染色法判断无向图的奇偶环
 
-	const int N=1E5+7;
-	const int M=3E5+7;
-	int n,m;
-	int col[N];
-	bool even,odd;
-	bool vis[N];
-	int cnt ;
-	int head[N];
-	struct Edge
+```c++
+const int N=1E5+7;
+const int M=3E5+7;
+int n,m;
+int col[N];
+bool even,odd;
+bool vis[N];
+int cnt ;
+int head[N];
+struct Edge
+{
+    int v;
+    int nxt;
+    bool vis;
+}edge[2*M];  
+void addedge( int u,int v)
+{
+    edge[cnt].v = v;
+    edge[cnt].nxt = head[u];
+    edge[cnt].vis = false;
+    head[u] = cnt;
+    cnt++;
+}
+void dfs( int u,int x,int fa)
+{
+    col[u] = x;
+    for ( int i = head[u] ; i !=-1 ; i = edge[i].nxt)
+    {
+	int v = edge[i].v;
+	if (v==fa) continue;交叉染色法判断无向图的奇偶环
+	if (col[v]!=-1)
 	{
-	    int v;
-	    int nxt;
-	    bool vis;
-	}edge[2*M];  
-	void addedge( int u,int v)
-	{
-	    edge[cnt].v = v;
-	    edge[cnt].nxt = head[u];
-	    edge[cnt].vis = false;
-	    head[u] = cnt;
-	    cnt++;
+	    if (col[v]==x) odd = true;
+	    else even = true;
 	}
-	void dfs( int u,int x,int fa)
+	if (!edge[i].vis)
 	{
-	    col[u] = x;
-	    for ( int i = head[u] ; i !=-1 ; i = edge[i].nxt)
+	    edge[i].vis = true;
+	    dfs(v,1-x,u);
+	}
+    }
+    col[u] = -1;
+}
+void solve()
+{
+    odd = false;
+    even = false;
+    for ( int i = 1 ; i <= n ; i++){
+	if (col[i]==-1) dfs(i,0,-1);
+    }
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	int T;
+	cin>>T;
+	while (T--)
+	{
+	    scanf("%d%d",&n,&m);
+	    ms(col,-1);
+	    ms(head,-1);
+	    cnt = 0 ;
+	    for ( int i = 1 ;i <= m ; i++)
 	    {
-		int v = edge[i].v;
-		if (v==fa) continue;交叉染色法判断无向图的奇偶环
-		if (col[v]!=-1)
-		{
-		    if (col[v]==x) odd = true;
-		    else even = true;
-		}
-		if (!edge[i].vis)
-		{
-		    edge[i].vis = true;
-		    dfs(v,1-x,u);
-		}
+		int u,v;
+		scanf("%d%d",&u,&v);
+		addedge(u,v);
+		addedge(v,u);
 	    }
-	    col[u] = -1;
+	    solve();
+	    if (odd) puts("YES");else puts("NO");
+	    if (even) puts("YES");else  puts("NO");
 	}
-	void solve()
-	{
-	    odd = false;
-	    even = false;
-	    for ( int i = 1 ; i <= n ; i++){
-		if (col[i]==-1) dfs(i,0,-1);
-	    }
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		int T;
-		cin>>T;
-		while (T--)
-		{
-		    scanf("%d%d",&n,&m);
-		    ms(col,-1);
-		    ms(head,-1);
-		    cnt = 0 ;
-		    for ( int i = 1 ;i <= m ; i++)
-		    {
-			int u,v;
-			scanf("%d%d",&u,&v);
-			addedge(u,v);
-			addedge(v,u);
-		    }
-		    solve();
-		    if (odd) puts("YES");else puts("NO");
-		    if (even) puts("YES");else  puts("NO");
-		}
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 
 ####交叉染色法判断二分图
-	const int N=205;
-	vector <int>edge[N];
-	int n,m;
-	int col[N];
-	bool dfs( int u,int x)
+```c++
+const int N=205;
+vector <int>edge[N];
+int n,m;
+int col[N];
+bool dfs( int u,int x)
+{
+    col[u] = x;
+    int siz = edge[u].size();
+    for ( int i = 0 ; i < siz ; i++)
+    {
+	int v = edge[u][i];
+	if (col[v]==1-x) continue;
+	if (col[v]==x) return false;
+	if (!dfs(v,1-x)) return false;
+    }
+    return true;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	while (~scanf("%d",&n))
 	{
-	    col[u] = x;
-	    int siz = edge[u].size();
-	    for ( int i = 0 ; i < siz ; i++)
+	    if (n==0) break;
+	    ms(col,-1);
+	    for ( int i =  0 ;i <= n ; i++) edge[i].clear();
+	    scanf("%d",&m);
+	    for ( int i = 1 ; i <= m ; i++)
 	    {
-		int v = edge[u][i];
-		if (col[v]==1-x) continue;
-		if (col[v]==x) return false;
-		if (!dfs(v,1-x)) return false;
+	        int u,v;
+	        scanf("%d%d",&u,&v);
+	        edge[u].push_back(v);
+	        edge[v].push_back(u);
 	    }
+	    if (dfs(0,0))
+	        puts("BICOLORABLE.");
+	    else puts("NOT BICOLORABLE.");
+	}
+```
+####匈牙利算法
+```c++
+bool dfs(int u)
+{
+ //   cout<<"u:"<<u<<endl;
+    for ( int i = head[u] ; i!=-1 ; i = edge[i].nxt) //对于每个妹子，枚举她喜欢的蓝孩纸
+    {
+	int v = edge[i].to; //v为妹子u喜欢的蓝孩纸的编号
+	if (vis[v]) continue; //避免递归反复寻找同一个男孩子陷入死循环。
+	vis[v] = true;
+	if (link[v]==-1||dfs(link[v])) //如果这个男孩子是单身狗或者这个男孩子的女票还有其他男孩子可以选择（可以腾出位置）
+	{
+	    link[v] = u ;// 男孩子v和女孩子u在一起了。
 	    return true;
 	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		while (~scanf("%d",&n))
-		{
-		    if (n==0) break;
-		    ms(col,-1);
-		    for ( int i =  0 ;i <= n ; i++) edge[i].clear();
-		    scanf("%d",&m);
-		    for ( int i = 1 ; i <= m ; i++)
-		    {
-		        int u,v;
-		        scanf("%d%d",&u,&v);
-		        edge[u].push_back(v);
-		        edge[v].push_back(u);
-		    }
-		    if (dfs(0,0))
-		        puts("BICOLORABLE.");
-		    else puts("NOT BICOLORABLE.");
-		}
-####匈牙利算法
-	bool dfs(int u)
-	{
-	 //   cout<<"u:"<<u<<endl;
-	    for ( int i = head[u] ; i!=-1 ; i = edge[i].nxt) //对于每个妹子，枚举她喜欢的蓝孩纸
-	    {
-		int v = edge[i].to; //v为妹子u喜欢的蓝孩纸的编号
-		if (vis[v]) continue; //避免递归反复寻找同一个男孩子陷入死循环。
-		vis[v] = true;
-		if (link[v]==-1||dfs(link[v])) //如果这个男孩子是单身狗或者这个男孩子的女票还有其他男孩子可以选择（可以腾出位置）
-		{
-		    link[v] = u ;// 男孩子v和女孩子u在一起了。
-		    return true;
-		}
-	    }
-	    return false;
-	}
-	int hung(int n)
-	{
-	    int ans = 0 ;
-	    ms(link,-1);
-	    for ( int i = 1 ; i <= n ; i++) //扫描每个妹子
-	    {
-		ms(vis,false);
-		if (dfs(i)) ans++;
-	    }
-	    return ans;
-	}
+    }
+    return false;
+}
+int hung(int n)
+{
+    int ans = 0 ;
+    ms(link,-1);
+    for ( int i = 1 ; i <= n ; i++) //扫描每个妹子
+    {
+	ms(vis,false);
+	if (dfs(i)) ans++;
+    }
+    return ans;
+}
+```
 
 
 
@@ -2731,108 +2998,112 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 
 
 
-	const int N=305;
-	int w[N][N];
-	int n;
-	int link[N];
-	int lx[N],ly[N];//顶标
-	int slk[N]; //slk为一个优化函数，表示在DFS增广过程中，所有搜到的与该Y方点关联的边的(lx+ly-W)的最小值
-	bool visx[N],visy[N];
-	bool find( int u)
+```c++
+const int N=305;
+int w[N][N];
+int n;
+int link[N];
+int lx[N],ly[N];//顶标
+int slk[N]; //slk为一个优化函数，表示在DFS增广过程中，所有搜到的与该Y方点关联的边的(lx+ly-W)的最小值
+bool visx[N],visy[N];
+bool find( int u)
+{
+    visx[u] = true;
+    for ( int v = 1 ; v <= n ; v++) //这道题特殊：每两个点都有边相连。
+    {                    //对于有些题目中可能两个集合某些点没有边相连，我们可以看作有权值为0的边。
+    if (visy[v]) continue;
+    int tmp = lx[u] + ly[v] - w[u][v]; //要时刻保证tmp>=0，并称一样一组点标为可行的。
+//    cout<<"tmp:"<<tmp<<endl;
+    if (tmp==0)
+    {
+	visy[v] = true;
+	if (link[v]==-1||find(link[v]))
 	{
-	    visx[u] = true;
-	    for ( int v = 1 ; v <= n ; v++) //这道题特殊：每两个点都有边相连。
-	    {                    //对于有些题目中可能两个集合某些点没有边相连，我们可以看作有权值为0的边。
-	    if (visy[v]) continue;
-	    int tmp = lx[u] + ly[v] - w[u][v]; //要时刻保证tmp>=0，并称一样一组点标为可行的。
-	//    cout<<"tmp:"<<tmp<<endl;
-	    if (tmp==0)
-	    {
-		visy[v] = true;
-		if (link[v]==-1||find(link[v]))
-		{
-		link[v] = u;
-		return true;
-		}
-	    }
-	    else
-		if (tmp<slk[v]) slk[v] = tmp; //顺便（？）更新slk
-	    }
-	    return false;
+	link[v] = u;
+	return true;
 	}
-	int KM()
+    }
+    else
+	if (tmp<slk[v]) slk[v] = tmp; //顺便（？）更新slk
+    }
+    return false;
+}
+int KM()
+{
+
+    ms(link,-1);//初始没有找到匹配，同hungary
+    ms(ly,0);
+    ms(lx,0);//因为要使得所有lx[i]+ly[j]-w[i][j]>=0,所以初始化的时候（不妨）lx[i]=max(w[i][j]),ly[i]=0;
+    for ( int i = 1 ;  i <= n ; i++)
+    for ( int j = 1 ; j <= n ; j++)
+	lx[i] = max(w[i][j],lx[i]);
+    for ( int i =  1 ; i <= n ; i++)
+    {
+//    ms(slk,0x3f);
+    for ( int j = 1 ; j <= n ; j++) slk[j] = inf;
+    while (true)
+    {
+    //  cout<<"mio mio mio "<<endl;
+	ms(visx,false);
+	ms(visy,false);
+
+	if (find(i)) break;
+	int d = inf;
+	for ( int j = 1 ; j <= n ; j++)
 	{
-	
-	    ms(link,-1);//初始没有找到匹配，同hungary
-	    ms(ly,0);
-	    ms(lx,0);//因为要使得所有lx[i]+ly[j]-w[i][j]>=0,所以初始化的时候（不妨）lx[i]=max(w[i][j]),ly[i]=0;
-	    for ( int i = 1 ;  i <= n ; i++)
-	    for ( int j = 1 ; j <= n ; j++)
-		lx[i] = max(w[i][j],lx[i]);
-	    for ( int i =  1 ; i <= n ; i++)
-	    {
-	//    ms(slk,0x3f);
-	    for ( int j = 1 ; j <= n ; j++) slk[j] = inf;
-	    while (true)
-	    {
-	    //  cout<<"mio mio mio "<<endl;
-		ms(visx,false);
-		ms(visy,false);
-	
-		if (find(i)) break;
-		int d = inf;
-		for ( int j = 1 ; j <= n ; j++)
-		{
-		if (!visy[j]&&slk[j]<d) d= slk[j]; //d取所有slk值的最小值。
-		                    //这样有两个作用，一个是可以保证所有所有【点标对】仍然可行。
-		                    //另一个是这样的d每次都可以增加一条<可行边>进入相等子图。
-		}
-		for (int j = 1 ; j <= n ; j++) if (visx[j]) lx[j]-=d;
-		for (int j = 1 ; j <= n ; j++) if (visy[j]) ly[j]+=d;else slk[j]-=d;
-	    }
-	    }
-	    int res = 0 ;
-	    for ( int i = 1 ; i <= n ; i++)
-	    {
-	    if (link[i]>-1)
-	    {
-		res += w[link[i]][i];
-	    }
-	    }
-	    return res;
+	if (!visy[j]&&slk[j]<d) d= slk[j]; //d取所有slk值的最小值。
+	                    //这样有两个作用，一个是可以保证所有所有【点标对】仍然可行。
+	                    //另一个是这样的d每次都可以增加一条<可行边>进入相等子图。
 	}
-	int main()
-	{
-	    #ifndef  ONLINE_JUDGE
-	
-	    freopen("code/in.txt","r",stdin);
-	  #endif
-	    while (scanf("%d",&n)!=EOF)
-	    {
-		for ( int i = 1 ; i <= n ; i++)
-		for ( int j = 1 ; j <= n ; j++)
-		    scanf("%d",&w[i][j]);
-		int ans = KM();
-		printf("%d\n",ans);
-	    }
-	  #ifndef ONLINE_JUDGE
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+	for (int j = 1 ; j <= n ; j++) if (visx[j]) lx[j]-=d;
+	for (int j = 1 ; j <= n ; j++) if (visy[j]) ly[j]+=d;else slk[j]-=d;
+    }
+    }
+    int res = 0 ;
+    for ( int i = 1 ; i <= n ; i++)
+    {
+    if (link[i]>-1)
+    {
+	res += w[link[i]][i];
+    }
+    }
+    return res;
+}
+int main()
+{
+    #ifndef  ONLINE_JUDGE
+
+    freopen("code/in.txt","r",stdin);
+  #endif
+    while (scanf("%d",&n)!=EOF)
+    {
+	for ( int i = 1 ; i <= n ; i++)
+	for ( int j = 1 ; j <= n ; j++)
+	    scanf("%d",&w[i][j]);
+	int ans = KM();
+	printf("%d\n",ans);
+    }
+  #ifndef ONLINE_JUDGE
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 ####spfa算法
 	vector < pi > edge[N];
 
 
-	int d[N];
-	bool inq[N];
-	int posi[N];
-	vector <int>ans;
-	void spfa( int s)
-	{
-	    ms(inq,false);
-	    ms(d,0x3f);
+```c++
+int d[N];
+bool inq[N];
+int posi[N];
+vector <int>ans;
+void spfa( int s)
+{
+    ms(inq,false);
+    ms(d,0x3f);
+```
 
 
 	    queue<int>q;
@@ -2841,25 +3112,29 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 	    inq[s] = true;
 
 
-	    while (!q.empty())
-	    {
-	    int u = q.front();
-	    q.pop();
-	    inq[u] = false;
+```c++
+    while (!q.empty())
+    {
+    int u = q.front();
+    q.pop();
+    inq[u] = false;
+```
 
 
 	    int siz = edge[u].size();
 
 
-	    for ( int i = 0 ; i < siz ; i ++)
-	    {
-		int v = edge[u][i].fst;
-		if (d[v]>d[u]+edge[u][i].sec)
-		{
-		d[v] = d[u] + edge[u][i].sec;
-		if (inq[v]) continue;
-		inq[v] = true;
-		q.push(v);
+```c++
+    for ( int i = 0 ; i < siz ; i ++)
+    {
+	int v = edge[u][i].fst;
+	if (d[v]>d[u]+edge[u][i].sec)
+	{
+	d[v] = d[u] + edge[u][i].sec;
+	if (inq[v]) continue;
+	inq[v] = true;
+	q.push(v);
+```
 
 
 		}
@@ -2871,289 +3146,293 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 ##计算几何
 ####n个圆面积交，可以求出交恰好k次的面积(k属于1..n)
 
-	const double eps = 1e-10;  
-	const int MAXN = 1E3+7;  
-	const double PI = acos(-1.0);  
-	#define sqr(x) ((x)*(x))  
-	const int N = 1010;  
-	double area[N];  
-	int n;  
-	  
-	int dblcmp(double d){ return d<-eps?-1:d>eps;}  
-	struct point
-	{
-	    double x,y;
-	    double ang;
-	    int d;
-	    point(){}
-	    point(double x,double y):x(x),y(y){}
-	    point(double _x,double _y,double _ang,int _d)
-	    {
-	    x = _x;
-	    y = _y;
-	    ang = _ang;
-	    d = _d;
-	    }
-	    void input(){scanf("%lf%lf",&x,&y);}
-	    double angle(){ return atan2(y,x);}
-	    point operator + (const point &rhs)const{ return point(x+rhs.x,y+rhs.y);}
-	    point operator - (const point &rhs)const{ return point(x-rhs.x,y-rhs.y);}
-	    point operator * (double t)const{ return point(t*x,t*y);}
-	    point operator / (double t)const{ return point(x/t,y/t);}
-	    double length() const { return sqrt(x*x+y*y);};
-	    point unit()const { double l = length();return point(x/l,y/l); }
-	}tp[N*2];
-	double cross (const point a,point b){ return a.x*b.y-a.y*b.x ;}
-	double dist(const point p1,point p2) { return (p1-p2).length();}
-	struct circle  
-	{ 
-	    point c;
-	    double r;
-	    int d; 
-	    void input()  
-	    {  
-	    c.input();
-	    scanf("%lf",&r);
-		d = 1;  
-	    }
-	    bool contain (const circle & cir)const{ return dblcmp(dist(cir.c,c)+cir.r-r)<=0;}
-	    bool interect (const circle & cir)const{ return dblcmp(dist(cir.c,c)-cir.r-r)<0;}
-	} cir[N];// tp[N * 2];  
-	  
-	double dis(point a, point b)  {return sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));} 
-	int CirCrossCir(circle cir1,circle cir2, point &p1, point &p2)  
+```c++
+const double eps = 1e-10;  
+const int MAXN = 1E3+7;  
+const double PI = acos(-1.0);  
+#define sqr(x) ((x)*(x))  
+const int N = 1010;  
+double area[N];  
+int n;  
+  
+int dblcmp(double d){ return d<-eps?-1:d>eps;}  
+struct point
+{
+    double x,y;
+    double ang;
+    int d;
+    point(){}
+    point(double x,double y):x(x),y(y){}
+    point(double _x,double _y,double _ang,int _d)
+    {
+    x = _x;
+    y = _y;
+    ang = _ang;
+    d = _d;
+    }
+    void input(){scanf("%lf%lf",&x,&y);}
+    double angle(){ return atan2(y,x);}
+    point operator + (const point &rhs)const{ return point(x+rhs.x,y+rhs.y);}
+    point operator - (const point &rhs)const{ return point(x-rhs.x,y-rhs.y);}
+    point operator * (double t)const{ return point(t*x,t*y);}
+    point operator / (double t)const{ return point(x/t,y/t);}
+    double length() const { return sqrt(x*x+y*y);};
+    point unit()const { double l = length();return point(x/l,y/l); }
+}tp[N*2];
+double cross (const point a,point b){ return a.x*b.y-a.y*b.x ;}
+double dist(const point p1,point p2) { return (p1-p2).length();}
+struct circle  
+{ 
+    point c;
+    double r;
+    int d; 
+    void input()  
+    {  
+    c.input();
+    scanf("%lf",&r);
+	d = 1;  
+    }
+    bool contain (const circle & cir)const{ return dblcmp(dist(cir.c,c)+cir.r-r)<=0;}
+    bool interect (const circle & cir)const{ return dblcmp(dist(cir.c,c)-cir.r-r)<0;}
+} cir[N];// tp[N * 2];  
+  
+double dis(point a, point b)  {return sqrt(sqr(a.x - b.x) + sqr(a.y - b.y));} 
+int CirCrossCir(circle cir1,circle cir2, point &p1, point &p2)  
+{  
+    point m = cir2.c-cir1.c;
+    point s = cir2.c+cir1.c;
+    point m2 = point(sqr(m.x),sqr(m.y));
+    double dis2 = m2.x + m2.y, d = -(dis2 - sqr(cir1.r - cir2.r)) * (dis2 - sqr(cir1.r + cir2.r));  
+    if (d + eps < 0) return 0;  
+    if (d < eps) d = 0;  
+    else d = sqrt(d);
+    double x = m.x * ((cir1.r + cir2.r) * (cir1.r - cir2.r) + m.x * s.x) + s.x * m2.y;  
+    double y = m.y * ((cir1.r+ cir2.r) * (cir1.r - cir2.r) + m.y * s.y) + s.y * m2.x;  
+    point dp = m*d;
+    dis2 *= 2;
+    p1 = point (x-dp.y,y+dp.x)/dis2;
+    p2 = point (x+dp.y,y-dp.x)/dis2;
+    if (d > eps) return 2;  
+    else return 1;  
+}  
+bool circmp(const circle& u, const circle& v)  
+{  
+    return dblcmp(u.r - v.r) < 0;  
+}  
+bool cmp(const point& u, const point& v)  
+{  
+    if (dblcmp(u.ang - v.ang)) return u.ang < v.ang;  
+    return u.d > v.d;  
+}  
+  
+double calc(circle cir, point p1, point p2)  
+{  
+    double ans = (p2.ang - p1.ang) * sqr(cir.r)
+	 - cross ( (p1-cir.c),(p2-cir.c)) + cross( p1,p2);
+    return ans *0.5; 
+}  
+  
+void CirUnion(circle cir[], int n)  
+{  
+    circle cir1, cir2;  
+    point p1,p2;
+    sort(cir, cir + n, circmp);  
+    for (int i = 0; i < n; ++i)  
+	for (int j = i + 1; j < n; ++j)  
+	if (cir[j].contain(cir[i]))
+	        cir[i].d++;  
+    for (int i = 0; i < n; ++i)  
+    {  
+	int tn = 0, cnt = 0;  
+	for (int j = 0; j < n; ++j)  
 	{  
-	    point m = cir2.c-cir1.c;
-	    point s = cir2.c+cir1.c;
-	    point m2 = point(sqr(m.x),sqr(m.y));
-	    double dis2 = m2.x + m2.y, d = -(dis2 - sqr(cir1.r - cir2.r)) * (dis2 - sqr(cir1.r + cir2.r));  
-	    if (d + eps < 0) return 0;  
-	    if (d < eps) d = 0;  
-	    else d = sqrt(d);
-	    double x = m.x * ((cir1.r + cir2.r) * (cir1.r - cir2.r) + m.x * s.x) + s.x * m2.y;  
-	    double y = m.y * ((cir1.r+ cir2.r) * (cir1.r - cir2.r) + m.y * s.y) + s.y * m2.x;  
-	    point dp = m*d;
-	    dis2 *= 2;
-	    p1 = point (x-dp.y,y+dp.x)/dis2;
-	    p2 = point (x+dp.y,y-dp.x)/dis2;
-	    if (d > eps) return 2;  
-	    else return 1;  
+	    if (i == j) continue;  
+	    if (CirCrossCir(cir[i],cir[j],p2, p1) < 2) continue;  
+	p1.ang = (p1-cir[i].c).angle();
+	p2.ang = (p2-cir[i].c).angle();
+	    p1.d = 1;  
+	    tp[tn++] = p1;  
+	    p2.d = -1;  
+	    tp[tn++] = p2;  
+	    if (dblcmp(p1.ang - p2.ang) > 0) cnt++;  
 	}  
-	bool circmp(const circle& u, const circle& v)  
+	tp[tn++] = point(cir[i].c.x - cir[i].r, cir[i].c.y, PI, -cnt);  
+	tp[tn++] = point(cir[i].c.x - cir[i].r, cir[i].c.y, -PI, cnt);  
+	sort(tp, tp + tn, cmp);  
+	int p, s = cir[i].d + tp[0].d;  
+	for (int j = 1; j < tn; ++j)  
 	{  
-	    return dblcmp(u.r - v.r) < 0;  
+	    p = s;  
+	    s += tp[j].d;  
+	    area[p] += calc(cir[i], tp[j - 1], tp[j]);  
 	}  
-	bool cmp(const point& u, const point& v)  
-	{  
-	    if (dblcmp(u.ang - v.ang)) return u.ang < v.ang;  
-	    return u.d > v.d;  
-	}  
-	  
-	double calc(circle cir, point p1, point p2)  
-	{  
-	    double ans = (p2.ang - p1.ang) * sqr(cir.r)
-		 - cross ( (p1-cir.c),(p2-cir.c)) + cross( p1,p2);
-	    return ans *0.5; 
-	}  
-	  
-	void CirUnion(circle cir[], int n)  
-	{  
-	    circle cir1, cir2;  
-	    point p1,p2;
-	    sort(cir, cir + n, circmp);  
-	    for (int i = 0; i < n; ++i)  
-		for (int j = i + 1; j < n; ++j)  
-		if (cir[j].contain(cir[i]))
-		        cir[i].d++;  
-	    for (int i = 0; i < n; ++i)  
-	    {  
-		int tn = 0, cnt = 0;  
-		for (int j = 0; j < n; ++j)  
-		{  
-		    if (i == j) continue;  
-		    if (CirCrossCir(cir[i],cir[j],p2, p1) < 2) continue;  
-		p1.ang = (p1-cir[i].c).angle();
-		p2.ang = (p2-cir[i].c).angle();
-		    p1.d = 1;  
-		    tp[tn++] = p1;  
-		    p2.d = -1;  
-		    tp[tn++] = p2;  
-		    if (dblcmp(p1.ang - p2.ang) > 0) cnt++;  
-		}  
-		tp[tn++] = point(cir[i].c.x - cir[i].r, cir[i].c.y, PI, -cnt);  
-		tp[tn++] = point(cir[i].c.x - cir[i].r, cir[i].c.y, -PI, cnt);  
-		sort(tp, tp + tn, cmp);  
-		int p, s = cir[i].d + tp[0].d;  
-		for (int j = 1; j < tn; ++j)  
-		{  
-		    p = s;  
-		    s += tp[j].d;  
-		    area[p] += calc(cir[i], tp[j - 1], tp[j]);  
-		}  
-	    }  
-	}  
-	void solve()  
-	{  
-	    scanf("%d", &n);  
-	    for (int i = 0; i < n; ++i)  
-		cir[i].input();  
-	    memset(area, 0, sizeof(area));  
-	    CirUnion(cir, n);  
-	    //去掉重复计算的  
-	    for (int i = 1; i <= n; ++i)  
-	    {  
-		area[i] -= area[i + 1];  
-	    }  
-	    //area[i]为重叠了i次的面积 
-	    for ( int i = 1 ; i <= n ; i++) printf("[%d] = %.3f\n",i,area[i]+eps);
-	    //tot 为总面积  
-	    //double tot = 0;  
-	    //for(int i=1; i<=n; i++) tot += area[i];  
-	    //printf("%f\n", tot);  
-	}  
-	  
-	int main()  
-	{  
-	   // freopen("./in.txt", "r", stdin);  
-	    solve();
-	    return 0;  
-	}
+    }  
+}  
+void solve()  
+{  
+    scanf("%d", &n);  
+    for (int i = 0; i < n; ++i)  
+	cir[i].input();  
+    memset(area, 0, sizeof(area));  
+    CirUnion(cir, n);  
+    //去掉重复计算的  
+    for (int i = 1; i <= n; ++i)  
+    {  
+	area[i] -= area[i + 1];  
+    }  
+    //area[i]为重叠了i次的面积 
+    for ( int i = 1 ; i <= n ; i++) printf("[%d] = %.3f\n",i,area[i]+eps);
+    //tot 为总面积  
+    //double tot = 0;  
+    //for(int i=1; i<=n; i++) tot += area[i];  
+    //printf("%f\n", tot);  
+}  
+  
+int main()  
+{  
+   // freopen("./in.txt", "r", stdin);  
+    solve();
+    return 0;  
+}
+```
 
 ####n个圆面积并
-	const double PI = acos(-1.0);
-	const int N =1e3+7;
-	inline int dblcmp( double d) { return d<-eps?-1:d>eps;}
-	struct point
-	{
-	    double x,y;
-	    point(){}
-	    point(double x,double y):x(x),y(y){}
-	    void input(){scanf("%lf%lf",&x,&y);}
-	    double angle(){ return atan2(y,x);}
-	    point operator + (const point &rhs)const{ return point(x+rhs.x,y+rhs.y);}
-	    point operator - (const point &rhs)const{ return point(x-rhs.x,y-rhs.y);}
-	    point operator * (double t)const{ return point(t*x,t*y);}
-	    point operator / (double t)const{ return point(x/t,y/t);}
-	    double length() const { return sqrt(x*x+y*y);};
-	    point unit()const { double l = length();return point(x/l,y/l); }
-	};
-	double cross (const point a,point b){ return a.x*b.y-a.y*b.x ;}
-	double dist(const point p1,point p2) { return (p1-p2).length();}
-	point rotate(point p,double angle,point o = point(0,0))
-	{   point t = p-o;
-	    double x = t.x * cos(angle) - t.y*sin(angle);
-	    double y = t.y * cos(angle) + t.x*sin(angle);
-	    return point (x,y)+o;
+```c++
+const double PI = acos(-1.0);
+const int N =1e3+7;
+inline int dblcmp( double d) { return d<-eps?-1:d>eps;}
+struct point
+{
+    double x,y;
+    point(){}
+    point(double x,double y):x(x),y(y){}
+    void input(){scanf("%lf%lf",&x,&y);}
+    double angle(){ return atan2(y,x);}
+    point operator + (const point &rhs)const{ return point(x+rhs.x,y+rhs.y);}
+    point operator - (const point &rhs)const{ return point(x-rhs.x,y-rhs.y);}
+    point operator * (double t)const{ return point(t*x,t*y);}
+    point operator / (double t)const{ return point(x/t,y/t);}
+    double length() const { return sqrt(x*x+y*y);};
+    point unit()const { double l = length();return point(x/l,y/l); }
+};
+double cross (const point a,point b){ return a.x*b.y-a.y*b.x ;}
+double dist(const point p1,point p2) { return (p1-p2).length();}
+point rotate(point p,double angle,point o = point(0,0))
+{   point t = p-o;
+    double x = t.x * cos(angle) - t.y*sin(angle);
+    double y = t.y * cos(angle) + t.x*sin(angle);
+    return point (x,y)+o;
+}
+struct region{
+    double st,ed;
+    region(){}
+    region(double st,double ed):st(st),ed(ed){}
+    bool operator < (const region & rhs)const
+    {   if (dblcmp(st-rhs.st)) return st<rhs.st;
+    return ed<rhs.ed;
+    }
+};
+struct circle{
+    point c;
+    double r;
+    vector <region>reg;
+    circle(){}
+    circle(point c,double r):c(c),r(r){}
+    void input()
+    {
+    c.input();
+    scanf("%lf",&r);
+    }
+    void add(const region &r){ reg.PB(r);}
+    bool contain (const circle & cir)const{ return dblcmp(dist(cir.c,c)+cir.r-r)<=0;}
+    bool interect (const circle & cir)const{ return dblcmp(dist(cir.c,c)-cir.r-r)<0;}
+};
+double sqr( double x){ return x*x;}
+void intersection(circle cir1,circle cir2,point &p1,point &p2)
+{
+    double l = dist(cir1.c,cir2.c);
+    double d = (sqr(l)-sqr(cir2.r) + sqr(cir1.r))/(2*l);
+    double d2 = sqrt(sqr(cir1.r)-sqr(d));
+    point mid = cir1.c + (cir2.c-cir1.c).unit() * d;
+    point v = rotate(cir2.c-cir1.c,PI/2).unit()*d2;
+    p1 = mid + v,p2 = mid -v;
+}
+point calc(const circle &cir,double angle)
+{
+    point p = point (cir.c.x+cir.r,cir.c.y);
+    return rotate(p,angle,cir.c);
+}
+ 
+circle cir[N];
+bool del[N];
+int n;
+ 
+double solve()
+{
+    double ans = 0 ;
+    for ( int i = 0 ; i < n ;  i++){
+    for ( int j = 0 ; j < n ; j++) if (!del[j]){
+	if (i==j) continue;
+	if (cir[j].contain(cir[i]))
+	{   del[i] = true;
+	break;
 	}
-	struct region{
-	    double st,ed;
-	    region(){}
-	    region(double st,double ed):st(st),ed(ed){}
-	    bool operator < (const region & rhs)const
-	    {   if (dblcmp(st-rhs.st)) return st<rhs.st;
-	    return ed<rhs.ed;
-	    }
-	};
-	struct circle{
-	    point c;
-	    double r;
-	    vector <region>reg;
-	    circle(){}
-	    circle(point c,double r):c(c),r(r){}
-	    void input()
-	    {
-	    c.input();
-	    scanf("%lf",&r);
-	    }
-	    void add(const region &r){ reg.PB(r);}
-	    bool contain (const circle & cir)const{ return dblcmp(dist(cir.c,c)+cir.r-r)<=0;}
-	    bool interect (const circle & cir)const{ return dblcmp(dist(cir.c,c)-cir.r-r)<0;}
-	};
-	double sqr( double x){ return x*x;}
-	void intersection(circle cir1,circle cir2,point &p1,point &p2)
+    }
+    }
+    for ( int i = 0 ; i < n ; i++) if (!del[i]){
+    circle &mc = cir[i];
+    point p1,p2;
+    bool flag = false;
+    for ( int j = 0 ; j < n ; j++) if (!del[j]){
+	if (i==j) continue;
+	if (!mc.interect(cir[j])) continue;
+	flag = true;
+	intersection(mc,cir[j],p1,p2);
+	double rs = (p2-mc.c).angle(),rt = (p1-mc.c).angle();
+	if (dblcmp(rs)<0) rs+=2*PI;
+	if (dblcmp(rt)<0) rt+=2*PI;
+	if (dblcmp(rs-rt)>0) mc.add(region(rs,PI*2)),mc.add(region(0,rt));
+	else mc.add(region(rs,rt));
+    }
+    if (!flag) { ans += PI*sqr(mc.r); continue;}
+    sort(mc.reg.begin(),mc.reg.end());
+    int cnt = 1;
+    for ( int j = 1 ; j < mc.reg.size() ; j++)
+    {
+	if (dblcmp(mc.reg[cnt-1].ed - mc.reg[j].st)>=0)
+	mc.reg[cnt-1].ed = max(mc.reg[cnt-1].ed,mc.reg[j].ed);
+	else mc.reg[cnt++] = mc.reg[j];
+    }
+	mc.add(region());
+	mc.reg[cnt]=mc.reg[0];
+	for ( int j = 0 ; j < cnt ; j++)
 	{
-	    double l = dist(cir1.c,cir2.c);
-	    double d = (sqr(l)-sqr(cir2.r) + sqr(cir1.r))/(2*l);
-	    double d2 = sqrt(sqr(cir1.r)-sqr(d));
-	    point mid = cir1.c + (cir2.c-cir1.c).unit() * d;
-	    point v = rotate(cir2.c-cir1.c,PI/2).unit()*d2;
-	    p1 = mid + v,p2 = mid -v;
+	p1 = calc(mc,mc.reg[j].ed);
+	p2 = calc(mc,mc.reg[j+1].st);
+	ans +=cross(p1,p2)/2;
+	double angle = mc.reg[j+1].st - mc.reg[j].ed;
+	if (dblcmp(angle)<0) angle+=2*PI;
+	ans+=0.5*sqr(mc.r)*(angle-sin(angle));
 	}
-	point calc(const circle &cir,double angle)
-	{
-	    point p = point (cir.c.x+cir.r,cir.c.y);
-	    return rotate(p,angle,cir.c);
-	}
-	 
-	circle cir[N];
-	bool del[N];
-	int n;
-	 
-	double solve()
-	{
-	    double ans = 0 ;
-	    for ( int i = 0 ; i < n ;  i++){
-	    for ( int j = 0 ; j < n ; j++) if (!del[j]){
-		if (i==j) continue;
-		if (cir[j].contain(cir[i]))
-		{   del[i] = true;
-		break;
-		}
-	    }
-	    }
-	    for ( int i = 0 ; i < n ; i++) if (!del[i]){
-	    circle &mc = cir[i];
-	    point p1,p2;
-	    bool flag = false;
-	    for ( int j = 0 ; j < n ; j++) if (!del[j]){
-		if (i==j) continue;
-		if (!mc.interect(cir[j])) continue;
-		flag = true;
-		intersection(mc,cir[j],p1,p2);
-		double rs = (p2-mc.c).angle(),rt = (p1-mc.c).angle();
-		if (dblcmp(rs)<0) rs+=2*PI;
-		if (dblcmp(rt)<0) rt+=2*PI;
-		if (dblcmp(rs-rt)>0) mc.add(region(rs,PI*2)),mc.add(region(0,rt));
-		else mc.add(region(rs,rt));
-	    }
-	    if (!flag) { ans += PI*sqr(mc.r); continue;}
-	    sort(mc.reg.begin(),mc.reg.end());
-	    int cnt = 1;
-	    for ( int j = 1 ; j < mc.reg.size() ; j++)
-	    {
-		if (dblcmp(mc.reg[cnt-1].ed - mc.reg[j].st)>=0)
-		mc.reg[cnt-1].ed = max(mc.reg[cnt-1].ed,mc.reg[j].ed);
-		else mc.reg[cnt++] = mc.reg[j];
-	    }
-		mc.add(region());
-		mc.reg[cnt]=mc.reg[0];
-		for ( int j = 0 ; j < cnt ; j++)
-		{
-		p1 = calc(mc,mc.reg[j].ed);
-		p2 = calc(mc,mc.reg[j+1].st);
-		ans +=cross(p1,p2)/2;
-		double angle = mc.reg[j+1].st - mc.reg[j].ed;
-		if (dblcmp(angle)<0) angle+=2*PI;
-		ans+=0.5*sqr(mc.r)*(angle-sin(angle));
-		}
-	    }
-	    return ans;
-	    
-	}
-	int main() 
-	{
-	    #ifndef  ONLINE_JUDGE 
-	    freopen("./in.txt","r",stdin);
-	  #endif
-	 
-	    scanf("%d",&n);
-	    for ( int i = 0 ; i < n ; i++) cir[i].input();
-	    printf("%.3f\n",solve());
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+    }
+    return ans;
+    
+}
+int main() 
+{
+    #ifndef  ONLINE_JUDGE 
+    freopen("./in.txt","r",stdin);
+  #endif
+ 
+    scanf("%d",&n);
+    for ( int i = 0 ; i < n ; i++) cir[i].input();
+    printf("%.3f\n",solve());
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 
 ​	 
@@ -3168,7 +3447,7 @@ Knoig定理：二分图的最小顶点覆盖数等于二分图的最大匹配数
 
 ##### SAM模板
 
-```
+```c++
 const int N=5E5+7;
 struct SAM
 {
@@ -3320,7 +3599,7 @@ struct SAM
 
 ###### 给出一个字符串A和n个字符串B,问A的子串中，不在任何一个B中出现的本质不同的子串有多少。
 
-```
+```c++
 #define MAXALP 30
 const int mod = 2012;
 struct state
@@ -3439,7 +3718,7 @@ int main()
 
 ###### 给出两个字符串，问公共长度大于等于k的子串个数（只要两个串的位置不同就认为是不同）
 
-```
+```c++
 #define MAXALP 55 //还有大写字母orz
 int k;
 struct state
@@ -3566,30 +3845,32 @@ kmp算法中nxt[i]的含义：
 next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和后缀相同的长度。
 需要注意的是，模板串不变的话，nxt数组求一次就行了。
 
-	void getnxt( int n)
-	{
-	    int i = 0;
-	    int j = -1;
-	    nxt[0] = -1;
-	    while (i<n)
-		if (j==-1||b[i]==b[j]) nxt[++i]=++j;
-	    else j = nxt[j];
-	}
-	 
-	void kmp( int n,int m)
-	{
-	    int i = 0 ;
-	    int j = 0 ;
-	    getnxt(m);
-	   // for ( int i = 0 ; i < m ; i++) cout<<i<<" "<<nxt[i]<<endl;
-	    while (i<n)
-	    {
-		if (j==-1||a[i]==b[j]) i++,j++;
-		else j = nxt[j];
-		if (j==m) ans++,j=nxt[j];
-	 
-	//        cout<<"n:"<<n<<" i:"<<i<<" j:"<<j<<endl;
-	    }
+```c++
+void getnxt( int n)
+{
+    int i = 0;
+    int j = -1;
+    nxt[0] = -1;
+    while (i<n)
+	if (j==-1||b[i]==b[j]) nxt[++i]=++j;
+    else j = nxt[j];
+}
+ 
+void kmp( int n,int m)
+{
+    int i = 0 ;
+    int j = 0 ;
+    getnxt(m);
+   // for ( int i = 0 ; i < m ; i++) cout<<i<<" "<<nxt[i]<<endl;
+    while (i<n)
+    {
+	if (j==-1||a[i]==b[j]) i++,j++;
+	else j = nxt[j];
+	if (j==m) ans++,j=nxt[j];
+ 
+//        cout<<"n:"<<n<<" i:"<<i<<" j:"<<j<<endl;
+    }
+```
 }
 如果不允许重叠。。。
 其实只要每次找到的时候j=0一下就好咯。
@@ -3601,190 +3882,194 @@ next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和�
 
 
 ####AC自动机
-	struct Trie
+```c++
+struct Trie
+{
+    struct Node
+    {
+    Node *nxt[26];
+    Node *fail;
+    int cnt;
+    Node()
+    {
+	for ( int i = 0 ; i < 26 ; i++) nxt[i] = NULL;
+	cnt = 0 ;
+	fail=NULL;
+    }
+    };
+    Node *root;
+    void init()
+    {
+    root = new Node();
+    }
+    void Insert(char *s)
+    {
+    int len = strlen(s);
+    Node *u = root;
+    for ( int i = 0 ; i < len ; i++)
+    {
+	int v = s[i]-'a';
+	if (u->nxt[v]==NULL) u->nxt[v] = new Node();
+	u = u->nxt[v];
+    }
+    u->cnt++;
+    }
+    void getFail()
+    {
+    root->fail = root;
+    queue<Node*>Q;
+    for ( int i = 0 ; i < 26 ; i++)
+    {
+	if (root->nxt[i]==NULL)
+	root->nxt[i] = root;
+	else
 	{
-	    struct Node
-	    {
-	    Node *nxt[26];
-	    Node *fail;
-	    int cnt;
-	    Node()
-	    {
-		for ( int i = 0 ; i < 26 ; i++) nxt[i] = NULL;
-		cnt = 0 ;
-		fail=NULL;
-	    }
-	    };
-	    Node *root;
-	    void init()
-	    {
-	    root = new Node();
-	    }
-	    void Insert(char *s)
-	    {
-	    int len = strlen(s);
-	    Node *u = root;
-	    for ( int i = 0 ; i < len ; i++)
-	    {
-		int v = s[i]-'a';
-		if (u->nxt[v]==NULL) u->nxt[v] = new Node();
-		u = u->nxt[v];
-	    }
-	    u->cnt++;
-	    }
-	    void getFail()
-	    {
-	    root->fail = root;
-	    queue<Node*>Q;
-	    for ( int i = 0 ; i < 26 ; i++)
-	    {
-		if (root->nxt[i]==NULL)
-		root->nxt[i] = root;
-		else
-		{
-		root->nxt[i]->fail = root;
-		Q.push(root->nxt[i]);
-		}
-	    }
-	    while (!Q.empty())
-	    {
-		Node *cur = Q.front();
-		Q.pop();
-		for ( int i = 0 ; i < 26 ; i++)
-		if (cur->nxt[i]==NULL)
-		{
-		    cur->nxt[i] = cur->fail->nxt[i];
-		}
-		else
-		{
-		    cur->nxt[i]->fail = cur->fail->nxt[i];
-		    Q.push(cur->nxt[i]);
-		}
-	    }
-	    }
-	    int Search(char *s)
-	    {
-	    int len = strlen(s);
-	    Node *u = root;
-	    int res = 0 ;
-	    for ( int i = 0 ; i < len ; i++)
-	    {
-		int v = s[i]-'a';
-		u = u->nxt[v];
-		Node *tmp = u;
-		while (tmp!=root)
-		{
-		res = res + tmp->cnt;
-		tmp->cnt = 0 ;
-		tmp = tmp->fail;
-		}
-	    }
-	    return res;
-	    }
-	}ac;
+	root->nxt[i]->fail = root;
+	Q.push(root->nxt[i]);
+	}
+    }
+    while (!Q.empty())
+    {
+	Node *cur = Q.front();
+	Q.pop();
+	for ( int i = 0 ; i < 26 ; i++)
+	if (cur->nxt[i]==NULL)
+	{
+	    cur->nxt[i] = cur->fail->nxt[i];
+	}
+	else
+	{
+	    cur->nxt[i]->fail = cur->fail->nxt[i];
+	    Q.push(cur->nxt[i]);
+	}
+    }
+    }
+    int Search(char *s)
+    {
+    int len = strlen(s);
+    Node *u = root;
+    int res = 0 ;
+    for ( int i = 0 ; i < len ; i++)
+    {
+	int v = s[i]-'a';
+	u = u->nxt[v];
+	Node *tmp = u;
+	while (tmp!=root)
+	{
+	res = res + tmp->cnt;
+	tmp->cnt = 0 ;
+	tmp = tmp->fail;
+	}
+    }
+    return res;
+    }
+}ac;
+```
 
 
 ####trie 树
 #####带删除的静态trie树模板
-	int n;
-	char s[N][12];
-	int tot;
-	struct Trie
+```c++
+int n;
+char s[N][12];
+int tot;
+struct Trie
+{
+    int nxt[10];
+    int cnt;
+ 
+    void init()
+    {
+	ms(nxt,0);
+	cnt = 0;
+    }
+}trie[N];
+int add()
+{
+    memset(&trie[tot],0,sizeof(Trie));
+    return tot++;
+}
+void Insert(char *s)
+{
+    int rt = 0 ;
+    int len = strlen(s);
+    for ( int i = 0 ; i < len ; i++)
+    {
+	int v = s[i]-'0';
+	if (!trie[rt].nxt[v]) trie[rt].nxt[v] = add();
+	rt = trie[rt].nxt[v];
+	trie[rt].cnt++;
+    }
+}
+void Delete(char *s)
+{
+    int rt = 0 ;
+    int len = strlen(s);
+    for ( int i = 0 ; i < len ; i++)
+    {
+	int v = s[i]-'0';
+	if (trie[rt].nxt[v])
 	{
-	    int nxt[10];
-	    int cnt;
-	 
-	    void init()
+	    rt = trie[rt].nxt[v];
+	    trie[rt].cnt--;
+	}
+    }
+}
+bool Find(char *s)
+{
+    int rt = 0 ;
+    int len = strlen(s);
+    for ( int i = 0 ; i < len ;i++)
+    {
+	int v = s[i]-'0';
+	if (!trie[rt].nxt[v]||trie[trie[rt].nxt[v]].cnt==0) return false;
+	rt = trie[rt].nxt[v];
+    }
+    return true;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	int T ; 
+	cin>>T;
+	while (T--)
+	{
+	    scanf("%d",&n);
+	    tot = 1;
+	    trie[0].init();
+	    for ( int i = 1 ; i <= n ; i++)
 	    {
-		ms(nxt,0);
-		cnt = 0;
+	        scanf("%s",s[i]);
+	        Insert(s[i]);
 	    }
-	}trie[N];
-	int add()
-	{
-	    memset(&trie[tot],0,sizeof(Trie));
-	    return tot++;
-	}
-	void Insert(char *s)
-	{
-	    int rt = 0 ;
-	    int len = strlen(s);
-	    for ( int i = 0 ; i < len ; i++)
+	    bool ok = true;
+	    for ( int i = 1 ; i <= n ; i++)
 	    {
-		int v = s[i]-'0';
-		if (!trie[rt].nxt[v]) trie[rt].nxt[v] = add();
-		rt = trie[rt].nxt[v];
-		trie[rt].cnt++;
+	        Delete(s[i]);
+	        if (Find(s[i]))
+	        {
+	            ok = false;
+	            break;
+	        }
+	        Insert(s[i]);
 	    }
-	}
-	void Delete(char *s)
-	{
-	    int rt = 0 ;
-	    int len = strlen(s);
-	    for ( int i = 0 ; i < len ; i++)
+	    if (ok)
 	    {
-		int v = s[i]-'0';
-		if (trie[rt].nxt[v])
-		{
-		    rt = trie[rt].nxt[v];
-		    trie[rt].cnt--;
-		}
+	        puts("YES");
 	    }
-	}
-	bool Find(char *s)
-	{
-	    int rt = 0 ;
-	    int len = strlen(s);
-	    for ( int i = 0 ; i < len ;i++)
+	    else
 	    {
-		int v = s[i]-'0';
-		if (!trie[rt].nxt[v]||trie[trie[rt].nxt[v]].cnt==0) return false;
-		rt = trie[rt].nxt[v];
+	        puts("NO");
 	    }
-	    return true;
 	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		int T ; 
-		cin>>T;
-		while (T--)
-		{
-		    scanf("%d",&n);
-		    tot = 1;
-		    trie[0].init();
-		    for ( int i = 1 ; i <= n ; i++)
-		    {
-		        scanf("%s",s[i]);
-		        Insert(s[i]);
-		    }
-		    bool ok = true;
-		    for ( int i = 1 ; i <= n ; i++)
-		    {
-		        Delete(s[i]);
-		        if (Find(s[i]))
-		        {
-		            ok = false;
-		            break;
-		        }
-		        Insert(s[i]);
-		    }
-		    if (ok)
-		    {
-		        puts("YES");
-		    }
-		    else
-		    {
-		        puts("NO");
-		    }
-		}
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}
+```
 
 
 
@@ -3793,79 +4078,83 @@ next[i]的含义是,i之前的整个前缀中，最长的该前缀的前缀和�
 可以求一个字符串中的最长回文子串
 求回文子串的最大长度模板：
 
-	int p[2*N];
-	int manachar( char *s)
-	{
-	    int len = strlen(s);
-	    int id = 0; //id表示之前位置的能延伸到最远位置的字符串的中心位置。
-	    int maxlen = 0 ;  //maxlen是为了更新答案而用。。。就是记录了一个最大值。。。
-	    int mx = 0 ;//mx为当前位置之前的回文串能延伸到的最远位置 即：max(p[j]+j) (j<i)
-		        //如果知道之前能延伸到最远位置的字符串的中心位置的下标为id，那么就是p[id]+id;
-	    for ( int i = len ; i >= 0 ; i--)  //插入'#'是为了将字符串长度奇偶性不同的统一考虑。
-	    {
-		s[i+i+2] = s[i];
-		s[i+i+1] = '#';
-	    }
-	    s[0]='*'; //s[0] ='*'以及用字符数组最后默认的s[len+len+2]='\0'是为了下面while 循环的时候不溢出。。
-		        //两边的字符一定要不一样。。用string的话记得两边都加字符。。。
-	    for ( int i = 2 ; i < 2*len+1 ; i++)
-	    {
-		if (p[id]+id>i) p[i] = min(p[2*id-i],p[id]+id-i);
-		else p[i] = 1;
-		while (s[i-p[i]]==s[i+p[i]]) p[i]++;
-		if (id+p[id]<i+p[i]) id = i;
-		if (maxlen<p[i]) maxlen = p[i];
-	    }
-	    return maxlen-1;  
-	    //这道题是问最长回文串的长度。。。如果是问回文串是什么的话。。。根据id和maxlen也可以构造出来。。。
-	}
+```c++
+int p[2*N];
+int manachar( char *s)
+{
+    int len = strlen(s);
+    int id = 0; //id表示之前位置的能延伸到最远位置的字符串的中心位置。
+    int maxlen = 0 ;  //maxlen是为了更新答案而用。。。就是记录了一个最大值。。。
+    int mx = 0 ;//mx为当前位置之前的回文串能延伸到的最远位置 即：max(p[j]+j) (j<i)
+	        //如果知道之前能延伸到最远位置的字符串的中心位置的下标为id，那么就是p[id]+id;
+    for ( int i = len ; i >= 0 ; i--)  //插入'#'是为了将字符串长度奇偶性不同的统一考虑。
+    {
+	s[i+i+2] = s[i];
+	s[i+i+1] = '#';
+    }
+    s[0]='*'; //s[0] ='*'以及用字符数组最后默认的s[len+len+2]='\0'是为了下面while 循环的时候不溢出。。
+	        //两边的字符一定要不一样。。用string的话记得两边都加字符。。。
+    for ( int i = 2 ; i < 2*len+1 ; i++)
+    {
+	if (p[id]+id>i) p[i] = min(p[2*id-i],p[id]+id-i);
+	else p[i] = 1;
+	while (s[i-p[i]]==s[i+p[i]]) p[i]++;
+	if (id+p[id]<i+p[i]) id = i;
+	if (maxlen<p[i]) maxlen = p[i];
+    }
+    return maxlen-1;  
+    //这道题是问最长回文串的长度。。。如果是问回文串是什么的话。。。根据id和maxlen也可以构造出来。。。
+}
+```
 
 manacher求最长回文子串的开始结束位置
 
-	void manacher(char *s)
+```c++
+void manacher(char *s)
+{
+    int len = strlen(s);
+ 
+    for ( int i = len ;  i>= 0 ; i--)
+    {
+	s[i*2+2] = s[i];
+	s[i*2+1] = '#';
+    }
+ 
+    int id = 0 ;
+    int maxlen = 0 ;
+    int center = 0 ;
+    s[0]='%';
+    for ( int i = 2 ; i < 2*len+1 ; i++)
+    {
+	if (id+p[id]>i) p[i] = min(p[2*id-i],p[id]+id-i);
+	else p[i] = 1;
+ 
+	while (s[p[i]+i]==s[i-p[i]]) p[i]++;
+ 
+	if (id+p[id]<i+p[i]) id = i;
+	if (p[i]>maxlen)
 	{
-	    int len = strlen(s);
-	 
-	    for ( int i = len ;  i>= 0 ; i--)
-	    {
-		s[i*2+2] = s[i];
-		s[i*2+1] = '#';
-	    }
-	 
-	    int id = 0 ;
-	    int maxlen = 0 ;
-	    int center = 0 ;
-	    s[0]='%';
-	    for ( int i = 2 ; i < 2*len+1 ; i++)
-	    {
-		if (id+p[id]>i) p[i] = min(p[2*id-i],p[id]+id-i);
-		else p[i] = 1;
-	 
-		while (s[p[i]+i]==s[i-p[i]]) p[i]++;
-	 
-		if (id+p[id]<i+p[i]) id = i;
-		if (p[i]>maxlen)
-		{
-		    maxlen = p[i];
-		    center = i;
-		}
-	    }
-	    int ans = (maxlen-1);
-	   // cout<<"ans:"<<ans<<" center:"<<center<<endl;
-	    if (ans<2)
-	    {
-		puts("No solution!");
-	    }
-	    else
-	    {
-		int left = center/2-1-ans/2+(ans%2==0);
-		int right = center/2-1+ans/2;
-		printf("%d %d\n",left,right);
-		for ( int  i = left ; i <= right ; i++) printf("%c",st2[i]);
-		printf("\n");
-	    }
-	    
+	    maxlen = p[i];
+	    center = i;
 	}
+    }
+    int ans = (maxlen-1);
+   // cout<<"ans:"<<ans<<" center:"<<center<<endl;
+    if (ans<2)
+    {
+	puts("No solution!");
+    }
+    else
+    {
+	int left = center/2-1-ans/2+(ans%2==0);
+	int right = center/2-1+ans/2;
+	printf("%d %d\n",left,right);
+	for ( int  i = left ; i <= right ; i++) printf("%c",st2[i]);
+	printf("\n");
+    }
+    
+}
+```
 
 
 
@@ -3875,7 +4164,7 @@ manacher求最长回文子串的开始结束位置
 
 
 
-```
+```c++
 struct PAM
 {
     //cnt表示某个节点的回文串的数量
@@ -3933,102 +4222,104 @@ struct PAM
 
 #####给出一个字符串，问所有不同的字串的个数。
 
-	const int N=1E3+7;
-	int n;
-	char s[N];
-	int sa[N],rk[N],t[N],t2[N],cnt[N];
-	int height[N];
-	int cmp(int *r,int a,int b,int l){return r[a]==r[b]&&r[a+l]==r[b+l];}
-	 
-	void getSa(int n,int m)
+```c++
+const int N=1E3+7;
+int n;
+char s[N];
+int sa[N],rk[N],t[N],t2[N],cnt[N];
+int height[N];
+int cmp(int *r,int a,int b,int l){return r[a]==r[b]&&r[a+l]==r[b+l];}
+ 
+void getSa(int n,int m)
+{
+    int *x = t,*y = t2;
+    ms(cnt,0);
+    for ( int i = 0 ; i < n ; i++) cnt[x[i]=s[i]]++;
+    for ( int i = 1 ; i < m ; i++) cnt[i] += cnt[i-1];
+    for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] = i ;
+    for ( int k = 1 ; k <=  n;  k <<=1 )
+    {
+	int p = 0 ;
+	for ( int i = n-k ; i < n; i ++) y[p++] = i;
+	for (  int i = 0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k;
+	ms(cnt,0);
+	for ( int i = 0 ; i < n ; i++) cnt[x[y[i]]]++;
+	for ( int i = 0 ; i < m ; i++) cnt[i]+=cnt[i-1];
+	for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
+	swap(x,y);
+	p = 1;
+	x[sa[0]] = 0;
+	for ( int i = 1 ; i < n ; i++)
+	    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+	if (p>=n) break;
+	m = p;
+    }
+}
+ 
+void getHeight( int n)
+{
+    int k = 0 ;
+    for ( int i = 0 ; i < n ;i ++) rk[sa[i]] = i ;
+    height[0] = 0 ;
+    for ( int i = 0 ; i < n;  i++)
+    {
+	if (rk[i]==0) continue;
+	if (k) k--;
+	int j = sa[rk[i]-1];
+	while (s[i+k]==s[j+k]) k++;
+	height[rk[i]] = k ;
+    }
+}
+ 
+int getSuffix( char s[])
+{
+    int len = strlen(s);
+    int up = 0;
+    for ( int i = 0 ; i < len ; i++)
+    {
+	int val = s[i];
+	up = max(up,val);
+    }
+    s[len++]='$';
+    getSa(len,up+1);
+    getHeight(len);
+    return len;
+}
+ 
+int solve( int n)
+{
+  //  for ( int i = 0 ; i < n ; i++) cout<<"i:"<<i<<" height[i]:"<<height[i]<<endl;
+    
+    ms(cnt,0); //cnt在求完sa之后就没用了，所以拿来用一下，嘿嘿嘿
+    int up = 0 ;
+    for ( int i = 0 ; i < n; i++) cnt[height[i]]++,up=max(up,height[i]);
+ 
+    for ( int i = up-1 ; i >=1 ; i--) cnt[i] = cnt[i]+cnt[i+1];
+    int res = 0 ;
+    //for ( int i = 1 ; i <= up; i++) cout<<"cnt[i]:"<<cnt[i]<<endl;
+    for ( int i = 1 ; i <= up ; i++ )
+	res += cnt[i];
+    return res;
+}
+ 
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+ 
+	int T;
+	scanf("%d",&T);
+	while (T--)
 	{
-	    int *x = t,*y = t2;
-	    ms(cnt,0);
-	    for ( int i = 0 ; i < n ; i++) cnt[x[i]=s[i]]++;
-	    for ( int i = 1 ; i < m ; i++) cnt[i] += cnt[i-1];
-	    for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] = i ;
-	    for ( int k = 1 ; k <=  n;  k <<=1 )
-	    {
-		int p = 0 ;
-		for ( int i = n-k ; i < n; i ++) y[p++] = i;
-		for (  int i = 0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k;
-		ms(cnt,0);
-		for ( int i = 0 ; i < n ; i++) cnt[x[y[i]]]++;
-		for ( int i = 0 ; i < m ; i++) cnt[i]+=cnt[i-1];
-		for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
-		swap(x,y);
-		p = 1;
-		x[sa[0]] = 0;
-		for ( int i = 1 ; i < n ; i++)
-		    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
-		if (p>=n) break;
-		m = p;
-	    }
+	    scanf("%s",s);
+	   int len = getSuffix(s);
+	   int ans = len*(len-1)/2;
+	    ans-=solve(len);
+	    printf("%d\n",ans);
+ 
 	}
-	 
-	void getHeight( int n)
-	{
-	    int k = 0 ;
-	    for ( int i = 0 ; i < n ;i ++) rk[sa[i]] = i ;
-	    height[0] = 0 ;
-	    for ( int i = 0 ; i < n;  i++)
-	    {
-		if (rk[i]==0) continue;
-		if (k) k--;
-		int j = sa[rk[i]-1];
-		while (s[i+k]==s[j+k]) k++;
-		height[rk[i]] = k ;
-	    }
-	}
-	 
-	int getSuffix( char s[])
-	{
-	    int len = strlen(s);
-	    int up = 0;
-	    for ( int i = 0 ; i < len ; i++)
-	    {
-		int val = s[i];
-		up = max(up,val);
-	    }
-	    s[len++]='$';
-	    getSa(len,up+1);
-	    getHeight(len);
-	    return len;
-	}
-	 
-	int solve( int n)
-	{
-	  //  for ( int i = 0 ; i < n ; i++) cout<<"i:"<<i<<" height[i]:"<<height[i]<<endl;
-	    
-	    ms(cnt,0); //cnt在求完sa之后就没用了，所以拿来用一下，嘿嘿嘿
-	    int up = 0 ;
-	    for ( int i = 0 ; i < n; i++) cnt[height[i]]++,up=max(up,height[i]);
-	 
-	    for ( int i = up-1 ; i >=1 ; i--) cnt[i] = cnt[i]+cnt[i+1];
-	    int res = 0 ;
-	    //for ( int i = 1 ; i <= up; i++) cout<<"cnt[i]:"<<cnt[i]<<endl;
-	    for ( int i = 1 ; i <= up ; i++ )
-		res += cnt[i];
-	    return res;
-	}
-	 
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-	 
-		int T;
-		scanf("%d",&T);
-		while (T--)
-		{
-		    scanf("%s",s);
-		   int len = getSuffix(s);
-		   int ans = len*(len-1)/2;
-		    ans-=solve(len);
-		    printf("%d\n",ans);
-	 
-		}
+```
 
 #####给出两个字符串，问最长的公共连续字串	（模板题）
 首先要理解后缀，后缀数组（sa[]），名次数组(rk[])，height数组，lcp 这些概念
@@ -4065,268 +4356,278 @@ height[rank[j]+2], height[rank[j]+3], ... ,height[rank[k]]中的最小值。
 
 设初始第一个字符串的长度为len1,那么如果是第一个字符串的后缀，一定有sa[i]<len1,如果是第二个字符串的后缀，就一定有sa[i]>len1  (sa[i]==len1的是插入的特殊符号开始的后缀)
 
-	const int N=2E5+7;
-	char s[N];
-	int sa[N],t[N],t2[N],cnt[N],n;
-	int c[N];
-	int w[N];
-	int rk[N],height[N];
-	int cmp( int *r,int a,int b,int l){ return r[a]==r[b]&&r[a+l]==r[b+l] ;};
-	void build_sa(int n,int m) //其实我觉得。。。sa怎么得到的不用管。。这部分讲道理不会变。。。反正知道能nlogn得到sa就对了2333
-	{
-	    int *x=t,*y=t2;
-	    // 基数排序（不是计数排序！） radix sort...
-	    for ( int i = 0 ; i < m ; i++) c[i] = 0 ; //ms(cnt,0);
-	    for ( int i = 0 ; i < n;  i++) c[x[i]=s[i]]++; //x[i]相当于保存了rank的相对大小，由于只是为了比较大小，所以没必要求出真实的rank值。
-	    for ( int i = 1 ; i < m ; i++) c[i]+=c[i-1];
-	    for ( int i = n-1 ; i >= 0 ;i--) sa[--c[x[i]]] =  i;
+```c++
+const int N=2E5+7;
+char s[N];
+int sa[N],t[N],t2[N],cnt[N],n;
+int c[N];
+int w[N];
+int rk[N],height[N];
+int cmp( int *r,int a,int b,int l){ return r[a]==r[b]&&r[a+l]==r[b+l] ;};
+void build_sa(int n,int m) //其实我觉得。。。sa怎么得到的不用管。。这部分讲道理不会变。。。反正知道能nlogn得到sa就对了2333
+{
+    int *x=t,*y=t2;
+    // 基数排序（不是计数排序！） radix sort...
+    for ( int i = 0 ; i < m ; i++) c[i] = 0 ; //ms(cnt,0);
+    for ( int i = 0 ; i < n;  i++) c[x[i]=s[i]]++; //x[i]相当于保存了rank的相对大小，由于只是为了比较大小，所以没必要求出真实的rank值。
+    for ( int i = 1 ; i < m ; i++) c[i]+=c[i-1];
+    for ( int i = n-1 ; i >= 0 ;i--) sa[--c[x[i]]] =  i;
+```
 
 
-	    for ( int k = 1 ; k <= n ; k<<=1)  //进行若干次基数排序，每次对长度为k的字符串排序
-	    {
-		int p  = 0 ;
-		for ( int i = n-k ; i < n ; i++)  y[p++] = i;  
-		for ( int i = 0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k; //y保存对第二关键字排序的结果，可以直接用上一次求得的sa算出。
-		for ( int  i = 0 ; i < m  ;  i++) c[i] = 0;
-		for ( int i = 0 ; i < n ; i++) c[x[y[i]]]++;
-		for ( int i = 0 ; i < m ; i++) c[i]+=c[i-1];
-		for ( int i = n-1 ; i >= 0 ; i--) sa[--c[x[y[i]]]] = y[i];
-		swap(x,y);
-		p = 1;
-		x[sa[0]] = 0 ;
-		for ( int i = 1 ; i < n ; i++)
-		    x[sa[i]]= cmp(y,sa[i-1],sa[i],k)?p-1:p++;
-		if (p>=n) break;
-		m = p;
-	    }
-	}
-	void getHeight( int n)
+```c++
+    for ( int k = 1 ; k <= n ; k<<=1)  //进行若干次基数排序，每次对长度为k的字符串排序
+    {
+	int p  = 0 ;
+	for ( int i = n-k ; i < n ; i++)  y[p++] = i;  
+	for ( int i = 0 ; i < n ; i++) if (sa[i]>=k) y[p++] = sa[i]-k; //y保存对第二关键字排序的结果，可以直接用上一次求得的sa算出。
+	for ( int  i = 0 ; i < m  ;  i++) c[i] = 0;
+	for ( int i = 0 ; i < n ; i++) c[x[y[i]]]++;
+	for ( int i = 0 ; i < m ; i++) c[i]+=c[i-1];
+	for ( int i = n-1 ; i >= 0 ; i--) sa[--c[x[y[i]]]] = y[i];
+	swap(x,y);
+	p = 1;
+	x[sa[0]] = 0 ;
+	for ( int i = 1 ; i < n ; i++)
+	    x[sa[i]]= cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+	if (p>=n) break;
+	m = p;
+    }
+}
+void getHeight( int n)
+{
+    int k = 0 ;
+    for ( int i = 0 ; i < n ; i++) rk[sa[i]] = i;
+    height[0] = 0 ;
+    for ( int i = 0 ; i < n ; i++) 
+    {
+	if (rk[i]==0) continue;
+	if (k) k--;
+	int j = sa[rk[i]-1];
+	while (s[i+k]==s[j+k]) k++;
+	height[rk[i]] = k;
+    }
+}
+int getSuffix(char s[])
+{
+    int len = strlen(s);
+    int up = 0 ;
+    for ( int i =  0 ; i < len ; i++)
+    {
+	w[i] = s[i];
+	up = max(up,w[i]);
+    }
+    w[len++] = 0 ;
+    build_sa(len,up+1);
+    getHeight(len);
+    return len;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	string st1,st2,st;
+	cin>>st1>>st2;
+	int len1 = st1.length();
+	st = st1 + "$" + st2;
+	strcpy(s,st.c_str());
+	int len = getSuffix(s);
+//        cout<<"s:"<<s<<endl;
+//        for ( int i = 0 ; i < len ; i++) cout<<s[i]<<" "<<w[i]<<endl;
+//        for ( int i = 0 ; i < len ; i++) cout<<"sa[i]:"<<sa[i]<<endl;
+//        for ( int i = 0 ; i < len ; i++) cout<<"height[i]:"<<height[i]<<endl;
+	
+	int ans = 0 ;
+     //  cout<<"len1:"<<len1<<endl;        
+	for ( int i = 2 ; i < len ; i++)
+	if (height[i]>ans)
 	{
-	    int k = 0 ;
-	    for ( int i = 0 ; i < n ; i++) rk[sa[i]] = i;
-	    height[0] = 0 ;
-	    for ( int i = 0 ; i < n ; i++) 
-	    {
-		if (rk[i]==0) continue;
-		if (k) k--;
-		int j = sa[rk[i]-1];
-		while (s[i+k]==s[j+k]) k++;
-		height[rk[i]] = k;
-	    }
+	    if (0<=sa[i-1]&&sa[i-1]<len1&&len1<sa[i]) ans = height[i];
+	    if (0<=sa[i]&&sa[i]<len1&&len1<sa[i-1]) ans = height[i];
 	}
-	int getSuffix(char s[])
-	{
-	    int len = strlen(s);
-	    int up = 0 ;
-	    for ( int i =  0 ; i < len ; i++)
-	    {
-		w[i] = s[i];
-		up = max(up,w[i]);
-	    }
-	    w[len++] = 0 ;
-	    build_sa(len,up+1);
-	    getHeight(len);
-	    return len;
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		string st1,st2,st;
-		cin>>st1>>st2;
-		int len1 = st1.length();
-		st = st1 + "$" + st2;
-		strcpy(s,st.c_str());
-		int len = getSuffix(s);
-	//        cout<<"s:"<<s<<endl;
-	//        for ( int i = 0 ; i < len ; i++) cout<<s[i]<<" "<<w[i]<<endl;
-	//        for ( int i = 0 ; i < len ; i++) cout<<"sa[i]:"<<sa[i]<<endl;
-	//        for ( int i = 0 ; i < len ; i++) cout<<"height[i]:"<<height[i]<<endl;
-		
-		int ans = 0 ;
-	     //  cout<<"len1:"<<len1<<endl;        
-		for ( int i = 2 ; i < len ; i++)
-		if (height[i]>ans)
-		{
-		    if (0<=sa[i-1]&&sa[i-1]<len1&&len1<sa[i]) ans = height[i];
-		    if (0<=sa[i]&&sa[i]<len1&&len1<sa[i-1]) ans = height[i];
-		}
-		printf("%d\n",ans);
+	printf("%d\n",ans);
+```
 #####给一个字符串，要求找出至少出现k次的最长重复子串...
 然后再次用到了根据height数组对后缀进行分组的套路...二分判定合法性，对于当前的最长长度x,分组使得每组中的height[i]都大于等于x,所不同的是，判定变成了存在一个组，后缀的个数至少为k个（因为这样，就可以对于大于等于k个的后缀，同时取前x长度，得到的就是出现了至少k次且长度为x的前缀）1A,蛤蛤蛤
 
 
 
-	const int N=2E4+7;
-	const  int M=2E6+11;
-	const int C = 5;
-	int n,sa[N],rk[N],t[N],t2[N],cnt[M];
-	int height[N];
-	int s[N];
-	int k;
-	int cmp(int *r,int a,int b,int l){ return r[a]==r[b]&&r[a+l]==r[b+l];}
-	void getSa( int n,int m)
+```c++
+const int N=2E4+7;
+const  int M=2E6+11;
+const int C = 5;
+int n,sa[N],rk[N],t[N],t2[N],cnt[M];
+int height[N];
+int s[N];
+int k;
+int cmp(int *r,int a,int b,int l){ return r[a]==r[b]&&r[a+l]==r[b+l];}
+void getSa( int n,int m)
+{
+    int *x = t;
+    int *y = t2;
+    ms(cnt,0);
+    for ( int i = 0 ; i < n;  i++) cnt[x[i]=s[i]]++;
+    for ( int i = 1 ; i < m ; i++) cnt[i]+=cnt[i-1];
+    for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] =  i;
+    for ( int k = 1 ; k <= n ; k<<=1)
+    {
+	int p = 0;
+	for ( int i = n-k ; i < n;  i++) y[p++] = i ;
+	for ( int i = 0 ; i < n;  i++) if (sa[i]>=k) y[p++] = sa[i]-k;
+	ms(cnt,0);
+	for ( int i = 0 ; i <n ; i++) cnt[x[y[i]]]++;
+	for ( int i = 0 ; i <m ; i++) cnt[i]+=cnt[i-1];
+	for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
+	swap(x,y);
+	p = 1;
+	x[sa[0]] = 0 ;
+	for ( int i = 1 ; i < n; i++)
+	    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
+	if (p>=n) break;
+	m = p;
+    }
+}
+void getHeight( int n)
+{
+    int k = 0 ;
+    for ( int i = 0 ; i < n; i++) rk[sa[i]] = i ;
+    height[0] =  0;
+    for ( int i = 0 ; i < n; i ++)
+    {
+	if (rk[i]==0) continue;
+	if (k) k--;
+	int j = sa[rk[i]-1];
+	while (s[i+k]==s[j+k]) k++;
+	height[rk[i]] = k ;
+    }
+}
+int getSuffix( int s[],int len)
+{
+    int up = 0 ;
+    for ( int i = 0 ; i < len ; i++)
+    {
+	up = max(up,s[i]);
+    }
+    s[len++] = 0 ;
+    getSa(len,up+1);
+    getHeight(len);
+    return len;
+}
+bool check( int x,int k,int n)
+{
+    int cnt = 1 ;
+    for ( int i = 2; i  <= n ; i++)
+    {
+	if (height[i]>=x&&i<n)
 	{
-	    int *x = t;
-	    int *y = t2;
-	    ms(cnt,0);
-	    for ( int i = 0 ; i < n;  i++) cnt[x[i]=s[i]]++;
-	    for ( int i = 1 ; i < m ; i++) cnt[i]+=cnt[i-1];
-	    for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[i]]] =  i;
-	    for ( int k = 1 ; k <= n ; k<<=1)
-	    {
-		int p = 0;
-		for ( int i = n-k ; i < n;  i++) y[p++] = i ;
-		for ( int i = 0 ; i < n;  i++) if (sa[i]>=k) y[p++] = sa[i]-k;
-		ms(cnt,0);
-		for ( int i = 0 ; i <n ; i++) cnt[x[y[i]]]++;
-		for ( int i = 0 ; i <m ; i++) cnt[i]+=cnt[i-1];
-		for ( int i = n-1 ; i >= 0 ; i--) sa[--cnt[x[y[i]]]] = y[i];
-		swap(x,y);
-		p = 1;
-		x[sa[0]] = 0 ;
-		for ( int i = 1 ; i < n; i++)
-		    x[sa[i]] = cmp(y,sa[i-1],sa[i],k)?p-1:p++;
-		if (p>=n) break;
-		m = p;
-	    }
+	    cnt++;
+	    continue;
 	}
-	void getHeight( int n)
+	if (cnt>=k) return true;
+	cnt = 1;
+    }
+    return false;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	scanf("%d %d",&n,&k);
+	for ( int i = 0 ; i < n ; i++) scanf("%d",&s[i]),s[i]+=C;
+	n = getSuffix(s,n);
+//        for ( int i = 0 ; i < n; i++) cout<<"s[i]:"<<s[i]<<endl;
+	int l = 1,r = n;
+	int ans = 0 ;
+	while (l<=r)
 	{
-	    int k = 0 ;
-	    for ( int i = 0 ; i < n; i++) rk[sa[i]] = i ;
-	    height[0] =  0;
-	    for ( int i = 0 ; i < n; i ++)
+	    int mid = (l+r)/2;
+	    if (check(mid,k,n))
 	    {
-		if (rk[i]==0) continue;
-		if (k) k--;
-		int j = sa[rk[i]-1];
-		while (s[i+k]==s[j+k]) k++;
-		height[rk[i]] = k ;
+	        ans = mid;
+	        l = mid + 1;
 	    }
+	    else r = mid-1;
 	}
-	int getSuffix( int s[],int len)
-	{
-	    int up = 0 ;
-	    for ( int i = 0 ; i < len ; i++)
-	    {
-		up = max(up,s[i]);
-	    }
-	    s[len++] = 0 ;
-	    getSa(len,up+1);
-	    getHeight(len);
-	    return len;
-	}
-	bool check( int x,int k,int n)
-	{
-	    int cnt = 1 ;
-	    for ( int i = 2; i  <= n ; i++)
-	    {
-		if (height[i]>=x&&i<n)
-		{
-		    cnt++;
-		    continue;
-		}
-		if (cnt>=k) return true;
-		cnt = 1;
-	    }
-	    return false;
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		scanf("%d %d",&n,&k);
-		for ( int i = 0 ; i < n ; i++) scanf("%d",&s[i]),s[i]+=C;
-		n = getSuffix(s,n);
-	//        for ( int i = 0 ; i < n; i++) cout<<"s[i]:"<<s[i]<<endl;
-		int l = 1,r = n;
-		int ans = 0 ;
-		while (l<=r)
-		{
-		    int mid = (l+r)/2;
-		    if (check(mid,k,n))
-		    {
-		        ans = mid;
-		        l = mid + 1;
-		    }
-		    else r = mid-1;
-		}
-		printf("%d\n",ans);
+	printf("%d\n",ans);
+```
 ##dp
 ####最大连续前缀和
-	for ( int i = 1 ; i <= n ; i++ )
-	{
-	    last = max(0,last)+a[i];
-	    ans = max(ans,last);
-	}
+```c++
+for ( int i = 1 ; i <= n ; i++ )
+{
+    last = max(0,last)+a[i];
+    ans = max(ans,last);
+}
+```
 
 
 ####数位dp
 #####hdu 2089 问区间[n,m]中，不含数字4，也不含数字串“62”的所有数的个数。
 
-	int n,m;
-	int dp[30][2];
-	int digit[30];
-	 
-		int dfs (int pos,bool preis6,bool limit)  //pos表示从低到高的第几位，是从高位往低位递归的（也就是从左到又）
-				                          // preis6 表示上一个数字是否为6，
-				                          // limit表示该位置是否有限制。
-		{
-		//    cout<<pos<<" "<<preis6<<" "<<limit<<" "<<endl;
-		    if (pos==0) return 1; //到该位置表明找到了一个解.
-		 
-		    int res = 0 ;
-		    if (!limit&&dp[pos][preis6]!=-1) return dp[pos][preis6];  //如果不是limit位置，表示结果是通用的，而之前又算过的话，就可以直接调用这个结果。
-		    int mx = limit?digit[pos]:9; //mx第pos位置能取到的最大的数字..如果不是limit,则可以0..9任意取。
-		//    cout<<"mx:"<<mx<<endl;
-		    
-		    for ( int i = 0 ; i <= mx;  i++)
-		    {
-			if (i==4||(i==2&&preis6)) continue;
-			res += dfs(pos-1,i==6,limit&&i==mx); 
-			//(limit&&i==mx)中limit的含义是。。如果当前一位不是limit位（即0..9可以随便取的位置）
-			//，那么之后的位置也一定不是limit位置。
-			//而i==mx部分的意思是，在当前位置的数字小于当前位置的数字能取的最大值（mx）之前，
-			//后面位的数字随便取也不会超过上界。
-		    }
-		    
-		    if (!limit) dp[pos][preis6]=res;  //记忆化. 非limit位的结果才通用，不然没必要存。
-		 
-		    return res;
-	 
-	}
-	int solve ( int n)
+```c++
+int n,m;
+int dp[30][2];
+int digit[30];
+ 
+	int dfs (int pos,bool preis6,bool limit)  //pos表示从低到高的第几位，是从高位往低位递归的（也就是从左到又）
+			                          // preis6 表示上一个数字是否为6，
+			                          // limit表示该位置是否有限制。
 	{
-	    ms(digit,0);  //将数按照每一位存到digit数组中
-	    int len = 0 ;
-	    while (n)
+	//    cout<<pos<<" "<<preis6<<" "<<limit<<" "<<endl;
+	    if (pos==0) return 1; //到该位置表明找到了一个解.
+	 
+	    int res = 0 ;
+	    if (!limit&&dp[pos][preis6]!=-1) return dp[pos][preis6];  //如果不是limit位置，表示结果是通用的，而之前又算过的话，就可以直接调用这个结果。
+	    int mx = limit?digit[pos]:9; //mx第pos位置能取到的最大的数字..如果不是limit,则可以0..9任意取。
+	//    cout<<"mx:"<<mx<<endl;
+	    
+	    for ( int i = 0 ; i <= mx;  i++)
 	    {
-		digit[++len] = n % 10;
-		n/=10;
+		if (i==4||(i==2&&preis6)) continue;
+		res += dfs(pos-1,i==6,limit&&i==mx); 
+		//(limit&&i==mx)中limit的含义是。。如果当前一位不是limit位（即0..9可以随便取的位置）
+		//，那么之后的位置也一定不是limit位置。
+		//而i==mx部分的意思是，在当前位置的数字小于当前位置的数字能取的最大值（mx）之前，
+		//后面位的数字随便取也不会超过上界。
 	    }
+	    
+	    if (!limit) dp[pos][preis6]=res;  //记忆化. 非limit位的结果才通用，不然没必要存。
 	 
-	    return dfs(len,false,true);
-	 
-	}
-	 
-	int main()
+	    return res;
+ 
+}
+int solve ( int n)
+{
+    ms(digit,0);  //将数按照每一位存到digit数组中
+    int len = 0 ;
+    while (n)
+    {
+	digit[++len] = n % 10;
+	n/=10;
+    }
+ 
+    return dfs(len,false,true);
+ 
+}
+ 
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+ 
+	while (~scanf("%d %d",&n,&m))
 	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-	 
-		while (~scanf("%d %d",&n,&m))
-		{
-		    if (n==0&&m==0) break;
-		    
-		    ms(dp,-1);
-		    int ans = solve (m)-solve(n-1);
-	 
-		    printf("%d\n",ans);
-		}
+	    if (n==0&&m==0) break;
+	    
+	    ms(dp,-1);
+	    int ans = solve (m)-solve(n-1);
+ 
+	    printf("%d\n",ans);
+	}
+```
 
 
 ​	
@@ -4335,236 +4636,248 @@ height[rank[j]+2], height[rank[j]+3], ... ,height[rank[k]]中的最小值。
 
 hdu 5787 :给出l,r,k(k<=5)求区间[l,r]中满足任意相邻k个数字都不相同的数的个数.
 
-		LL l,r;
-		int k;
-		LL digit[25];
-		LL dp[22][11][11][11][11];
-		int LEN;
-		LL dfs(int pos,int k1,int k2,int k3,int k4,bool limit,bool prehasnonzero)
-		{
-		    if (pos==0) return 1;
-		    if (prehasnonzero&&!limit&&dp[pos][k1][k2][k3][k4]!=-1LL) return dp [pos][k1][k2][k3][k4];
-		 
-	    int mx = limit?digit[pos]:9;
-	    LL res = 0LL;
-	    if (!prehasnonzero)
-	    {
-		for  (int i = 0 ; i <= mx ;i++)
-		{
-		    res +=dfs(pos-1,i,10,10,10,limit&&i==mx,i==0?false:true);
-		}
-	    }
-	    else
-	    {
-		for ( int i = 0 ; i <= mx ; i++)
-		{
-		   // if (i==k1||i==k2||i==k3||i==k4) continue;
-		    if (k>=2&&i==k1) continue;
-		    if (k>=3&&i==k2) continue;
-		    if (k>=4&&i==k3) continue;
-		    if (k>=5&&i==k4) continue;
-	 
-		    res +=dfs(pos-1,i,k1,k2,k3,limit&&i==mx,true);
-		}
-	    }
-	 
-	    if (prehasnonzero&&!limit) dp[pos][k1][k2][k3][k4] = res;
-	    return res;
-	}
-	LL solve ( LL n)
+```c++
+	LL l,r;
+	int k;
+	LL digit[25];
+	LL dp[22][11][11][11][11];
+	int LEN;
+	LL dfs(int pos,int k1,int k2,int k3,int k4,bool limit,bool prehasnonzero)
 	{
-	    ms(digit,0);
-	    int len = 0 ;
-	    while (n)
-	    {
-		digit[++len] = n%10;
-		n/=10;
-	    }
-	    LEN = len;
-	    return dfs(len,10,10,10,10,true,false);
-	}
-	int main()
+	    if (pos==0) return 1;
+	    if (prehasnonzero&&!limit&&dp[pos][k1][k2][k3][k4]!=-1LL) return dp [pos][k1][k2][k3][k4];
+	 
+    int mx = limit?digit[pos]:9;
+    LL res = 0LL;
+    if (!prehasnonzero)
+    {
+	for  (int i = 0 ; i <= mx ;i++)
 	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		while (~scanf("%lld%lld%d",&l,&r,&k))
-		{
-		    ms(dp,-1);
-	//            cout<<"solve(100):"<<solve(100)<<endl;
-	//            cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
-		    LL ans = solve(r)-solve(l-1);
-		    printf("%lld\n",ans);
-		}
+	    res +=dfs(pos-1,i,10,10,10,limit&&i==mx,i==0?false:true);
+	}
+    }
+    else
+    {
+	for ( int i = 0 ; i <= mx ; i++)
+	{
+	   // if (i==k1||i==k2||i==k3||i==k4) continue;
+	    if (k>=2&&i==k1) continue;
+	    if (k>=3&&i==k2) continue;
+	    if (k>=4&&i==k3) continue;
+	    if (k>=5&&i==k4) continue;
+ 
+	    res +=dfs(pos-1,i,k1,k2,k3,limit&&i==mx,true);
+	}
+    }
+ 
+    if (prehasnonzero&&!limit) dp[pos][k1][k2][k3][k4] = res;
+    return res;
+}
+LL solve ( LL n)
+{
+    ms(digit,0);
+    int len = 0 ;
+    while (n)
+    {
+	digit[++len] = n%10;
+	n/=10;
+    }
+    LEN = len;
+    return dfs(len,10,10,10,10,true,false);
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	while (~scanf("%lld%lld%d",&l,&r,&k))
+	{
+	    ms(dp,-1);
+//            cout<<"solve(100):"<<solve(100)<<endl;
+//            cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
+	    LL ans = solve(r)-solve(l-1);
+	    printf("%lld\n",ans);
+	}
+```
 
 #####带整除的数位dp
 
 hdu3652：给出n,问[1,n]中，满足包含“13”且这个数（不是各位的和）能被13整除的数的个数。做法是把能被13整除的数考虑成全集U,然后在U中做分划，一部分是含13的，另一部分是不含13的。dfs要一个参数记录从最高位到现在的pos位置的数字之和%13的结果
 
-	LL n;
-	LL dp[20][15];
-	LL dp2[20][2][15];
-	int digit[20];
+```c++
+LL n;
+LL dp[20][15];
+LL dp2[20][2][15];
+int digit[20];
+```
 
 
-	LL dfs (int pos,int sum,bool limit)
+```c++
+LL dfs (int pos,int sum,bool limit)
+{
+    if (pos==0) return sum==0;
+    
+    if (!limit&&dp[pos][sum]!=-1) return dp[pos][sum];
+ 
+    int mx = limit ? digit[pos]:9;
+ 
+    LL res = 0LL ;
+    for ( int i = 0 ; i  <=  mx ; i++)
+    {
+	res+=dfs(pos-1,(sum*10+i)%13,limit&&i==mx);
+    }
+    
+    if(!limit) dp[pos][sum] = res;
+    return res;
+}
+LL dfs2(int pos,bool preis1,int sum,bool limit)
+{
+    if (pos==0) return sum==0;
+ 
+    if (!limit&&dp2[pos][preis1][sum]!=-1) return dp2[pos][preis1][sum];
+ 
+    int mx = limit? digit[pos]:9;
+    LL res = 0 ;
+    for ( int i = 0 ; i <=  mx ; i++)
+    {
+	if (preis1&&i==3) continue;
+	res+=dfs2(pos-1,i==1,(sum*10+i)%13,limit&&i==mx);
+    }
+ 
+    if (!limit) dp2[pos][preis1][sum] = res;
+    return res;
+}
+ 
+LL solve ( LL n)
+{
+    ms(digit,0);
+ 
+    int len =  0;
+    while (n)
+    {
+	digit[++len] = n%10;
+	n/= 10;
+    }
+    return dfs(len,0,true)-dfs2(len,false,0,true); //在能被13整除的数里划分，减去不含“13”的，就是含“13”的。
+	                                          //因为含“13”的情况太复杂了。。。
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+  #endif
+	
+	ms(dp,-1); //dp数组子啊外面清空就好。。。。因为dp数组是所有数据公用的啊。。。。
+	ms(dp2,-1);
+	while (~scanf("%lld",&n))
 	{
-	    if (pos==0) return sum==0;
-	    
-	    if (!limit&&dp[pos][sum]!=-1) return dp[pos][sum];
-	 
-	    int mx = limit ? digit[pos]:9;
-	 
-	    LL res = 0LL ;
-	    for ( int i = 0 ; i  <=  mx ; i++)
-	    {
-		res+=dfs(pos-1,(sum*10+i)%13,limit&&i==mx);
-	    }
-	    
-	    if(!limit) dp[pos][sum] = res;
-	    return res;
+	    LL ans = solve (n);
+	    printf("%lld\n",ans);
 	}
-	LL dfs2(int pos,bool preis1,int sum,bool limit)
-	{
-	    if (pos==0) return sum==0;
-	 
-	    if (!limit&&dp2[pos][preis1][sum]!=-1) return dp2[pos][preis1][sum];
-	 
-	    int mx = limit? digit[pos]:9;
-	    LL res = 0 ;
-	    for ( int i = 0 ; i <=  mx ; i++)
-	    {
-		if (preis1&&i==3) continue;
-		res+=dfs2(pos-1,i==1,(sum*10+i)%13,limit&&i==mx);
-	    }
-	 
-	    if (!limit) dp2[pos][preis1][sum] = res;
-	    return res;
-	}
-	 
-	LL solve ( LL n)
-	{
-	    ms(digit,0);
-	 
-	    int len =  0;
-	    while (n)
-	    {
-		digit[++len] = n%10;
-		n/= 10;
-	    }
-	    return dfs(len,0,true)-dfs2(len,false,0,true); //在能被13整除的数里划分，减去不含“13”的，就是含“13”的。
-		                                          //因为含“13”的情况太复杂了。。。
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-	  #endif
-		
-		ms(dp,-1); //dp数组子啊外面清空就好。。。。因为dp数组是所有数据公用的啊。。。。
-		ms(dp2,-1);
-		while (~scanf("%lld",&n))
-		{
-		    LL ans = solve (n);
-		    printf("%lld\n",ans);
-		}
+```
 
 #####b进制数位dp
 
-	int l,r;
-	int k,base;
-	int digit[700];
-	int dp[700][700];
+```c++
+int l,r;
+int k,base;
+int digit[700];
+int dp[700][700];
+```
 
 
-	int dfs( int pos , int cnt, bool limit)
-	{
-	    if (pos==0) return cnt==0;
-	    if (cnt<0) return 0;
-	 
-	    if (!limit&&dp[pos][cnt]!=-1) return dp[pos][cnt];
-	 
-	    int mx = limit?digit[pos]:1;
-	   // int mx = 1;
-	    int res = 0 ;
-	    for ( int i = 0 ; i <= mx ; i ++)
-	    {
-		if (i>1) continue;
-		res += dfs(pos-1,i==1?cnt-1:cnt,limit&&i==mx);
-	    }
-	    return limit?res:dp[pos][cnt] = res;
-	}
-	int solve(int n )
-	{
-	    ms(digit,0);
-	    int len = 0 ;
-	    while (n)
-	    {
-		digit[++len] = n % base;
-		n/=base;
-	    }
-	 
-	    return dfs(len,k,true);
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-		 #endif
-	//        ios::sync_with_stdio(false);
-		ms(dp,-1);
-		cin>>l>>r;
-		cin>>k>>base;
-	//        cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
-		int ans = solve (r) - solve (l-1);
-		cout<<ans<<endl;
-	 int l,r;
-	int k,base;
-	int digit[700];
-	int dp[700][700];
+```c++
+int dfs( int pos , int cnt, bool limit)
+{
+    if (pos==0) return cnt==0;
+    if (cnt<0) return 0;
+ 
+    if (!limit&&dp[pos][cnt]!=-1) return dp[pos][cnt];
+ 
+    int mx = limit?digit[pos]:1;
+   // int mx = 1;
+    int res = 0 ;
+    for ( int i = 0 ; i <= mx ; i ++)
+    {
+	if (i>1) continue;
+	res += dfs(pos-1,i==1?cnt-1:cnt,limit&&i==mx);
+    }
+    return limit?res:dp[pos][cnt] = res;
+}
+int solve(int n )
+{
+    ms(digit,0);
+    int len = 0 ;
+    while (n)
+    {
+	digit[++len] = n % base;
+	n/=base;
+    }
+ 
+    return dfs(len,k,true);
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+	 #endif
+//        ios::sync_with_stdio(false);
+	ms(dp,-1);
+	cin>>l>>r;
+	cin>>k>>base;
+//        cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
+	int ans = solve (r) - solve (l-1);
+	cout<<ans<<endl;
+ int l,r;
+int k,base;
+int digit[700];
+int dp[700][700];
+```
 
 
-	int dfs( int pos , int cnt, bool limit)
-	{
-	    if (pos==0) return cnt==0;
-	    if (cnt<0) return 0;
-	 
-	    if (!limit&&dp[pos][cnt]!=-1) return dp[pos][cnt];
-	 
-	    int mx = limit?digit[pos]:1;
-	   // int mx = 1;
-	    int res = 0 ;
-	    for ( int i = 0 ; i <= mx ; i ++)
-	    {
-		if (i>1) continue;
-		res += dfs(pos-1,i==1?cnt-1:cnt,limit&&i==mx);
-	    }
-	    return limit?res:dp[pos][cnt] = res;
-	}
-	int solve(int n )
-	{
-	    ms(digit,0);
-	    int len = 0 ;
-	    while (n)
-	    {
-		digit[++len] = n % base;
-		n/=base;
-	    }
-	 
-	    return dfs(len,k,true);
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-		freopen("code/in.txt","r",stdin);
-		 #endif
-	//        ios::sync_with_stdio(false);
-		ms(dp,-1);
-		cin>>l>>r;
-		cin>>k>>base;
-	//        cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
-		int ans = solve (r) - solve (l-1);
-		cout<<ans<<endl;
+```c++
+int dfs( int pos , int cnt, bool limit)
+{
+    if (pos==0) return cnt==0;
+    if (cnt<0) return 0;
+ 
+    if (!limit&&dp[pos][cnt]!=-1) return dp[pos][cnt];
+ 
+    int mx = limit?digit[pos]:1;
+   // int mx = 1;
+    int res = 0 ;
+    for ( int i = 0 ; i <= mx ; i ++)
+    {
+	if (i>1) continue;
+	res += dfs(pos-1,i==1?cnt-1:cnt,limit&&i==mx);
+    }
+    return limit?res:dp[pos][cnt] = res;
+}
+int solve(int n )
+{
+    ms(digit,0);
+    int len = 0 ;
+    while (n)
+    {
+	digit[++len] = n % base;
+	n/=base;
+    }
+ 
+    return dfs(len,k,true);
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+	freopen("code/in.txt","r",stdin);
+	 #endif
+//        ios::sync_with_stdio(false);
+	ms(dp,-1);
+	cin>>l>>r;
+	cin>>k>>base;
+//        cout<<"solve(r):"<<solve(r)<<" solve(l-1):"<<solve(l-1)<<endl;
+	int ans = solve (r) - solve (l-1);
+	cout<<ans<<endl;
+```
 
 ##博弈论
 
@@ -4707,79 +5020,81 @@ hdu3652：给出n,问[1,n]中，满足包含“13”且这个数（不是各位�
 ####模拟退火
 给出一个矩形区域的长宽，给出区域中若干点，问距离所有点的最近距离的最大值是多少。
 
-	#define INF 1e8
-	#define MAX 1e6
-	#define MAXN 1005
-	double X,Y;
-	int n;
-	struct Point {
-	    double x, y;
-	    double d;
-	    Point() {}
-	    Point(double _x, double _y) : x(_x), y(_y) {}
-	    Point operator +(const Point &p) const {
-		return Point(x + p.x, y + p.y);
+```c++
+#define INF 1e8
+#define MAX 1e6
+#define MAXN 1005
+double X,Y;
+int n;
+struct Point {
+    double x, y;
+    double d;
+    Point() {}
+    Point(double _x, double _y) : x(_x), y(_y) {}
+    Point operator +(const Point &p) const {
+	return Point(x + p.x, y + p.y);
+    }
+    Point operator -(const Point &p) const {
+	return Point(x - p.x, y - p.y);
+    }
+    Point operator *(double k) const {
+	return Point(x * k, y * k);
+    }
+    bool ok ()
+    {
+	if (x<0||y<0||x>X||y>Y) return false;
+	return true;
+    }
+} p[MAXN];
+const Point d[4] = {Point(-1, 0), Point(0, -1), Point(1, 0), Point(0, 1)};
+double dis(const Point &a, const Point &b) {
+    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
+}
+void solve(const Point *p, int n, Point &ret) {
+    int i, j;
+    double x, cur, ans = 0;
+    const double delta = 0.95;
+    bool tag;
+    Point nxt;
+    for (ret = p[0], x = (X+Y)/10; x > eps; x *= delta) {
+	for (tag = true; tag;) {
+	    for (tag = (i = 0); i < 4; ++i) {
+	        nxt.x = ret.x + dx4[i] * x * X;
+	        nxt.y = ret.y + dy4[i] * x * Y;
+	        if (!nxt.ok()) continue;
+	        for (cur=inf, j = 0; j < n; ++j) cur = min(cur,dis(nxt,p[j]));
+	        if (cur > ans) {
+	            ans = cur; ret = nxt; tag = true;
+	            break;
+	        }
 	    }
-	    Point operator -(const Point &p) const {
-		return Point(x - p.x, y - p.y);
-	    }
-	    Point operator *(double k) const {
-		return Point(x * k, y * k);
-	    }
-	    bool ok ()
-	    {
-		if (x<0||y<0||x>X||y>Y) return false;
-		return true;
-	    }
-	} p[MAXN];
-	const Point d[4] = {Point(-1, 0), Point(0, -1), Point(1, 0), Point(0, 1)};
-	double dis(const Point &a, const Point &b) {
-	    return sqrt((a.x - b.x) * (a.x - b.x) + (a.y - b.y) * (a.y - b.y));
 	}
-	void solve(const Point *p, int n, Point &ret) {
-	    int i, j;
-	    double x, cur, ans = 0;
-	    const double delta = 0.95;
-	    bool tag;
-	    Point nxt;
-	    for (ret = p[0], x = (X+Y)/10; x > eps; x *= delta) {
-		for (tag = true; tag;) {
-		    for (tag = (i = 0); i < 4; ++i) {
-		        nxt.x = ret.x + dx4[i] * x * X;
-		        nxt.y = ret.y + dy4[i] * x * Y;
-		        if (!nxt.ok()) continue;
-		        for (cur=inf, j = 0; j < n; ++j) cur = min(cur,dis(nxt,p[j]));
-		        if (cur > ans) {
-		            ans = cur; ret = nxt; tag = true;
-		            break;
-		        }
-		    }
-		}
-	    }
-	    
-	}
-	int main()
-	{
-	#ifndef  ONLINE_JUDGE 
-	    freopen("code/in.txt","r",stdin);
-	#endif
-	    int T;
-	    cin>>T;
-	    while (T--)
-	    {
-		scanf("%lf%lf%d",&X,&Y,&n);
-		for ( int i = 0 ;  i < n ; i++)
-		    scanf("%lf %lf",&p[i].x,&p[i].y);
-		Point ans;
-		solve(p,n,ans);
-	 
-		printf("The safest point is (%.1f, %.1f).\n",ans.x,ans.y);
-	 
-	    }
-	#ifndef ONLINE_JUDGE  
-	    fclose(stdin);
-	#endif
-	    return 0;
+    }
+    
+}
+int main()
+{
+#ifndef  ONLINE_JUDGE 
+    freopen("code/in.txt","r",stdin);
+#endif
+    int T;
+    cin>>T;
+    while (T--)
+    {
+	scanf("%lf%lf%d",&X,&Y,&n);
+	for ( int i = 0 ;  i < n ; i++)
+	    scanf("%lf %lf",&p[i].x,&p[i].y);
+	Point ans;
+	solve(p,n,ans);
+ 
+	printf("The safest point is (%.1f, %.1f).\n",ans.x,ans.y);
+ 
+    }
+#ifndef ONLINE_JUDGE  
+    fclose(stdin);
+#endif
+    return 0;
+```
 
 
 ##数学结论
@@ -4827,7 +5142,7 @@ LL euler( LL x)
 
 
 
-```
+```c++
 long long mod2(long long a,long long b,long long n)
 {
     long long  exp = a%n, res = 0;
@@ -4895,7 +5210,7 @@ bool miller_rabin(long long n)
 
 
 
-```
+```c++
 inv[0]=1; inv[1]=1;
 for(int i=2;i<maxn;i++){
     inv[i]=(-mod/i)*(long long)inv[mod%i]%mod;
@@ -4909,7 +5224,7 @@ for(int i=2;i<maxn;i++){
 
 ##### 单个值
 
-```
+```c++
 int eular(int x){
     int ret=1;
     for(int i=2;i*i<=x;++i)
@@ -4927,7 +5242,7 @@ int eular(int x){
 
 ##### 表
 
-```
+```c++
 const int limit=1000000;
 int E[limit+1];
 bool mark[limit+1];
@@ -4956,7 +5271,7 @@ void eulartable(){
 
 #### 快速傅里叶变换(FFT)
 
-```
+```c++
 #define L(x) (1 << (x))
 const double PI = acos(-1.0);
 const int N = 17, Maxn = L(N + 1);
@@ -5151,7 +5466,7 @@ B(n+1) = Sum(0,n) C(n,k)B(k). n = 1,2,...
 
 ##### 第二类 Stirling数
 
-```
+```c++
 第二类Stirling数是把包含n个元素的集合划分为正好k个非空子集的方法的数目。
 memset(stirling,0,sizeof(stirling));
     for (int i=1;i<=MaxInt;++i)
@@ -5181,30 +5496,34 @@ d[n]表示n个数错排的方案数。
 ####快速乘 （解决long long * long long %mod）
 log版本
 
-	ll fastMultiplication(ll a,ll b,ll mod){
-	    ll ans = 0;
-	    while(b){
-		if(b%2==1){
-		    b--; 
-		    ans = ans + a;
-		                ans %= mod;
-		}else{
-		                b /= 2;
-		    a = a + a;
-		                a %= mod;
-		}
-	    }
-	    return ans;
+```c++
+ll fastMultiplication(ll a,ll b,ll mod){
+    ll ans = 0;
+    while(b){
+	if(b%2==1){
+	    b--; 
+	    ans = ans + a;
+	                ans %= mod;
+	}else{
+	                b /= 2;
+	    a = a + a;
+	                a %= mod;
 	}
+    }
+    return ans;
+}
+```
 
 
 O(1)版本：
 
-	inline long long multi(long long x,long long y,long long mod)  
-	{  
-	long long tmp=(x*y-(long long)((long double)x/mod*y+1.0e-8)*mod);  
-	return tmp<0 ? tmp+mod : tmp;  
-	}
+```c++
+inline long long multi(long long x,long long y,long long mod)  
+{  
+long long tmp=(x*y-(long long)((long double)x/mod*y+1.0e-8)*mod);  
+return tmp<0 ? tmp+mod : tmp;  
+}
+```
 
 
 ####组合数奇偶性
@@ -5220,137 +5539,143 @@ O(1)版本：
 ####BSGS算法
 B^L == N (mod P)，求L,保证B，p 互质
 
-	  LL p,b,n;
-	map<LL,LL>Hash;
-	map<LL,LL>::iterator it;
-	inline LL ksm(LL a,LL b,LL MOD)
+```c++
+  LL p,b,n;
+map<LL,LL>Hash;
+map<LL,LL>::iterator it;
+inline LL ksm(LL a,LL b,LL MOD)
+{
+    LL res = 1LL;
+    while (b)
+    {
+	if (b&1) res = (res*a)%MOD;
+	b = b >> 1;
+	a = (a*a)%MOD;
+    }
+    return res;
+}
+LL BSGS(LL a,LL b ,LL p) // a^x = b (mod p),求x 
+{
+    a%=p;
+    b%=p;
+    if (!a&&!b) return 1;
+    if (!a) return -1;
+    Hash.clear();
+    LL m = ceil(sqrt(double(p)));
+    LL tmp = b;
+    for (LL j = 0 ; j <= m ; j++)
+    {
+	Hash[tmp]=j;
+	tmp = (tmp*a)%p;
+    }
+    tmp = ksm(a,m,p);
+    LL ret = 1;
+ 
+    for (LL i = 1  ; i <= m+1 ; i++)
+    {
+	ret = ret*tmp%p;
+	if (Hash[ret]) return i*m-Hash[ret]; //注意处理下%....虽然其实不处理也没关系...
+    }
+    return -1;
+ 
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+       // freopen("./in.txt","r",stdin);
+  #endif
+	while (~scanf("%lld%lld%lld",&p,&b,&n))   // B^L = n(mod p)
 	{
-	    LL res = 1LL;
-	    while (b)
-	    {
-		if (b&1) res = (res*a)%MOD;
-		b = b >> 1;
-		a = (a*a)%MOD;
-	    }
-	    return res;
+	    LL ans = BSGS(b,n,p);
+	    if (ans==-1) printf("no solution\n");
+	    else printf("%lld\n",(ans%p+p)%p);
 	}
-	LL BSGS(LL a,LL b ,LL p) // a^x = b (mod p),求x 
-	{
-	    a%=p;
-	    b%=p;
-	    if (!a&&!b) return 1;
-	    if (!a) return -1;
-	    Hash.clear();
-	    LL m = ceil(sqrt(double(p)));
-	    LL tmp = b;
-	    for (LL j = 0 ; j <= m ; j++)
-	    {
-		Hash[tmp]=j;
-		tmp = (tmp*a)%p;
-	    }
-	    tmp = ksm(a,m,p);
-	    LL ret = 1;
-	 
-	    for (LL i = 1  ; i <= m+1 ; i++)
-	    {
-		ret = ret*tmp%p;
-		if (Hash[ret]) return i*m-Hash[ret]; //注意处理下%....虽然其实不处理也没关系...
-	    }
-	    return -1;
-	 
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-	       // freopen("./in.txt","r",stdin);
-	  #endif
-		while (~scanf("%lld%lld%lld",&p,&b,&n))   // B^L = n(mod p)
-		{
-		    LL ans = BSGS(b,n,p);
-		    if (ans==-1) printf("no solution\n");
-		    else printf("%lld\n",(ans%p+p)%p);
-		}
+```
 
 
 ​		
 ####扩展BSGS算法       
 已知数a,p,b，求满足a^x≡b(mod p)的最小自然数x。需要注意这里没有保证(a,p)=1，因此不能直接使用BSGS算法。
 
-	map<LL,LL>mp;
-	LL a,b,p;
-	LL ksm(LL a,LL b,LL p)
-	{
-	    LL res = 1LL;
-	    while (b)
-	    {
-		if (b&1) res = res * a % p;
-		b = b>>1LL;
-		a = a * a % p;
-	    }
-	    return res;
-	}
-	LL gcd( LL a,LL b){return b?gcd(b,a%b):a;}
-	LL BSGS(LL a,LL b,LL p)
-	{
-	    a%=p;
-	    b%=p;
-	    if (a==0&&b==0) return 0;
-	    if (a==0) return -1;
-	    if (b==1) return 0;
-	    int cnt = 0 ;
-	    LL t = 1;
-	    for (int g = gcd(a,p); g!=1 ; g = gcd(a,p))
-	    {
-		if (b%g) return -1;
-		p/=g;
-		b/=g;
-		t=t*a/g%p;
-		cnt++;
-		if (b==t) return cnt;
-	    }
-	    mp.clear();
-	    int m = ceil(sqrt(double(p)));
-	    LL base = b ;
-	    for ( int i = 0 ; i < m ; i++)
-	    {
-		mp[base] =  i;
-		base = base * a % p;
-	    }
-	    base = ksm(a,m,p);
-	    LL ret = t ;
-	    for ( int i = 1 ; i <= m+1 ; i++)
-	    {
-		ret = ret * base % p;
-		if (mp.count(ret)) return i*m-mp[ret]+cnt;
-	    }
-	    return -1;
-	}
-	int main()
-	{
-		#ifndef  ONLINE_JUDGE 
-	//        freopen("./in.txt","r",stdin);
-	  #endif
-	    while (scanf("%lld%lld%lld",&a,&p,&b))
-	    {
-		if (a==0&&b==0&&p==0) break;
-		LL ans = BSGS(a,b,p);
-		if (ans==-1) puts("No Solution");
-		else printf("%lld\n",ans);
-	    }
-	  #ifndef ONLINE_JUDGE  
-	  fclose(stdin);
-	  #endif
-	    return 0;
-	}    
+```c++
+map<LL,LL>mp;
+LL a,b,p;
+LL ksm(LL a,LL b,LL p)
+{
+    LL res = 1LL;
+    while (b)
+    {
+	if (b&1) res = res * a % p;
+	b = b>>1LL;
+	a = a * a % p;
+    }
+    return res;
+}
+LL gcd( LL a,LL b){return b?gcd(b,a%b):a;}
+LL BSGS(LL a,LL b,LL p)
+{
+    a%=p;
+    b%=p;
+    if (a==0&&b==0) return 0;
+    if (a==0) return -1;
+    if (b==1) return 0;
+    int cnt = 0 ;
+    LL t = 1;
+    for (int g = gcd(a,p); g!=1 ; g = gcd(a,p))
+    {
+	if (b%g) return -1;
+	p/=g;
+	b/=g;
+	t=t*a/g%p;
+	cnt++;
+	if (b==t) return cnt;
+    }
+    mp.clear();
+    int m = ceil(sqrt(double(p)));
+    LL base = b ;
+    for ( int i = 0 ; i < m ; i++)
+    {
+	mp[base] =  i;
+	base = base * a % p;
+    }
+    base = ksm(a,m,p);
+    LL ret = t ;
+    for ( int i = 1 ; i <= m+1 ; i++)
+    {
+	ret = ret * base % p;
+	if (mp.count(ret)) return i*m-mp[ret]+cnt;
+    }
+    return -1;
+}
+int main()
+{
+	#ifndef  ONLINE_JUDGE 
+//        freopen("./in.txt","r",stdin);
+  #endif
+    while (scanf("%lld%lld%lld",&a,&p,&b))
+    {
+	if (a==0&&b==0&&p==0) break;
+	LL ans = BSGS(a,b,p);
+	if (ans==-1) puts("No Solution");
+	else printf("%lld\n",ans);
+    }
+  #ifndef ONLINE_JUDGE  
+  fclose(stdin);
+  #endif
+    return 0;
+}    
+```
 #### 自适应辛普森积分公式
-	double f(double x){return sin(x)*x;}//这是被积函数
-	double simpson(double l,double r){return (r-l)*(f(l)+f(r)+4*f((l+r)/2))/6;}
-	double di(double l,double r){//越二分以得到更精确的结果
-	    double m=(l+r)/2;
-	    double ans=simpson(l,r);
-	    if(sgn(ans-simpson(l,m)-simpson(m,r))==0)return ans; //在误差之内
-	    return di(l,m)+di(m,r); //不再误差之内就继续将区间缩小
-	}
+```c++
+double f(double x){return sin(x)*x;}//这是被积函数
+double simpson(double l,double r){return (r-l)*(f(l)+f(r)+4*f((l+r)/2))/6;}
+double di(double l,double r){//越二分以得到更精确的结果
+    double m=(l+r)/2;
+    double ans=simpson(l,r);
+    if(sgn(ans-simpson(l,m)-simpson(m,r))==0)return ans; //在误差之内
+    return di(l,m)+di(m,r); //不再误差之内就继续将区间缩小
+}
+```
 
 
 ####矩阵
@@ -5364,39 +5689,41 @@ B^L == N (mod P)，求L,保证B，p 互质
 * 难点其实在于构造M1矩阵，也就是说哪些项是重要的。一般而言，可能有的项是，s[n],f[n],常数项，以及为了构造出f[n]的辅助项。
 
 #####矩阵快速幂
-	struct Mat
-	{
-	    LL mat[8][8];
-	    void clear()
-	    {
-	    ms(mat,0);
-	    }
-	}M,M1;
-	 
-	Mat operator * (Mat a,Mat b)
-	{
-	    Mat c;
-	    c.clear();
-	    for ( int i = 0 ; i < 3 ; i++)
-	    for ( int j  = 0 ; j < 3 ; j++)
-		for ( int k = 0 ; k < 3 ; k++)
-		c.mat[i][j] = (c.mat[i][j] + a.mat[i][k]%mod*b.mat[k][j]%mod)%mod;
-	    return c;
-	}
-	Mat operator ^ (Mat a,int b)
-	{
-	    Mat ret;
-	    ret.clear();
-	    for ( int i = 0 ; i < 3 ; i++) ret.mat[i][i] = 1;
-	    
-	    while (b>0)
-	    {
-	    if (b&1) ret = ret * a;
-	    a = a * a;
-	    b=b>>1;
-	    }
-	    return ret;
-	}
+```c++
+struct Mat
+{
+    LL mat[8][8];
+    void clear()
+    {
+    ms(mat,0);
+    }
+}M,M1;
+ 
+Mat operator * (Mat a,Mat b)
+{
+    Mat c;
+    c.clear();
+    for ( int i = 0 ; i < 3 ; i++)
+    for ( int j  = 0 ; j < 3 ; j++)
+	for ( int k = 0 ; k < 3 ; k++)
+	c.mat[i][j] = (c.mat[i][j] + a.mat[i][k]%mod*b.mat[k][j]%mod)%mod;
+    return c;
+}
+Mat operator ^ (Mat a,int b)
+{
+    Mat ret;
+    ret.clear();
+    for ( int i = 0 ; i < 3 ; i++) ret.mat[i][i] = 1;
+    
+    while (b>0)
+    {
+    if (b&1) ret = ret * a;
+    a = a * a;
+    b=b>>1;
+    }
+    return ret;
+}
+```
 
 
 #####给定一个有向图，问从A点恰好走k步（允许重复经过边）到达B点的方案数mod p的值
