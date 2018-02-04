@@ -1,7 +1,7 @@
 /* ***********************************************
 Author :111qqz
-Created Time :2017年10月10日 星期二 23时02分29秒
-File Name :5517.cpp
+Created Time :2016年04月22日 星期五 19时00分08秒
+File Name :code/hdu/#81/1001.cpp
 ************************************************ */
 
 #include <cstdio>
@@ -16,7 +16,6 @@ File Name :5517.cpp
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
-#define PB push_back
 #define fst first
 #define sec second
 #define lson l,m,rt<<1
@@ -31,11 +30,41 @@ const double eps = 1E-8;
 const int dx4[4]={1,0,0,-1};
 const int dy4[4]={0,-1,1,0};
 const int inf = 0x3f3f3f3f;
+int m;
+ long long n;
+int col[35];
 int main()
 {
 	#ifndef  ONLINE_JUDGE 
-	freopen("./in.txt","r",stdin);
+	freopen("code/in.txt","r",stdin);
   #endif
+
+	int T;
+	cin>>T;
+	while (T--)
+	{
+	    cin>>m>>n;
+	    ms(col,0);
+	     long long p = 1;
+	    for ( int i = 1 ; i <= m ; i++) p=p*3;
+	    n = n % p;
+	    int cnt = 0 ;
+	    while (n>0)
+	    {
+		col[++cnt]=n%3;
+		n/=3;
+	    }
+
+	    for ( int i = m ; i >=1  ;i--)
+	    {
+		if (col[i]==0) cout<<"R";
+		if (col[i]==1) cout<<"G";
+		if (col[i]==2) cout<<"B";
+	    }
+	    cout<<endl;
+
+
+	}
 
   #ifndef ONLINE_JUDGE  
   fclose(stdin);

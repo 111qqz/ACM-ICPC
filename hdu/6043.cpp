@@ -1,6 +1,6 @@
 /* ***********************************************
 Author :111qqz
-Created Time :2017年11月01日 星期三 00时14分38秒
+Created Time :2017年11月01日 星期三 09时09分51秒
 File Name :6043.cpp
 ************************************************ */
 
@@ -20,37 +20,11 @@ const double eps = 1E-8;
 const int dx4[4]={1,0,0,-1};
 const int dy4[4]={0,-1,1,0};
 const int inf = 0x3f3f3f3f;
-LL n,k;
 int main()
 {
 	#ifndef  ONLINE_JUDGE 
-	//freopen("./in.txt","r",stdin);
+	freopen("./in.txt","r",stdin);
   #endif
-	int cas = 0 ;
-	while (~scanf("%lld %lld",&n,&k))
-	{
-	    printf("Case #%d: ",++cas);
-	    if (k<=n)
-	    {
-		printf("%lld\n",k);
-		continue;
-	    }
-	    k-=n;
-	    LL num = (k-1)/(n-1)+1;
-	    LL yu = k%(n-1);
-	    if (yu==0) yu+=n-1;
-	    if (num%2==1)
-	    {
-		printf("%lld\n",yu);
-	    }
-	    else
-	    {
-		if (yu<=n-2) printf("%lld\n",yu);
-		else printf("%lld\n",n);
-	    }
-	}
-
-
 
   #ifndef ONLINE_JUDGE  
   fclose(stdin);
