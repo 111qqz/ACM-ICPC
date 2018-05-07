@@ -1,7 +1,0 @@
-3
-abacab
-abccab
-faultydogeuniversity
-hasnopalindromeatall
-abbacabbaccab
-youmayexpectedstrongsamplesbutnow
